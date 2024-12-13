@@ -9,19 +9,36 @@ from pymongo import MongoClient
 
 # MongoDB connection
 def get_mongo_client():
-    client = MongoClient("mongodb://localhost:27017/")  # Adjust your connection string as needed
-    return client
+    try:
+        # Make sure the MongoDB client connects successfully
+        client = MongoClient("mongodb+srv://abhishelke297127:Abhi%402971@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority", tls=True, tlsAllowInvalidCertificates=False)
+        client.admin.command('ping')  # Ping to check connection
+        return client
+    except Exception as e:
+        st.error(f"Error connecting to MongoDB: {e}")
+        return None
 
 # Fetch data for the fixed database and collection
 def fetch_data(collection_name):
     client = get_mongo_client()
-    db = client["JavaFileAnalysis"]  # Fixed database name
+    if client is None:
+        return []
+    
+    db = client["JavaFileAnalysis"]
     collection = db[collection_name]
+    
+    # Check if data is returned
     data = list(collection.find())  # Convert cursor to list
+    if not data:
+        st.warning(f"No data found in collection: {collection_name}")
     return data
 
 # Process data into a DataFrame
 def process_data(data):
+    if not data:
+        st.warning("No data to process.")
+        return pd.DataFrame(), {}
+    
     rows = []
     seen_commit_ids = set()  # Track already added commit IDs
 
@@ -38,7 +55,7 @@ def process_data(data):
             continue
         seen_commit_ids.add(commit_id)
 
-        # Extract filenames and counts for each category
+        # Check if keys are missing
         added_files = extract_files(doc.get("added_java_files", {}))
         renamed_files = extract_files(doc.get("renamed_java_files", {}))
         modified_files = extract_files(doc.get("modified_java_files", {}))
@@ -143,12 +160,11 @@ def export_to_pdf(df, total_counts):
 def main():
     st.title("Java File Analysis - Enhanced Viewer")
 
-    import pymongo
+    # Connect to MongoDB Atlas
+    client = get_mongo_client()
+    if client is None:
+        return
 
-    connection_string = (
-    "mongodb+srv://abhishelke297127:Abhi%402971@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
-    )
-    client = pymongo.MongoClient(connection_string, tls=True, tlsAllowInvalidCertificates=False)
     db = client["JavaFileAnalysis"]
     collection_names = db.list_collection_names()
 
