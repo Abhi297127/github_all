@@ -108,7 +108,7 @@ def generate_charts(df):
     # Bar Chart of Files Added/Modified Per Commit
     fig2 = px.bar(
         df,
-        x="Commit ID",
+        x="Commit Date",
         y=["Added Files Count", "Renamed Files Count", "Modified Files Count", "Deleted Files Count"],
         title="File Actions Per Commit",
         labels={"value": "File Count", "variable": "Action Type"},
@@ -215,4 +215,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
