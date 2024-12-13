@@ -143,10 +143,10 @@ def export_to_pdf(df, total_counts):
 def main():
     st.title("Java File Analysis - Enhanced Viewer")
 
-    username = st.secrets["MONGO_USER"]
-    password = st.secrets["MONGO_PASS"]
-    connection_string = f"mongodb+srv://{username}:{password}@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
-    client = MongoClient(connection_string)
+    import pymongo
+
+    connection_string = "mongodb+srv://<username>:<password>@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
+    client = pymongo.MongoClient(connection_string, tls=True, tlsAllowInvalidCertificates=False)
     db = client["JavaFileAnalysis"]
     collection_names = db.list_collection_names()
 
