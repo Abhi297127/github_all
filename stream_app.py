@@ -145,8 +145,9 @@ def main():
 
     import pymongo
 
-    connection_string = "mongodb://abhishelke297127:Abhi%402971@cluster0-shard-00-00.uu8yq.mongodb.net:27017,cluster0-shard-00-01.uu8yq.mongodb.net:27017,cluster0-shard-00-02.uu8yq.mongodb.net:27017/test?ssl=true&replicaSet=atlas-12345-shard-0&authSource=admin&retryWrites=true&w=majority"
-
+    connection_string = (
+    "mongodb+srv://abhishelke297127:Abhi%402971@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
+    )
     client = pymongo.MongoClient(connection_string, tls=True, tlsAllowInvalidCertificates=False)
     db = client["JavaFileAnalysis"]
     collection_names = db.list_collection_names()
