@@ -1,5 +1,4 @@
 import streamlit as st
-import base64
 from pymongo import MongoClient
 import pandas as pd
 import plotly.express as px
@@ -8,7 +7,6 @@ from io import BytesIO
 from fpdf import FPDF
 import os
 import datetime
-import extra_streamlit_components as stx
 
 # Enhanced Custom CSS for Modern UI
 def local_css():
@@ -96,8 +94,7 @@ def local_css():
 def get_mongo_client():
     try:
         # Replace with your secure connection method
-        connection_string = st.secrets.get("MONGO_CONNECTION_STRING", 
-            "mongodb+srv://abhishelke297127:Abhi%402971@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority")
+        connection_string = "mongodb+srv://abhishelke297127:Abhi%402971@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
         
         client = MongoClient(connection_string, 
                              tls=True, 
@@ -113,7 +110,7 @@ def get_mongo_client():
         st.warning("Please check your connection string and network.")
         return None
 
-# Data Processing Functions (similar to previous implementation)
+# Data Processing Functions
 def fetch_data(collection_name):
     client = get_mongo_client()
     if client is None:
@@ -210,6 +207,45 @@ def generate_advanced_charts(df):
         )
         st.plotly_chart(fig2, use_container_width=True)
 
+# PDF Export Function (Simplified)
+def export_to_pdf(df, total_counts):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # Title
+    pdf.set_font("Arial", style="B", size=16)
+    pdf.cell(0, 10, "Java File Analysis Report", ln=True, align="C")
+    pdf.ln(10)
+
+    # Total Counts
+    pdf.set_font("Arial", style="B", size=12)
+    pdf.cell(0, 10, "Summary of File Actions:", ln=True)
+    for action, count in total_counts.items():
+        pdf.cell(0, 10, f"{action}: {count}", ln=True)
+    pdf.ln(10)
+
+    # Table Header
+    pdf.set_font("Arial", style="B", size=10)
+    headers = list(df.columns)
+    col_width = pdf.w / (len(headers) + 1)
+    for header in headers:
+        pdf.cell(col_width, 10, header, border=1)
+    pdf.ln()
+
+    # Table Data
+    pdf.set_font("Arial", size=8)
+    for _, row in df.iterrows():
+        for col in headers:
+            pdf.cell(col_width, 10, str(row[col]), border=1)
+        pdf.ln()
+
+    # Save to BytesIO
+    buffer = BytesIO()
+    buffer.write(pdf.output(dest="S").encode("latin1"))
+    buffer.seek(0)
+    return buffer
+
 # Main Streamlit App
 def main():
     # Apply Custom CSS
@@ -244,11 +280,6 @@ def main():
     # Sidebar for Collection Selection
     st.sidebar.title("🔍 Analysis Configuration")
     collection_name = st.sidebar.selectbox("Select Collection", collection_names)
-    
-    # Date Range Filter in Sidebar
-    st.sidebar.markdown("### 📅 Date Range Filter")
-    start_date = st.sidebar.date_input("Start Date")
-    end_date = st.sidebar.date_input("End Date")
 
     # Data Processing
     if collection_name:
@@ -308,11 +339,7 @@ def main():
         else:
             st.warning("No data available in this collection.")
 
-# PDF Export Function (similar to previous implementation)
-def export_to_pdf(df, total_counts):
-    # [Keep the previous PDF export implementation]
-    pass
-
 if __name__ == "__main__":
     main()
+    
     
