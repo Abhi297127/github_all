@@ -145,7 +145,7 @@ def main():
 
     import pymongo
 
-    connection_string = "mongodb+srv://<username>:<password>@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
+    connection_string = "mongodb+srv://abhishelke297127:Abhi@2971@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
     client = pymongo.MongoClient(connection_string, tls=True, tlsAllowInvalidCertificates=False)
     db = client["JavaFileAnalysis"]
     collection_names = db.list_collection_names()
