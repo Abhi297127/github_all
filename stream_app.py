@@ -186,8 +186,13 @@ def main():
             columns_order = [col for col in filtered_data.columns if col not in ["Commit Date", "Date", "Time"]]
             filtered_data = filtered_data[columns_order + ["Date", "Time"]]
 
+        # Display filtered data
+        st.write("### Data Table")
+        st.dataframe(filtered_data, use_container_width=True)
+
         # Extract and display Java filenames
         st.write("### Java Files (Added)")
+
         # Check if 'Added Files' column exists
         if "Added Files" in filtered_data.columns:
             # Drop rows where 'Added Files' is empty
