@@ -197,57 +197,7 @@ def main():
                     color_discrete_sequence=["#4caf50"]
                 )
                 st.plotly_chart(fig)
-    # elif page == "Codes":
-    #     st.subheader("Run Java Code")
-    
-    # # File uploader for Java files
-    #     uploaded_file = st.file_uploader("📁 Upload a Java file", type=["java"])
-
-    #     if uploaded_file:
-    #         # Save uploaded file to a temporary directory
-    #         temp_dir = "temp_java_files"
-    #         os.makedirs(temp_dir, exist_ok=True)
-
-    #         # Save the file locally
-    #         java_file_path = os.path.join(temp_dir, uploaded_file.name)
-    #         with open(java_file_path, "wb") as f:
-    #             f.write(uploaded_file.getvalue())
-            
-    #         st.success(f"✅ File uploaded and saved: {uploaded_file.name}")
-            
-    #         # Extract class name (filename without extension)
-    #         class_name = os.path.splitext(os.path.basename(uploaded_file.name))[0]
-            
-    #         # Add a button to compile and run the Java file
-    #         if st.button("▶️ Compile and Run"):
-    #             try:
-    #                 # --- Step 1: Compile the Java file ---
-    #                 compile_process = subprocess.run(
-    #                     ["javac", java_file_path], capture_output=True, text=True
-    #                 )
-                    
-    #                 # Check for compilation errors
-    #                 if compile_process.returncode != 0:
-    #                     st.error("❌ Compilation Error")
-    #                     st.code(compile_process.stderr, language="text")
-    #                 else:
-    #                     st.success("✅ Compilation Successful!")
-                        
-    #                     # --- Step 2: Run the Java file ---
-    #                     run_process = subprocess.run(
-    #                         ["java", class_name], capture_output=True, text=True, cwd=temp_dir
-    #                     )
-                        
-    #                     # Display output or runtime errors
-    #                     if run_process.returncode == 0:
-    #                         st.success("🏁 Program Output:")
-    #                         st.code(run_process.stdout, language="text")
-    #                     else:
-    #                         st.error("❌ Runtime Error")
-    #                         st.code(run_process.stderr, language="text")
                 
-    #             except Exception as e:
-    #                 st.error(f"An unexpected error occurred: {str(e)}")
 
 if __name__ == "__main__":
     main()
