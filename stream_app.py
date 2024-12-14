@@ -2,17 +2,17 @@ import streamlit as st
 from pymongo import MongoClient
 import pandas as pd
 import plotly.express as px
-from io import BytesIO
-from fpdf import FPDF
-import os
-from pymongo import MongoClient
+from datetime import datetime
 
 # MongoDB connection
 def get_mongo_client():
     try:
-        # Make sure the MongoDB client connects successfully
-        client = MongoClient("mongodb+srv://abhishelke297127:Abhi%402971@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority", tls=True, tlsAllowInvalidCertificates=False)
-        client.admin.command('ping')  # Ping to check connection
+        client = MongoClient(
+            "mongodb+srv://abhishelke297127:Abhi@2971@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority",
+            tls=True,
+            tlsAllowInvalidCertificates=False
+        )
+        client.admin.command('ping')
         return client
     except Exception as e:
         st.error(f"Error connecting to MongoDB: {e}")
@@ -23,25 +23,14 @@ def fetch_data(collection_name):
     client = get_mongo_client()
     if client is None:
         return []
-    
+
     db = client["JavaFileAnalysis"]
     collection = db[collection_name]
-    
-    # Check if data is returned
-    data = list(collection.find())  # Convert cursor to list
-    if not data:
-        st.warning(f"No data found in collection: {collection_name}")
-    return data
+    return list(collection.find())
 
 # Process data into a DataFrame
 def process_data(data):
-    if not data:
-        st.warning("No data to process.")
-        return pd.DataFrame(), {}
-    
     rows = []
-    seen_commit_ids = set()  # Track already added commit IDs
-
     total_counts = {
         "Total Added Files": 0,
         "Total Renamed Files": 0,
@@ -50,168 +39,162 @@ def process_data(data):
     }
 
     for doc in data:
-        commit_id = doc.get("commit_id", "N/A")
-        if commit_id in seen_commit_ids:
-            continue
-        seen_commit_ids.add(commit_id)
-
-        # Check if keys are missing
-        added_files = extract_files(doc.get("added_java_files", {}))
-        renamed_files = extract_files(doc.get("renamed_java_files", {}))
-        modified_files = extract_files(doc.get("modified_java_files", {}))
-        deleted_files = extract_files(doc.get("deleted_java_files", {}))
-
-        # Update total counts
-        total_counts["Total Added Files"] += len(added_files)
-        total_counts["Total Renamed Files"] += len(renamed_files)
-        total_counts["Total Modified Files"] += len(modified_files)
-        total_counts["Total Deleted Files"] += len(deleted_files)
+        added_files = doc.get("added_java_files", {}).values()
+        renamed_files = doc.get("renamed_java_files", {}).values()
+        modified_files = doc.get("modified_java_files", {}).values()
+        deleted_files = doc.get("deleted_java_files", {}).values()
 
         row = {
-            "Commit ID": commit_id,
+            "Commit ID": doc.get("commit_id", "N/A"),
             "Commit Date": doc.get("commit_date", "N/A"),
-            "Commit Time": doc.get("commit_time", "N/A"),
-            "Commit Message": doc.get("commit_message", "N/A"),
-            "Added Files Count": len(added_files),
-            "Added File Names": ", ".join(added_files) if added_files else "0",
-            "Renamed Files Count": len(renamed_files),
-            "Renamed File Names": ", ".join(renamed_files) if renamed_files else "0",
-            "Modified Files Count": len(modified_files),
-            "Modified File Names": ", ".join(modified_files) if modified_files else "0",
-            "Deleted Files Count": len(deleted_files),
-            "Deleted File Names": ", ".join(deleted_files) if deleted_files else "0",
+            "Added Files": ", ".join(sum(added_files, [])),
+            "Renamed Files": ", ".join(sum(renamed_files, [])),
+            "Modified Files": ", ".join(sum(modified_files, [])),
+            "Deleted Files": ", ".join(sum(deleted_files, [])),
         }
+
+        # Update counts
+        total_counts["Total Added Files"] += len(sum(added_files, []))
+        total_counts["Total Renamed Files"] += len(sum(renamed_files, []))
+        total_counts["Total Modified Files"] += len(sum(modified_files, []))
+        total_counts["Total Deleted Files"] += len(sum(deleted_files, []))
+
         rows.append(row)
 
     df = pd.DataFrame(rows)
     return df, total_counts
 
-# Extract filenames from nested dictionaries
-def extract_files(files_dict):
-    filenames = []
-    for key, value in files_dict.items():
-        filenames.extend(value)
-    return filenames
-
-# Generate visualizations
-def generate_charts(df):
-    st.subheader("Visualizations")
-
-    # Total Files Actioned
-    action_totals = df[["Added Files Count", "Renamed Files Count", "Modified Files Count", "Deleted Files Count"]].sum()
-    action_totals = pd.DataFrame(action_totals, columns=["Total Files"]).reset_index()
-    action_totals.rename(columns={"index": "Action Type"}, inplace=True)
-
-    fig = px.pie(action_totals, values="Total Files", names="Action Type", title="Distribution of File Actions")
-    st.plotly_chart(fig)
-
-    # Bar Chart of Files Added/Modified Per Commit
-    fig2 = px.bar(
-        df,
-        x="Commit Date",
-        y=["Added Files Count", "Renamed Files Count", "Modified Files Count", "Deleted Files Count"],
-        title="File Actions Per Commit",
-        labels={"value": "File Count", "variable": "Action Type"},
-        barmode="group",
+# Sidebar navigation
+def sidebar():
+    st.sidebar.title("📊 Navigation")
+    return st.sidebar.radio(
+        "Go to", 
+        ["Home", "All Data", "Visualization Charts"],
+        index=0,
+        help="Navigate between different sections of the app."
     )
-    st.plotly_chart(fig2)
 
-# Export to PDF
-def export_to_pdf(df, total_counts):
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
+# Add custom CSS
+def add_custom_css():
+    st.markdown(
+        """
+        <style>
+        /* Background color */
+        .css-1d391kg {background-color: #f5f5f5;}
+        
+        /* Header and subheader styles */
+        .stTitle {color: #1f4e79; font-size: 2.2rem; font-weight: bold;}
+        .stSubheader {color: #34568b; font-weight: bold;}
+        
+        /* Sidebar styles */
+        .css-1aumxhk {background-color: #234e70;}
+        .css-1aumxhk h1 {color: white;}
+        .css-1aumxhk label, .css-1aumxhk .stRadio > div {color: #c0d6df;}
+        
+        /* Buttons and download links */
+        .stDownloadButton {background-color: #ff914d; color: white; border: none; padding: 8px 15px; border-radius: 5px;}
+        .stDownloadButton:hover {background-color: #ff6f3c;}
+        .css-1aehpvq {color: #ff6f3c;}
+        
+        /* Dataframe table */
+        .dataframe {font-size: 0.9rem;}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-    # Title
-    pdf.set_font("Arial", style="B", size=16)
-    pdf.cell(200, 10, txt="Java File Analysis Report", ln=True, align="C")
-    pdf.ln(10)
-
-    # Total Counts
-    pdf.set_font("Arial", style="B", size=12)
-    pdf.cell(200, 10, txt="Summary of File Actions:", ln=True)
-    pdf.ln(5)
-    for action, count in total_counts.items():
-        pdf.cell(200, 10, txt=f"{action}: {count}", ln=True)
-    pdf.ln(10)
-
-    # Table Header
-    pdf.set_font("Arial", style="B", size=12)
-    col_width = pdf.w / (len(df.columns) + 1)  # Adjust column width dynamically
-    for col in df.columns:
-        pdf.cell(col_width, 10, col[:30], border=1, align="C")  # Truncate column names for layout
-    pdf.ln()
-
-    # Table Data
-    pdf.set_font("Arial", size=10)
-    for index, row in df.iterrows():
-        for col in df.columns:
-            pdf.cell(col_width, 10, str(row[col])[:30], border=1)  # Truncate data for layout
-        pdf.ln()
-
-    # Save PDF to buffer
-    buffer = BytesIO()
-    buffer.write(pdf.output(dest="S").encode("latin1"))
-    buffer.seek(0)
-    return buffer
-
-# Streamlit App
+# Main app
 def main():
-    st.title("Java File Analysis - Enhanced Viewer")
+    # Add custom CSS
+    add_custom_css()
 
-    # Connect to MongoDB Atlas
+    st.title("🚀 Java File Analysis")
+    st.caption("Analyze and visualize Java file actions efficiently.")
+    
+    # Sidebar navigation
+    page = sidebar()
+
+    # MongoDB connection
     client = get_mongo_client()
-    if client is None:
+    if not client:
         return
 
     db = client["JavaFileAnalysis"]
     collection_names = db.list_collection_names()
 
-    # Let the user choose a collection
-    collection_name = st.selectbox("Select Collection", collection_names)
+    if page == "Home":
+        st.subheader("Welcome to Java File Analysis!")
+        st.write(
+            """
+            This application allows you to:
+            - View all file actions from your MongoDB database.
+            - Explore visualizations of added, renamed, modified, and deleted files.
+            """
+        )
+        st.image("https://via.placeholder.com/800x400", caption="Java File Analysis Dashboard", use_column_width=True)
 
-    if collection_name:
-        raw_data = fetch_data(collection_name)
+    elif page == "All Data":
+        st.subheader("All Data")
 
+        # Collection selection
+        collection_name = st.selectbox("📂 Select Collection", collection_names)
+        raw_data = fetch_data(collection_name) if collection_name else []
+
+        # Date filtering
+        start_date = st.date_input("📅 Start Date", value=datetime(2023, 1, 1))
+        end_date = st.date_input("📅 End Date", value=datetime(2024, 1, 1))
+
+        # Filter data
         if raw_data:
             processed_data, total_counts = process_data(raw_data)
 
-            # Display the total counts
-            st.subheader("Summary of File Actions")
+            # Filter by date range
+            if "Commit Date" in processed_data.columns:
+                processed_data["Commit Date"] = pd.to_datetime(processed_data["Commit Date"])
+                filtered_data = processed_data[
+                    (processed_data["Commit Date"] >= pd.to_datetime(start_date)) &
+                    (processed_data["Commit Date"] <= pd.to_datetime(end_date))
+                ]
+            else:
+                filtered_data = processed_data
+
+            # Display total counts
+            st.write("### Total File Counts")
             for action, count in total_counts.items():
                 st.write(f"**{action}:** {count}")
 
-            # Display the data table
-            st.subheader("Commit Data")
-            st.dataframe(processed_data, use_container_width=True)
+            # Display filtered data
+            st.write("### Data Table")
+            st.dataframe(filtered_data, use_container_width=True)
 
-            # Add visualizations
-            generate_charts(processed_data)
+    elif page == "Visualization Charts":
+        st.subheader("Visualization Charts")
 
-            # Option to download the data as CSV
-            st.download_button(
-                "Download Data as CSV",
-                processed_data.to_csv(index=False),
-                file_name="commit_data.csv",
-                mime="text/csv",
+        # Collection selection
+        collection_name = st.selectbox("📂 Select Collection", collection_names)
+        raw_data = fetch_data(collection_name) if collection_name else []
+
+        # Chart filters
+        if raw_data:
+            processed_data, total_counts = process_data(raw_data)
+            action_type = st.selectbox(
+                "📊 Select Action Type",
+                ["Added Files", "Renamed Files", "Modified Files", "Deleted Files"]
             )
 
-            # Option to download the data as PDF
-            pdf_buffer = export_to_pdf(processed_data, total_counts)
-            st.download_button(
-                "Download Report as PDF",
-                pdf_buffer,
-                file_name="commit_report.pdf",
-                mime="application/pdf",
-            )
+            # Generate charts
+            if action_type in processed_data.columns:
+                chart_data = processed_data[["Commit Date", action_type]].copy()
+                chart_data["Count"] = chart_data[action_type].apply(lambda x: len(x.split(", ")))
 
-        else:
-            st.warning("No data available in this collection.")
-
-    # Refresh button
-    if st.button("Refresh Data"):
-        st.rerun()
+                fig = px.bar(
+                    chart_data,
+                    x="Commit Date",
+                    y="Count",
+                    title=f"{action_type} Over Time",
+                    color_discrete_sequence=["#4caf50"]
+                )
+                st.plotly_chart(fig)
 
 if __name__ == "__main__":
     main()
