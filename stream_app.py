@@ -192,17 +192,22 @@ def main():
 
         # Extract and display Java filenames
         st.write("### Java Files")
-        if "File Name" in filtered_data.columns:
-            java_files = filtered_data["File Name"].dropna()
+        if "File Name" in filtered_data.columns and "Action" in filtered_data.columns:
+    # Filter rows where Action is "Added"
+            added_files = filtered_data[filtered_data["Action"].str.lower() == "added"]
+
+    # Extract Java files
+            java_files = added_files["File Name"].dropna()
             java_files = [file for file in java_files if file.endswith(".java")]
 
             if java_files:
-                st.write(f"**Total Java Files:** {len(java_files)}")
+                st.write(f"**Total Java Files Added:** {len(java_files)}")
                 st.write("\n".join(java_files))
             else:
-                st.write("No Java files found.")
+                st.write("No Java files were added.")
         else:
-            st.write("No file names available in the data.")
+            st.write("Required columns ('File Name' and 'Action') are not available in the data.")
+
     elif page == "Visualization Charts":
         st.subheader("Visualization Charts")
 
