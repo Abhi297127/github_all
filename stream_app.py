@@ -9,7 +9,7 @@ import plotly.express as px
 @st.cache_resource
 def get_mongo_client():
     username = "abhishelke297127"
-    password = "Abhi@2971"
+    password = "Abhi%402971"
     encoded_username = quote_plus(username)
     encoded_password = quote_plus(password)
     uri = f"mongodb+srv://{encoded_username}:{encoded_password}@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
