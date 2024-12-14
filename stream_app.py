@@ -186,33 +186,27 @@ def main():
             columns_order = [col for col in filtered_data.columns if col not in ["Commit Date", "Date", "Time"]]
             filtered_data = filtered_data[columns_order + ["Date", "Time"]]
 
-        # Display filtered data
-        st.write("### Data Table")
-        st.dataframe(filtered_data, use_container_width=True)
-
-        # Extract and display Java filenames below the table
+        # Extract and display Java filenames
         st.write("### Java Files (Added)")
-        if "File Name" in filtered_data.columns and "Action" in filtered_data.columns:
-            # Ensure Action column has consistent casing
-            filtered_data["Action"] = filtered_data["Action"].str.strip().str.lower()
+        # Check if 'Added Files' column exists
+        if "Added Files" in filtered_data.columns:
+            # Drop rows where 'Added Files' is empty
+            added_files = filtered_data["Added Files"].dropna()
 
-            # Filter rows where Action is "added"
-            added_files = filtered_data[filtered_data["Action"] == "added"]
+            # Split files in case of multiple filenames per row (comma-separated)
+            java_files = []
+            for files in added_files:
+                java_files.extend([file.strip() for file in files.split(",") if file.endswith(".java")])
 
-            # Extract filenames ending with .java
-            java_files = added_files["File Name"].dropna()
-            java_files = [file for file in java_files if file.endswith(".java")]
-
-            # Display filenames
+            # Display the filenames
             if java_files:
                 st.write(f"**Total Java Files Added:** {len(java_files)}")
-                st.write("### List of Java Files:")
-                for file in java_files:
-                    st.write(f"- {file}")
+                st.write(", ".join(java_files))
             else:
                 st.write("No Java files were added.")
         else:
-            st.write("Required columns ('File Name' and 'Action') are not available in the data.")
+            st.write("The 'Added Files' column is not available in the data.")
+
 
     elif page == "Visualization Charts":
         st.subheader("Visualization Charts")
