@@ -139,78 +139,78 @@ def main():
         st.subheader("All Data")
 
     # Collection selection
-    collection_name = st.selectbox("📂 Select Collection", collection_names)
-    raw_data = fetch_data(collection_name) if collection_name else []
+        collection_name = st.selectbox("📂 Select Collection", collection_names)
+        raw_data = fetch_data(collection_name) if collection_name else []
 
-    # Date filtering
-    start_date = st.date_input("📅 Start Date", value=datetime(2023, 1, 1))
-    end_date = st.date_input("📅 End Date", value=datetime(2024, 1, 1))
+        # Date filtering
+        start_date = st.date_input("📅 Start Date", value=datetime(2023, 1, 1))
+        end_date = st.date_input("📅 End Date", value=datetime(2024, 1, 1))
 
-    # Filter data
-    if raw_data:
-        processed_data, total_counts = process_data(raw_data)
+        # Filter data
+        if raw_data:
+            processed_data, total_counts = process_data(raw_data)
 
-        # Filter by date range
-        if "Commit Date" in processed_data.columns:
-            # Ensure Commit Date is in datetime format
-            processed_data["Commit Date"] = pd.to_datetime(processed_data["Commit Date"], errors='coerce')
+            # Filter by date range
+            if "Commit Date" in processed_data.columns:
+                # Ensure Commit Date is in datetime format
+                processed_data["Commit Date"] = pd.to_datetime(processed_data["Commit Date"], errors='coerce')
 
-            # Drop invalid datetime rows (if any)
-            processed_data = processed_data.dropna(subset=["Commit Date"])
+                # Drop invalid datetime rows (if any)
+                processed_data = processed_data.dropna(subset=["Commit Date"])
 
-            # Separate Date and Time
-            processed_data["Date"] = processed_data["Commit Date"].dt.date
-            processed_data["Time"] = processed_data["Commit Date"].dt.time
+                # Separate Date and Time
+                processed_data["Date"] = processed_data["Commit Date"].dt.date
+                processed_data["Time"] = processed_data["Commit Date"].dt.time
 
-            # Filter data
-            filtered_data = processed_data[
-                (processed_data["Commit Date"] >= pd.to_datetime(start_date)) &
-                (processed_data["Commit Date"] <= pd.to_datetime(end_date))
-            ]
-        else:
-            filtered_data = processed_data
-
-        # Ensure data types are clean
-        filtered_data = filtered_data.convert_dtypes()
-
-        # Replace NaNs with empty strings (to avoid errors with PyArrow)
-        filtered_data = filtered_data.fillna("")
-
-        # Display total counts
-        st.write("### Total File Counts")
-        for action, count in total_counts.items():
-            st.write(f"**{action}:** {count}")
-
-        # Rearrange columns to include Date and Time
-        if "Commit Date" in filtered_data.columns:
-            columns_order = [col for col in filtered_data.columns if col not in ["Commit Date", "Date", "Time"]]
-            filtered_data = filtered_data[columns_order + ["Date", "Time"]]
-
-        # Display filtered data
-        st.write("### Data Table")
-        st.dataframe(filtered_data, use_container_width=True)
-
-        # Extract and display Java filenames
-        st.write("### Java Files (Added)")
-
-        # Check if 'Added Files' column exists
-        if "Added Files" in filtered_data.columns:
-            # Drop rows where 'Added Files' is empty
-            added_files = filtered_data["Added Files"].dropna()
-
-            # Split files in case of multiple filenames per row (comma-separated)
-            java_files = []
-            for files in added_files:
-                java_files.extend([file.strip() for file in files.split(",") if file.endswith(".java")])
-
-            # Display the filenames
-            if java_files:
-                st.write(f"**Total Java Files Added:** {len(java_files)}")
-                st.write(", ".join(java_files))
+                # Filter data
+                filtered_data = processed_data[
+                    (processed_data["Commit Date"] >= pd.to_datetime(start_date)) &
+                    (processed_data["Commit Date"] <= pd.to_datetime(end_date))
+                ]
             else:
-                st.write("No Java files were added.")
-        else:
-            st.write("The 'Added Files' column is not available in the data.")
+                filtered_data = processed_data
+
+            # Ensure data types are clean
+            filtered_data = filtered_data.convert_dtypes()
+
+            # Replace NaNs with empty strings (to avoid errors with PyArrow)
+            filtered_data = filtered_data.fillna("")
+
+            # Display total counts
+            st.write("### Total File Counts")
+            for action, count in total_counts.items():
+                st.write(f"**{action}:** {count}")
+
+            # Rearrange columns to include Date and Time
+            if "Commit Date" in filtered_data.columns:
+                columns_order = [col for col in filtered_data.columns if col not in ["Commit Date", "Date", "Time"]]
+                filtered_data = filtered_data[columns_order + ["Date", "Time"]]
+
+            # Display filtered data
+            st.write("### Data Table")
+            st.dataframe(filtered_data, use_container_width=True)
+
+            # Extract and display Java filenames
+            st.write("### Java Files (Added)")
+
+            # Check if 'Added Files' column exists
+            if "Added Files" in filtered_data.columns:
+                # Drop rows where 'Added Files' is empty
+                added_files = filtered_data["Added Files"].dropna()
+
+                # Split files in case of multiple filenames per row (comma-separated)
+                java_files = []
+                for files in added_files:
+                    java_files.extend([file.strip() for file in files.split(",") if file.endswith(".java")])
+
+                # Display the filenames
+                if java_files:
+                    st.write(f"**Total Java Files Added:** {len(java_files)}")
+                    st.write(", ".join(java_files))
+                else:
+                    st.write("No Java files were added.")
+            else:
+                st.write("The 'Added Files' column is not available in the data.")
 
 
     elif page == "Visualization Charts":
