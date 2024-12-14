@@ -194,7 +194,7 @@ def main():
         st.write("### Java Files")
         if "File Name" in filtered_data.columns and "Action" in filtered_data.columns:
     # Filter rows where Action is "Added"
-            added_files = filtered_data[filtered_data["Action"].str.lower() == "added"]
+            added_files = filtered_data[filtered_data["Action"].str.lower() == "Added Files"]
 
     # Extract Java files
             java_files = added_files["File Name"].dropna()
