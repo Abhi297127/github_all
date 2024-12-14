@@ -4,7 +4,7 @@ from urllib.parse import quote_plus
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
- 
+   
 # ---- Database Connection ----
 @st.cache_resource
 def get_mongo_client():
