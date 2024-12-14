@@ -131,7 +131,7 @@ def main():
             - Explore visualizations of added, renamed, modified, and deleted files.
             """
         )
-        st.image("java.jpeg", caption="Java File Analysis Dashboard", use_container_width=True)
+        st.image("java.jpg", caption="Java File Analysis Dashboard", use_container_width=True)
 
     elif page == "All Data":
         st.subheader("All Data")
