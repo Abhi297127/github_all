@@ -190,19 +190,25 @@ def main():
         st.write("### Data Table")
         st.dataframe(filtered_data, use_container_width=True)
 
-        # Extract and display Java filenames
-        st.write("### Java Files")
+        # Extract and display Java filenames below the table
+        st.write("### Java Files (Added)")
         if "File Name" in filtered_data.columns and "Action" in filtered_data.columns:
-    # Filter rows where Action is "Added"
-            added_files = filtered_data[filtered_data["Action"].str.lower() == "Added Files"]
+            # Ensure Action column has consistent casing
+            filtered_data["Action"] = filtered_data["Action"].str.strip().str.lower()
 
-    # Extract Java files
+            # Filter rows where Action is "added"
+            added_files = filtered_data[filtered_data["Action"] == "added"]
+
+            # Extract filenames ending with .java
             java_files = added_files["File Name"].dropna()
             java_files = [file for file in java_files if file.endswith(".java")]
 
+            # Display filenames
             if java_files:
                 st.write(f"**Total Java Files Added:** {len(java_files)}")
-                st.write("\n".join(java_files))
+                st.write("### List of Java Files:")
+                for file in java_files:
+                    st.write(f"- {file}")
             else:
                 st.write("No Java files were added.")
         else:
