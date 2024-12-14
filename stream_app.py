@@ -153,6 +153,10 @@ def main():
             # Filter by date range
             if "Commit Date" in processed_data.columns:
                 processed_data["Commit Date"] = pd.to_datetime(processed_data["Commit Date"])
+                # Separate Date and Time
+                processed_data["Date"] = processed_data["Commit Date"].dt.date
+                processed_data["Time"] = processed_data["Commit Date"].dt.time
+
                 filtered_data = processed_data[
                     (processed_data["Commit Date"] >= pd.to_datetime(start_date)) &
                     (processed_data["Commit Date"] <= pd.to_datetime(end_date))
@@ -165,10 +169,28 @@ def main():
             for action, count in total_counts.items():
                 st.write(f"**{action}:** {count}")
 
+            # Rearrange columns to include Date and Time
+            if "Commit Date" in filtered_data.columns:
+                columns_order = [col for col in filtered_data.columns if col != "Commit Date"]
+                filtered_data = filtered_data[columns_order + ["Date", "Time"]]
+
             # Display filtered data
             st.write("### Data Table")
             st.dataframe(filtered_data, use_container_width=True)
 
+            # Extract and display Java filenames
+            st.write("### Java Files")
+            if "File Name" in filtered_data.columns:
+                java_files = filtered_data["File Name"].dropna()
+                java_files = [file for file in java_files if file.endswith(".java")]
+                
+                if java_files:
+                    st.write(f"**Total Java Files:** {len(java_files)}")
+                    st.write("\n".join(java_files))
+                else:
+                    st.write("No Java files found.")
+            else:
+                st.write("No file names available in the data.")
     elif page == "Visualization Charts":
         st.subheader("Visualization Charts")
 
@@ -197,7 +219,7 @@ def main():
                     color_discrete_sequence=["#4caf50"]
                 )
                 st.plotly_chart(fig)
-                
+
 
 if __name__ == "__main__":
     main()
