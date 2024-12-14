@@ -195,6 +195,8 @@ def main():
                     color_discrete_sequence=["#4caf50"]
                 )
                 st.plotly_chart(fig)
+    elif page == "Codes":
+        st.subheader("Code")
 
 if __name__ == "__main__":
     main()
