@@ -196,7 +196,7 @@ def main():
                 )
                 st.plotly_chart(fig)
     elif page == "Codes":
-        st.subheader("Code")
+        st.subheader("Codes")
         # Collection selection
         collection_name = st.selectbox("📂 Select Collection", collection_names)
 
