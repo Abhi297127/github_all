@@ -8,7 +8,7 @@ from datetime import datetime
 def get_mongo_client():
     try:
         client = MongoClient(
-            "mongodb+srv://abhishelke297127:Abhi@2971@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority",
+            "mongodb+srv://abhishelke297127:Abhi%402971@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority",
             tls=True,
             tlsAllowInvalidCertificates=False
         )
