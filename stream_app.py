@@ -47,7 +47,7 @@ def logout():
     st.session_state.logged_in = False
     st.session_state.role = None
     st.session_state.username = None
-    st.experimental_rerun()
+    st.rerun()
 
 # Main logic
 if st.session_state.logged_in:
