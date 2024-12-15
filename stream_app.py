@@ -64,7 +64,7 @@ def admin_page():
         st.write("Sent Questions:")
         num = 1
         for idx, question in enumerate(st.session_state.questions_db):
-            st.write(f"{num}.**{question['question_name']}** ({question['class_name']})")
+            st.write(f"{num}.  **{question['question_name']}** ({question['class_name']})")
 
             col1, col2 = st.columns([1, 1])
 
