@@ -38,23 +38,16 @@ def process_data(data):
     }
 
     for doc in data:
-        # Safely get fields and validate type
-        added_files = doc.get("added_java_files", {})
-        renamed_files = doc.get("renamed_java_files", {})
-        modified_files = doc.get("modified_java_files", {})
-        deleted_files = doc.get("deleted_java_files", {})
+        # Safely fetch file changes and ensure values are lists
+        def safe_extract_files(file_changes):
+            if isinstance(file_changes, dict):
+                return [item for value in file_changes.values() if isinstance(value, list) for item in value]
+            return []
 
-        # Ensure fields are dictionaries
-        added_files = added_files if isinstance(added_files, dict) else {}
-        renamed_files = renamed_files if isinstance(renamed_files, dict) else {}
-        modified_files = modified_files if isinstance(modified_files, dict) else {}
-        deleted_files = deleted_files if isinstance(deleted_files, dict) else {}
-
-        # Convert file values to lists safely
-        added_files_list = sum(added_files.values(), []) if added_files else []
-        renamed_files_list = sum(renamed_files.values(), []) if renamed_files else []
-        modified_files_list = sum(modified_files.values(), []) if modified_files else []
-        deleted_files_list = sum(deleted_files.values(), []) if deleted_files else []
+        added_files_list = safe_extract_files(doc.get("added_java_files", {}))
+        renamed_files_list = safe_extract_files(doc.get("renamed_java_files", {}))
+        modified_files_list = safe_extract_files(doc.get("modified_java_files", {}))
+        deleted_files_list = safe_extract_files(doc.get("deleted_java_files", {}))
 
         row = {
             "Commit ID": doc.get("commit_id", "N/A"),
