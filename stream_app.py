@@ -7,6 +7,9 @@ USERS = {
     "student2": {"password": "student456", "role": "student"},
 }
 
+# Mock database for storing questions
+questions_db = {}
+
 # Initialize session state
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -39,14 +42,45 @@ def login():
 def admin_page():
     st.subheader("Admin Dashboard")
     st.write("Welcome to the admin dashboard!")
-    st.write("You can add admin-specific functionality here.")
+    
+    # Admin can send questions to students
+    st.write("Send a question to a student:")
+
+    # Form for sending question
+    with st.form(key="send_question_form"):
+        student_username = st.selectbox("Select Student", ["student1", "student2"])
+        question_name = st.text_input("Question Name")
+        class_name = st.text_input("Class Name")
+        submit_button = st.form_submit_button("Send Question")
+
+        if submit_button:
+            # Store the question in the mock database
+            if student_username not in questions_db:
+                questions_db[student_username] = []
+            questions_db[student_username].append({"question_name": question_name, "class_name": class_name})
+            st.success(f"Question sent to {student_username}!")
+
+    # Display the list of all questions sent to the students
+    if questions_db:
+        st.write("Sent Questions:")
+        for student, questions in questions_db.items():
+            st.write(f"Questions for {student}:")
+            for q in questions:
+                st.write(f"- {q['question_name']} ({q['class_name']})")
 
 
 # Student dashboard
 def student_page():
     st.subheader("Student Dashboard")
     st.write(f"Welcome, {st.session_state.username}!")
-    st.write("You can add student-specific functionality here.")
+    
+    # Display questions sent to the logged-in student
+    if st.session_state.username in questions_db:
+        st.write("Your Questions:")
+        for q in questions_db[st.session_state.username]:
+            st.write(f"- {q['question_name']} ({q['class_name']})")
+    else:
+        st.write("No questions have been sent to you yet.")
 
 
 # Logout functionality
@@ -58,7 +92,7 @@ def logout():
     st.rerun()
 
 
-# Homepage contenta
+# Homepage content
 def homepage():
     st.title("Welcome to the Homepage")
     st.write("This is the Home page of the application.")
