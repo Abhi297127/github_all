@@ -58,7 +58,7 @@ def logout():
     st.rerun()
 
 
-# Homepage content
+# Homepage contenta
 def homepage():
     st.title("Welcome to the Homepage")
     st.write("This is the Home page of the application.")
@@ -68,9 +68,18 @@ def homepage():
 # Toolbar with dynamic options
 def toolbar():
     st.sidebar.title("Navigation")
-    options = ["Home", "Login"]
+
+    # Define navigation options based on login status
     if st.session_state.logged_in:
-        options += ["Admin Dashboard" if st.session_state.role == "admin" else "Student Dashboard"]
+        options = ["Home"]
+        if st.session_state.role == "admin":
+            options.append("Admin Dashboard")
+        elif st.session_state.role == "student":
+            options.append("Student Dashboard")
+    else:
+        options = ["Home", "Login"]
+
+    # Sidebar navigation
     selected_option = st.sidebar.radio("Go to:", options, key="sidebar_navigation")
 
     if selected_option == "Home":
