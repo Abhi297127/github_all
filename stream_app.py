@@ -85,7 +85,7 @@ def toolbar():
 
 # Header with top-right Logout button
 def header():
-    cols = st.columns([10, 1])  # Adjust column width ratio
+    cols = st.columns([5, 1])  # Adjust column width ratio
     with cols[0]:
         st.write("")  # Placeholder for alignment
     with cols[1]:
