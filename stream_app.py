@@ -30,14 +30,19 @@ def fetch_data(collection_name):
 
 # Safely extract file names from dict
 def safe_extract_files(file_dict):
-    """Safely extract file names from dict, ensuring values are lists or strings."""
+    """
+    Safely extract only filenames from a dictionary.
+    Handles values as lists or strings and extracts base filenames.
+    """
     files = []
     if isinstance(file_dict, dict):
         for value in file_dict.values():
-            if isinstance(value, list):  # If list, extend files
-                files.extend(value)
-            elif isinstance(value, str):  # If string, append directly
-                files.append(value)
+            if isinstance(value, list):
+                # Extract base filenames from list
+                files.extend([os.path.basename(file) for file in value])
+            elif isinstance(value, str):
+                # Extract base filename from string
+                files.append(os.path.basename(value))
     return files
 
 # Process data into a DataFrame
