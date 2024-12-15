@@ -13,6 +13,9 @@ if "logged_in" not in st.session_state:
     st.session_state.role = None
     st.session_state.username = None
 
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "Home"
+
 
 # Login functionality
 def login():
@@ -20,12 +23,13 @@ def login():
     username = st.text_input("Username", key="login_username")
     password = st.text_input("Password", type="password", key="login_password")
 
-    if st.button("Login"):
+    if st.button("Login", key="login_button"):
         if username in USERS and USERS[username]["password"] == password:
             st.session_state.logged_in = True
             st.session_state.role = USERS[username]["role"]
             st.session_state.username = username
             st.success(f"Welcome {username}!")
+            st.session_state.current_page = "Home"
             st.rerun()
         else:
             st.error("Invalid username or password")
@@ -50,46 +54,49 @@ def logout():
     st.session_state.logged_in = False
     st.session_state.role = None
     st.session_state.username = None
+    st.session_state.current_page = "Home"
     st.rerun()
 
 
 # Homepage content
 def homepage():
     st.title("Welcome to the Homepage")
-    st.write("This is a centralized homepage with a toolbar for navigation.")
-    st.write("Use the toolbar to log in or navigate to different sections.")
-    if not st.session_state.logged_in:
-        login()
+    st.write("This is the Home page of the application.")
+    st.write("Navigate to other sections using the sidebar.")
 
 
 # Toolbar with dynamic options
 def toolbar():
-    st.sidebar.title("Toolbar")
+    st.sidebar.title("Navigation")
+    options = ["Home", "Login"]
     if st.session_state.logged_in:
-        st.sidebar.write(f"Logged in as: **{st.session_state.username}**")
-        if st.session_state.role == "admin":
-            if st.sidebar.button("Admin Dashboard"):
-                admin_page()
-        elif st.session_state.role == "student":
-            if st.sidebar.button("Student Dashboard"):
-                student_page()
-        if st.sidebar.button("Logout"):
-            logout()
-    else:
-        if st.sidebar.button("Login"):
-            login()
+        options += ["Admin Dashboard" if st.session_state.role == "admin" else "Student Dashboard", "Logout"]
+    selected_option = st.sidebar.radio("Go to:", options, key="sidebar_navigation")
+
+    if selected_option == "Home":
+        st.session_state.current_page = "Home"
+    elif selected_option == "Login":
+        st.session_state.current_page = "Login"
+    elif selected_option == "Admin Dashboard" and st.session_state.logged_in:
+        st.session_state.current_page = "Admin Dashboard"
+    elif selected_option == "Student Dashboard" and st.session_state.logged_in:
+        st.session_state.current_page = "Student Dashboard"
+    elif selected_option == "Logout":
+        logout()
 
 
 # Main application logic
 def main():
     toolbar()
-    if st.session_state.logged_in:
-        if st.session_state.role == "admin":
-            admin_page()
-        elif st.session_state.role == "student":
-            student_page()
-    else:
+
+    if st.session_state.current_page == "Home":
         homepage()
+    elif st.session_state.current_page == "Login":
+        login()
+    elif st.session_state.current_page == "Admin Dashboard" and st.session_state.logged_in:
+        admin_page()
+    elif st.session_state.current_page == "Student Dashboard" and st.session_state.logged_in:
+        student_page()
 
 
 # Run the application
