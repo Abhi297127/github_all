@@ -7,7 +7,7 @@ USERS = {
     "student2": {"password": "student456", "role": "student"},
 }
 
-# Mock database for storing questions
+# Mock database for storing questions (sent to all students)
 questions_db = {}
 
 # Initialize session state
@@ -42,31 +42,25 @@ def login():
 def admin_page():
     st.subheader("Admin Dashboard")
     st.write("Welcome to the admin dashboard!")
-    
-    # Admin can send questions to students
-    st.write("Send a question to a student:")
 
-    # Form for sending question
-    with st.form(key="send_question_form"):
-        student_username = st.selectbox("Select Student", ["student1", "student2"])
-        question_name = st.text_input("Question Name")
-        class_name = st.text_input("Class Name")
-        submit_button = st.form_submit_button("Send Question")
+    # Admin can send or edit questions for all students
+    st.write("Send or edit a question for all students:")
+
+    # Form for sending or editing question
+    with st.form(key="send_edit_question_form"):
+        question_name = st.text_input("Question Name", value=questions_db.get('question_name', ''))
+        class_name = st.text_input("Class Name", value=questions_db.get('class_name', ''))
+        submit_button = st.form_submit_button("Send/Update Question")
 
         if submit_button:
-            # Store the question in the mock database
-            if student_username not in questions_db:
-                questions_db[student_username] = []
-            questions_db[student_username].append({"question_name": question_name, "class_name": class_name})
-            st.success(f"Question sent to {student_username}!")
+            # Store or update the question in the mock database
+            questions_db['question_name'] = question_name
+            questions_db['class_name'] = class_name
+            st.success("Question sent/updated to all students!")
 
-    # Display the list of all questions sent to the students
-    if questions_db:
-        st.write("Sent Questions:")
-        for student, questions in questions_db.items():
-            st.write(f"Questions for {student}:")
-            for q in questions:
-                st.write(f"- {q['question_name']} ({q['class_name']})")
+    # Display the question for all students on the Admin page
+    if 'question_name' in questions_db:
+        st.write(f"Sent Question: {questions_db['question_name']} ({questions_db['class_name']})")
 
 
 # Student dashboard
@@ -74,13 +68,11 @@ def student_page():
     st.subheader("Student Dashboard")
     st.write(f"Welcome, {st.session_state.username}!")
     
-    # Display questions sent to the logged-in student
-    if st.session_state.username in questions_db:
-        st.write("Your Questions:")
-        for q in questions_db[st.session_state.username]:
-            st.write(f"- {q['question_name']} ({q['class_name']})")
+    # Display the question sent to all students by the admin
+    if 'question_name' in questions_db:
+        st.write(f"Your Question: {questions_db['question_name']} ({questions_db['class_name']})")
     else:
-        st.write("No questions have been sent to you yet.")
+        st.write("No question has been sent to you yet.")
 
 
 # Logout functionality
