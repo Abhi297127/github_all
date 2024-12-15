@@ -70,7 +70,7 @@ def toolbar():
     st.sidebar.title("Navigation")
     options = ["Home", "Login"]
     if st.session_state.logged_in:
-        options += ["Admin Dashboard" if st.session_state.role == "admin" else "Student Dashboard", "Logout"]
+        options += ["Admin Dashboard" if st.session_state.role == "admin" else "Student Dashboard"]
     selected_option = st.sidebar.radio("Go to:", options, key="sidebar_navigation")
 
     if selected_option == "Home":
@@ -81,12 +81,22 @@ def toolbar():
         st.session_state.current_page = "Admin Dashboard"
     elif selected_option == "Student Dashboard" and st.session_state.logged_in:
         st.session_state.current_page = "Student Dashboard"
-    elif selected_option == "Logout":
-        logout()
+
+
+# Header with top-right Logout button
+def header():
+    cols = st.columns([8, 1])  # Adjust column width ratio
+    with cols[0]:
+        st.write("")  # Placeholder for alignment
+    with cols[1]:
+        if st.session_state.logged_in:
+            if st.button("Logout", key="logout_button"):
+                logout()
 
 
 # Main application logic
 def main():
+    header()
     toolbar()
 
     if st.session_state.current_page == "Home":
