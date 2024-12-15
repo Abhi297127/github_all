@@ -3,8 +3,6 @@ from pymongo import MongoClient
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
-import subprocess
-import os
 
 # MongoDB connection
 def get_mongo_client():
@@ -21,11 +19,11 @@ def get_mongo_client():
         return None
 
 # Fetch data for the fixed database and collection
+@st.cache_data(ttl=600)
 def fetch_data(collection_name):
     client = get_mongo_client()
     if client is None:
         return []
-
     db = client["JavaFileAnalysis"]
     collection = db[collection_name]
     return list(collection.find())
@@ -68,53 +66,29 @@ def process_data(data):
 
 # Sidebar navigation
 def sidebar():
-    st.sidebar.title("📊 Navigation")
+    st.sidebar.title("\U0001F4CA Navigation")
     return st.sidebar.radio(
         "Go to", 
-        ["Home", "All Data", "Visualization Charts"],
-        index=0,
-        help="Navigate between different sections of the app."
+        ["Home", "All Data", "Visualization Charts", "Codes"],
+        index=0
     )
 
-# Add custom CSS
-def add_custom_css():
-    st.markdown(
-        """
-        <style>
-        /* Background color */
-        .css-1d391kg {background-color: #f5f5f5;}
-        
-        /* Header and subheader styles */
-        .stTitle {color: #1f4e79; font-size: 2.2rem; font-weight: bold;}
-        .stSubheader {color: #34568b; font-weight: bold;}
-        
-        /* Sidebar styles */
-        .css-1aumxhk {background-color: #234e70;}
-        .css-1aumxhk h1 {color: white;}
-        .css-1aumxhk label, .css-1aumxhk .stRadio > div {color: #c0d6df;}
-        
-        /* Buttons and download links */
-        .stDownloadButton {background-color: #ff914d; color: white; border: none; padding: 8px 15px; border-radius: 5px;}
-        .stDownloadButton:hover {background-color: #ff6f3c;}
-        .css-1aehpvq {color: #ff6f3c;}
-        
-        /* Dataframe table */
-        .dataframe {font-size: 0.9rem;}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+# Refresh Button
+def refresh_data():
+    st.cache_data.clear()
+    st.experimental_rerun()
 
 # Main app
 def main():
-    # Add custom CSS
-    add_custom_css()
-
-    st.title("🚀 Java File Analysis")
+    st.title("\U0001F680 Java File Analysis")
     st.caption("Analyze and visualize Java file actions efficiently.")
-    
+
     # Sidebar navigation
     page = sidebar()
+
+    # Add Refresh Button
+    if st.sidebar.button("\u21bb Refresh Data"):
+        refresh_data()
 
     # MongoDB connection
     client = get_mongo_client()
@@ -133,98 +107,49 @@ def main():
             - Explore visualizations of added, renamed, modified, and deleted files.
             """
         )
-        st.image("java.jpg", caption="Java File Analysis Dashboard", use_container_width=True)
+        st.image("java.jpg", caption="Java File Analysis Dashboard", use_column_width=True)
 
     elif page == "All Data":
         st.subheader("All Data")
 
-    # Collection selection
-        collection_name = st.selectbox("📂 Select Collection", collection_names)
+        # Collection selection
+        collection_name = st.selectbox("\U0001F4C2 Select Collection", collection_names)
         raw_data = fetch_data(collection_name) if collection_name else []
 
         # Date filtering
-        start_date = st.date_input("📅 Start Date", value=datetime(2023, 1, 1))
-        end_date = st.date_input("📅 End Date", value=datetime(2024, 1, 1))
+        start_date = st.date_input("\U0001F4C5 Start Date", value=datetime(2023, 1, 1))
+        end_date = st.date_input("\U0001F4C5 End Date", value=datetime(2024, 1, 1))
 
-        # Filter data
         if raw_data:
             processed_data, total_counts = process_data(raw_data)
 
             # Filter by date range
-            if "Commit Date" in processed_data.columns:
-                # Ensure Commit Date is in datetime format
-                processed_data["Commit Date"] = pd.to_datetime(processed_data["Commit Date"], errors='coerce')
-
-                # Drop invalid datetime rows (if any)
-                processed_data = processed_data.dropna(subset=["Commit Date"])
-
-                # Separate Date and Time
-                processed_data["Date"] = processed_data["Commit Date"].dt.date
-                processed_data["Time"] = processed_data["Commit Date"].dt.time
-
-                # Filter data
-                filtered_data = processed_data[
-                    (processed_data["Commit Date"] >= pd.to_datetime(start_date)) &
-                    (processed_data["Commit Date"] <= pd.to_datetime(end_date))
-                ]
-            else:
-                filtered_data = processed_data
-
-            # Ensure data types are clean
-            filtered_data = filtered_data.convert_dtypes()
-
-            # Replace NaNs with empty strings (to avoid errors with PyArrow)
-            filtered_data = filtered_data.fillna("")
+            processed_data["Commit Date"] = pd.to_datetime(processed_data["Commit Date"], errors='coerce')
+            filtered_data = processed_data[
+                (processed_data["Commit Date"] >= pd.to_datetime(start_date)) &
+                (processed_data["Commit Date"] <= pd.to_datetime(end_date))
+            ]
 
             # Display total counts
             st.write("### Total File Counts")
             for action, count in total_counts.items():
                 st.write(f"**{action}:** {count}")
 
-            # Rearrange columns to include Date and Time
-            if "Commit Date" in filtered_data.columns:
-                columns_order = [col for col in filtered_data.columns if col not in ["Commit Date", "Date", "Time"]]
-                filtered_data = filtered_data[columns_order + ["Date", "Time"]]
-
             # Display filtered data
             st.write("### Data Table")
             st.dataframe(filtered_data, use_container_width=True)
-
-            # Extract and display Java filenames
-            st.write("### Java Files (Added)")
-
-            # Check if 'Added Files' column exists
-            if "Added Files" in filtered_data.columns:
-                # Drop rows where 'Added Files' is empty
-                added_files = filtered_data["Added Files"].dropna()
-
-                # Split files in case of multiple filenames per row (comma-separated)
-                java_files = []
-                for files in added_files:
-                    java_files.extend([file.strip() for file in files.split(",") if file.endswith(".java")])
-
-                # Display the filenames
-                if java_files:
-                    st.write(f"**Total Java Files Added:** {len(java_files)}")
-                    st.write(", ".join(java_files))
-                else:
-                    st.write("No Java files were added.")
-            else:
-                st.write("The 'Added Files' column is not available in the data.")
-
 
     elif page == "Visualization Charts":
         st.subheader("Visualization Charts")
 
         # Collection selection
-        collection_name = st.selectbox("📂 Select Collection", collection_names)
+        collection_name = st.selectbox("\U0001F4C2 Select Collection", collection_names)
         raw_data = fetch_data(collection_name) if collection_name else []
 
-        # Chart filters
         if raw_data:
             processed_data, total_counts = process_data(raw_data)
             action_type = st.selectbox(
-                "📊 Select Action Type",
+                "\U0001F4CA Select Action Type",
                 ["Added Files", "Renamed Files", "Modified Files", "Deleted Files"]
             )
 
@@ -241,7 +166,6 @@ def main():
                     color_discrete_sequence=["#4caf50"]
                 )
                 st.plotly_chart(fig)
-
 
 if __name__ == "__main__":
     main()
