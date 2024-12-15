@@ -48,18 +48,18 @@ def admin_page():
     with st.form(key="send_edit_question_form"):
         question_name = st.text_input("Question Name")
         class_name = st.text_input("Class Name")
-        submit_button = st.form_submit_button("Send/Update Question")
+        submit_button = st.form_submit_button("Send Question")
 
         if submit_button:
-            # Add or update the question in the mock database
+            # Add new question to the mock database
             question = {
                 "question_name": question_name,
                 "class_name": class_name
             }
             st.session_state.questions_db.append(question)
-            st.success("Question sent/updated to all students!")
+            st.success("Question sent to all students!")
 
-    # Display the list of questions with options to edit or delete
+    # Display the list of questions with options to edit, update or delete
     if len(st.session_state.questions_db) > 0:
         st.write("Sent Questions:")
         for idx, question in enumerate(st.session_state.questions_db):
@@ -67,17 +67,35 @@ def admin_page():
 
             col1, col2 = st.columns([1, 1])
 
+            # Edit button for each question
             with col1:
                 if st.button(f"Edit {question['question_name']}", key=f"edit_{idx}"):
-                    st.session_state.questions_db[idx] = {
-                        "question_name": st.text_input("Edit Question Name", value=question['question_name']),
-                        "class_name": st.text_input("Edit Class Name", value=question['class_name'])
-                    }
+                    edit_question(question, idx)
 
+            # Delete button for each question
             with col2:
                 if st.button(f"Delete {question['question_name']}", key=f"delete_{idx}"):
-                    st.session_state.questions_db.pop(idx)
-                    st.rerun()
+                    delete_question(idx)
+
+def edit_question(question, idx):
+    st.write("Edit Question:")
+    # Pre-fill the fields with current data
+    new_question_name = st.text_input("Edit Question Name", value=question['question_name'])
+    new_class_name = st.text_input("Edit Class Name", value=question['class_name'])
+
+    if st.button("Resend", key=f"resend_{idx}"):
+        # Update the question in the database
+        st.session_state.questions_db[idx] = {
+            "question_name": new_question_name,
+            "class_name": new_class_name
+        }
+        st.success("Question has been updated and resent!")
+
+def delete_question(idx):
+    # Delete question from the database
+    st.session_state.questions_db.pop(idx)
+    st.success("Question has been deleted!")
+    st.rerun()
 
 # Student dashboard
 def student_page():
