@@ -28,7 +28,6 @@ def fetch_data(collection_name):
     collection = db[collection_name]
     return list(collection.find())
 
-# Process data into a DataFrame
 def process_data(data):
     rows = []
     total_counts = {
@@ -39,25 +38,41 @@ def process_data(data):
     }
 
     for doc in data:
-        added_files = doc.get("added_java_files", {}).values()
-        renamed_files = doc.get("renamed_java_files", {}).values()
-        modified_files = doc.get("modified_java_files", {}).values()
-        deleted_files = doc.get("deleted_java_files", {}).values()
+        added_files = doc.get("added_java_files", {})
+        renamed_files = doc.get("renamed_java_files", {})
+        modified_files = doc.get("modified_java_files", {})
+        deleted_files = doc.get("deleted_java_files", {})
+
+        # Ensure these fields are dictionaries; otherwise, default to empty dictionary
+        if not isinstance(added_files, dict):
+            added_files = {}
+        if not isinstance(renamed_files, dict):
+            renamed_files = {}
+        if not isinstance(modified_files, dict):
+            modified_files = {}
+        if not isinstance(deleted_files, dict):
+            deleted_files = {}
+
+        # Extract file lists safely
+        added_files_list = sum(added_files.values(), [])
+        renamed_files_list = sum(renamed_files.values(), [])
+        modified_files_list = sum(modified_files.values(), [])
+        deleted_files_list = sum(deleted_files.values(), [])
 
         row = {
             "Commit ID": doc.get("commit_id", "N/A"),
             "Commit Date": doc.get("commit_date", "N/A"),
-            "Added Files": ", ".join(sum(added_files, [])),
-            "Renamed Files": ", ".join(sum(renamed_files, [])),
-            "Modified Files": ", ".join(sum(modified_files, [])),
-            "Deleted Files": ", ".join(sum(deleted_files, [])),
+            "Added Files": ", ".join(added_files_list),
+            "Renamed Files": ", ".join(renamed_files_list),
+            "Modified Files": ", ".join(modified_files_list),
+            "Deleted Files": ", ".join(deleted_files_list),
         }
 
         # Update counts
-        total_counts["Total Added Files"] += len(sum(added_files, []))
-        total_counts["Total Renamed Files"] += len(sum(renamed_files, []))
-        total_counts["Total Modified Files"] += len(sum(modified_files, []))
-        total_counts["Total Deleted Files"] += len(sum(deleted_files, []))
+        total_counts["Total Added Files"] += len(added_files_list)
+        total_counts["Total Renamed Files"] += len(renamed_files_list)
+        total_counts["Total Modified Files"] += len(modified_files_list)
+        total_counts["Total Deleted Files"] += len(deleted_files_list)
 
         rows.append(row)
 
