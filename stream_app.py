@@ -88,7 +88,7 @@ def sidebar():
 # Refresh Button
 def refresh_data():
     st.cache_data.clear()
-    st.experimental_rerun()
+    st.rerun()
 
 # Main app
 def main():
