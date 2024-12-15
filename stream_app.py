@@ -3,6 +3,7 @@ from pymongo import MongoClient
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
+import os
 
 # MongoDB connection
 def get_mongo_client():
@@ -28,17 +29,20 @@ def fetch_data(collection_name):
     collection = db[collection_name]
     return list(collection.find())
 
-# Safely extract file names from dict
 def safe_extract_files(file_dict):
-    """Safely extract file names from dict, ensuring values are lists or strings."""
+    """
+    Safely extract only filenames from a dictionary.
+    Handles values as lists or strings and extracts base filenames.
+    """
     files = []
     if isinstance(file_dict, dict):
-        for key,value in file_dict.values():
-            if isinstance(key, list):  # If list, extend files
-                files.extend(key)
-            elif isinstance(key, str):  # If string, append directly
-                files.append(key)
+        for value in file_dict.values():  # Corrected key-value iteration
+            if isinstance(value, list):  # If list, extract filenames
+                files.extend([os.path.basename(file) for file in value])
+            elif isinstance(value, str):  # If string, extract filename
+                files.append(os.path.basename(value))
     return files
+
 
 # Process data into a DataFrame
 def process_data(data):
