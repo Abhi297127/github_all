@@ -34,9 +34,9 @@ def safe_extract_files(file_dict):
     files = []
     if isinstance(file_dict, dict):
         for key,value in file_dict.values():
-            if isinstance(value, list):  # If list, extend files
+            if isinstance(key, list):  # If list, extend files
                 files.extend(key)
-            elif isinstance(value, str):  # If string, append directly
+            elif isinstance(key, str):  # If string, append directly
                 files.append(key)
     return files
 
