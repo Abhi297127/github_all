@@ -62,6 +62,7 @@ def add_custom_css():
         }
         button:hover {
             background: #e05500;
+            color:black;
         }
         .logout-btn {
             background: #d9534f;
