@@ -69,12 +69,12 @@ def admin_page():
 
             # Edit button for each question
             with col1:
-                if st.button(f"Edit {question['question_name']}", key=f"edit_{idx}"):
+                if st.button("Edit Question", key=f"edit_{idx}"):
                     edit_question(question, idx)
 
             # Delete button for each question
             with col2:
-                if st.button(f"Delete {question['question_name']}", key=f"delete_{idx}"):
+                if st.button("Delete Question", key=f"delete_{idx}"):
                     delete_question(idx)
 
 def edit_question(question, idx):
