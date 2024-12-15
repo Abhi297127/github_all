@@ -38,19 +38,19 @@ def process_data(data):
     }
 
     for doc in data:
-        # Safely get fields and ensure they are dictionaries
+        # Safely get fields and validate type
         added_files = doc.get("added_java_files", {})
         renamed_files = doc.get("renamed_java_files", {})
         modified_files = doc.get("modified_java_files", {})
         deleted_files = doc.get("deleted_java_files", {})
 
-        # Validate fields and default to empty dictionary
+        # Ensure fields are dictionaries
         added_files = added_files if isinstance(added_files, dict) else {}
         renamed_files = renamed_files if isinstance(renamed_files, dict) else {}
         modified_files = modified_files if isinstance(modified_files, dict) else {}
         deleted_files = deleted_files if isinstance(deleted_files, dict) else {}
 
-        # Safely process file lists
+        # Convert file values to lists safely
         added_files_list = sum(added_files.values(), []) if added_files else []
         renamed_files_list = sum(renamed_files.values(), []) if renamed_files else []
         modified_files_list = sum(modified_files.values(), []) if modified_files else []
