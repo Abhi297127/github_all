@@ -33,11 +33,11 @@ def safe_extract_files(file_dict):
     """Safely extract file names from dict, ensuring values are lists or strings."""
     files = []
     if isinstance(file_dict, dict):
-        for key,value in file_dict.values():
-            if isinstance(key, list):  # If list, extend files
-                files.extend(key)
-            elif isinstance(key, str):  # If string, append directly
-                files.append(key)
+        for value in file_dict.values():
+            if isinstance(value, list):  # If list, extend files
+                files.extend(value)
+            elif isinstance(value, str):  # If string, append directly
+                files.append(value)
     return files
 
 # Process data into a DataFrame
