@@ -62,8 +62,9 @@ def admin_page():
     # Display the list of questions with options to edit, update or delete
     if len(st.session_state.questions_db) > 0:
         st.write("Sent Questions:")
+        num = 1
         for idx, question in enumerate(st.session_state.questions_db):
-            st.write(f"**{question['question_name']}** ({question['class_name']})")
+            st.write(f"{num}.**{question['question_name']}** ({question['class_name']})")
 
             col1, col2 = st.columns([1, 1])
 
@@ -76,6 +77,7 @@ def admin_page():
             with col2:
                 if st.button("Delete Question", key=f"delete_{idx}"):
                     delete_question(idx)
+            num +=1
 
 def edit_question(question, idx):
     st.write("Edit Question:")
