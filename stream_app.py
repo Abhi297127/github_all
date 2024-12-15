@@ -28,6 +28,19 @@ def fetch_data(collection_name):
     collection = db[collection_name]
     return list(collection.find())
 
+# Safely extract file names from dict
+def safe_extract_files(file_dict):
+    """Safely extract file names from dict, ensuring values are lists or strings."""
+    files = []
+    if isinstance(file_dict, dict):
+        for value in file_dict.values():
+            if isinstance(value, list):  # If list, extend files
+                files.extend(value)
+            elif isinstance(value, str):  # If string, append directly
+                files.append(value)
+    return files
+
+# Process data into a DataFrame
 def process_data(data):
     rows = []
     total_counts = {
@@ -38,12 +51,6 @@ def process_data(data):
     }
 
     for doc in data:
-        # Safely fetch file changes and ensure values are lists
-        def safe_extract_files(file_changes):
-            if isinstance(file_changes, dict):
-                return [item for value in file_changes.values() if isinstance(value, list) for item in value]
-            return []
-
         added_files_list = safe_extract_files(doc.get("added_java_files", {}))
         renamed_files_list = safe_extract_files(doc.get("renamed_java_files", {}))
         modified_files_list = safe_extract_files(doc.get("modified_java_files", {}))
@@ -81,7 +88,7 @@ def sidebar():
 # Refresh Button
 def refresh_data():
     st.cache_data.clear()
-    st.rerun()
+    st.experimental_rerun()
 
 # Main app
 def main():
@@ -112,7 +119,7 @@ def main():
             - Explore visualizations of added, renamed, modified, and deleted files.
             """
         )
-        st.image("java.jpg", caption="Java File Analysis Dashboard", use_container_width=True)
+        st.image("java.jpg", caption="Java File Analysis Dashboard", use_column_width=True)
 
     elif page == "All Data":
         st.subheader("All Data")
