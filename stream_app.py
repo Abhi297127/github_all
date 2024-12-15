@@ -38,26 +38,23 @@ def process_data(data):
     }
 
     for doc in data:
+        # Safely get fields and ensure they are dictionaries
         added_files = doc.get("added_java_files", {})
         renamed_files = doc.get("renamed_java_files", {})
         modified_files = doc.get("modified_java_files", {})
         deleted_files = doc.get("deleted_java_files", {})
 
-        # Ensure these fields are dictionaries; otherwise, default to empty dictionary
-        if not isinstance(added_files, dict):
-            added_files = {}
-        if not isinstance(renamed_files, dict):
-            renamed_files = {}
-        if not isinstance(modified_files, dict):
-            modified_files = {}
-        if not isinstance(deleted_files, dict):
-            deleted_files = {}
+        # Validate fields and default to empty dictionary
+        added_files = added_files if isinstance(added_files, dict) else {}
+        renamed_files = renamed_files if isinstance(renamed_files, dict) else {}
+        modified_files = modified_files if isinstance(modified_files, dict) else {}
+        deleted_files = deleted_files if isinstance(deleted_files, dict) else {}
 
-        # Extract file lists safely
-        added_files_list = sum(added_files.values(), [])
-        renamed_files_list = sum(renamed_files.values(), [])
-        modified_files_list = sum(modified_files.values(), [])
-        deleted_files_list = sum(deleted_files.values(), [])
+        # Safely process file lists
+        added_files_list = sum(added_files.values(), []) if added_files else []
+        renamed_files_list = sum(renamed_files.values(), []) if renamed_files else []
+        modified_files_list = sum(modified_files.values(), []) if modified_files else []
+        deleted_files_list = sum(deleted_files.values(), []) if deleted_files else []
 
         row = {
             "Commit ID": doc.get("commit_id", "N/A"),
@@ -122,7 +119,7 @@ def main():
             - Explore visualizations of added, renamed, modified, and deleted files.
             """
         )
-        st.image("java.jpg", caption="Java File Analysis Dashboard", use_column_width=True)
+        st.image("java.jpg", caption="Java File Analysis Dashboard", use_container_width=True)
 
     elif page == "All Data":
         st.subheader("All Data")
