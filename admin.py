@@ -20,6 +20,9 @@ def admin_dashboard(db):
                 try:
                     questions_collection.insert_one(new_question)
                     st.success("Question sent successfully!")
+                    # Clear the form fields by resetting session state
+                    st.session_state['new_question_name'] = ""
+                    st.session_state['new_class_name'] = ""
                     st.rerun()  # Refresh the page to show updated data
                 except Exception as e:
                     st.error(f"Error while sending the question: {e}")
