@@ -3,6 +3,8 @@ import streamlit as st
 def student_dashboard(db):
     st.subheader("Student Dashboard")
     st.write(f"Welcome, {st.session_state.username}!")
+
+    # Refresh button
     if st.button("Refresh Data", key="refresh_button"):
         st.rerun()  # Refresh the page to fetch the latest data
 
@@ -12,9 +14,9 @@ def student_dashboard(db):
 
     if questions:
         st.write("Your Questions:")
-        num=1
+        num = 1
         for question in questions:
-            st.write(f"{num}.**{question['question_name']}** ({question['class_name']})")
+            st.write(f"{num}. **{question['question_name']}** (Class: {question['class_name']})")
             num += 1
     else:
-        st.write("No questions available.")
+        st.info("No questions available.")
