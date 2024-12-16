@@ -25,13 +25,7 @@ def admin_dashboard(db):
 
     for question in questions:
         st.write(f"**{question['question_name']}** ({question['class_name']})")
-        col1, col2 = st.columns([1, 1])
-
-        # Edit
-        with col1:
-            if st.button(f"Edit {question['question_name']}", key=f"edit_button_{question['_id']}"):
-                edit_question(db, question)
-
+        col2 = st.columns([1, 1])
         # Delete
         with col2:
             if st.button(f"Delete {question['question_name']}", key=f"delete_button_{question['_id']}"):
@@ -67,7 +61,7 @@ def delete_question(db, question):
 
                 if result.deleted_count > 0:
                     st.success("Question deleted successfully!")
-                    st.experimental_rerun()  # Refresh the page to show updated data
+                    st.rerun()  # Refresh the page to show updated data
                 else:
                     st.warning("No question found to delete.")
             except Exception as e:
