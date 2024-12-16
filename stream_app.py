@@ -29,6 +29,7 @@ if "current_page" not in st.session_state:
 
 # User credentials (dummy data)
 USERS = {
+    "admin": {"password": "admin123", "role": "admin"},
     "AF0454940": {"password": "Adi123", "role": "Aditi_Sandbhor"},
     "AF0454887": {"password": "Bhu123", "role": "Bhushan_Ingle"},
     "AF0454880": {"password": "Ath123", "role": "Atharv_Patekar"},
