@@ -9,7 +9,6 @@ def admin_dashboard(db):
     questions_collection = db.questions
 
     # Add new question form
-    # Set default values for new_question_name and new_class_name in session_state
     if 'new_question_name' not in st.session_state:
         st.session_state['new_question_name'] = ''
     if 'new_class_name' not in st.session_state:
@@ -25,13 +24,12 @@ def admin_dashboard(db):
             if question_name and class_name:
                 # Check if the combination of question_name and class_name already exists
                 existing_question = questions_collection.find_one({
-                    "question_name": question_name,
                     "class_name": class_name
                 })
 
                 if existing_question:
-                    # Show a warning if a duplicate entry exists
-                    st.warning(f"The question name '{question_name}' for class '{class_name}' already exists.")
+                    # Show a warning if a duplicate class_name exists
+                    st.warning(f"The class '{class_name}' already has a question assigned.")
                 else:
                     # Insert new question if no duplicates are found
                     new_question = {"question_name": question_name, "class_name": class_name}
