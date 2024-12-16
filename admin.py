@@ -39,8 +39,8 @@ def admin_dashboard(db):
     questions = list(questions_collection.find())
 
     if questions:
+        num=1
         for question in questions:
-            num=1
             st.write(f"{num} **{question['question_name']}** ({question['class_name']})")
             col1 = st.columns([1, 1])
             # Delete button for each question
