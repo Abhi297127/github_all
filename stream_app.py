@@ -75,16 +75,27 @@ def login():
 }
 
 
-    if st.button("Login", key="login_button"):
-        if username in USERS and USERS[username]["password"] == password:
-            st.session_state.logged_in = True
-            st.session_state.role = USERS[username]["role"]
-            st.session_state.username = username
-            st.success(f"Welcome {username}! You are logged in as {USERS[username]['role'].capitalize()}.")
-            st.session_state.current_page = "Home"
-            st.rerun()
-        else:
-            st.error("Invalid username or password")
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
+
+    if not st.session_state.logged_in:
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+
+        if st.button("Login", key="login_button"):
+            # Trim inputs to handle whitespace issues
+            username = username.strip()
+            password = password.strip()
+
+            if username in USERS and USERS[username]["password"] == password:
+                st.session_state.logged_in = True
+                st.session_state.role = USERS[username]["role"]
+                st.session_state.username = username
+                st.success(f"Welcome {username}! You are logged in as {USERS[username]['role'].capitalize()}.")
+                st.session_state.current_page = "Home"
+                st.rerun()
+            else:
+                st.error("Invalid username or password")
 
 # Logout functionality
 def logout():
