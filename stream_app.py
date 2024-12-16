@@ -72,7 +72,7 @@ def toolbar():
 def header():
     cols = st.columns([5, 1])  # Adjust column widths
     with cols[0]:
-        st.title("Login")
+        st.subheader("Login successfully")
     with cols[1]:
         if st.session_state.logged_in:
             st.markdown(f"**{st.session_state.username}**")
