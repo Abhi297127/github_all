@@ -47,7 +47,6 @@ def admin_dashboard(db):
             with col1[0]:
                 if st.button(f"Delete Question{num}.", key=f"delete_button_{question['_id']}"):
                     try:
-                        num +=1
                         result = questions_collection.delete_one({"_id": ObjectId(question["_id"])})
                         if result.deleted_count > 0:
                             st.success("Question deleted successfully!")
@@ -56,6 +55,7 @@ def admin_dashboard(db):
                             st.warning("No question found to delete.")
                     except Exception as e:
                         st.error(f"Error while deleting the question: {e}")
+                    num +=1
     else:
         st.info("No questions available.")
 
