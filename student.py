@@ -2,7 +2,7 @@ import streamlit as st
 
 def student_dashboard(db):
     st.subheader("Student Dashboard")
-    st.write(f"Welcome, {st.session_state.username}!")
+    st.write(f"Welcome, {st.session_state.role}!")
 
     # Refresh button
     if st.button("Refresh Data", key="refresh_button"):
