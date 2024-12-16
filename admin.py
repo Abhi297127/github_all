@@ -141,11 +141,6 @@ def edit_question(db, question):
     # Existing question management code remains the same as in the previous admin_dashboard
     # (Keep the existing form for adding, editing, and deleting questions)
 
-
-
-import streamlit as st
-from pymongo import MongoClient
-
 def manage_students():
     st.subheader("Manage Students")
     
@@ -170,7 +165,7 @@ def manage_students():
         students = list(collection.find())  # Retrieve all documents (students)
 
         # Show the count of students
-        st.write(f"Total Students: {len(students)}")
+        st.write(f"Total Students in {collection_selection}: {len(students)}")
 
         # Show the list of students with delete buttons
         if students:
@@ -178,11 +173,10 @@ def manage_students():
                 student_name = student.get('name')  # Adjust based on your schema
                 if student_name:
                     # Display each student's name with a delete button
-                    if st.button(f"Delete {student_name}"):
-                        # Drop the student from the collection
-                        collection.delete_one({"name": student_name})
-                        st.success(f"Student {student_name} has been dropped.")
+                    if st.button(f"Delete {collection_selection} collection"):
+                        # Drop the entire collection
+                        db.drop_collection(collection_selection)
+                        st.success(f"The collection '{collection_selection}' has been dropped.")
                         break  # Break after deletion to reload the page and reflect changes
         else:
             st.write("No students found in this collection.")
-
