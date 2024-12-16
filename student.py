@@ -20,3 +20,5 @@ def student_dashboard(db):
             num += 1
     else:
         st.info("No questions available.")
+def student_data(db):
+    st.subheader("Student Data")

@@ -1,7 +1,7 @@
 import streamlit as st
 from pymongo import MongoClient
 from admin import admin_dashboard
-from student import student_dashboard
+from student import student_dashboard, student_data
 import os
 
 # MongoDB Connection
@@ -157,6 +157,8 @@ def main():
         admin_dashboard(db)
     elif st.session_state.current_page == "Student Dashboard":
         student_dashboard(db)
+    elif st.session_state.current_page == "Student data":
+        student_data(db)
     else:
         st.error("Page not found or access restricted.")
 
