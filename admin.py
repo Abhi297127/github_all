@@ -141,7 +141,7 @@ def edit_question(db, question):
     # Existing question management code remains the same as in the previous admin_dashboard
     # (Keep the existing form for adding, editing, and deleting questions)
 
-def manage_students(db):
+def manage_students():
     st.subheader("Manage Students")
     
     # MongoDB credentials
@@ -156,27 +156,17 @@ def manage_students(db):
     # Get the list of collections
     collections = db.list_collection_names()
 
-    # Display the collections in a list format
-    collection_selection = st.selectbox("Select a collection", collections)
+    # Display the collections and a delete button for each one
+    if collections:
+        for collection_name in collections:
+            # Show the collection name
+            st.write(f"Collection: {collection_name}")
+            # Create a delete button for each collection
+            if st.button(f"Delete {collection_name} collection"):
+                # Drop the entire collection
+                db.drop_collection(collection_name)
+                st.success(f"The collection '{collection_name}' has been dropped.")
+                break  # Break after deletion to reload the page and reflect changes
+    else:
+        st.write("No collections found in this database.")
 
-    # Display the students in the selected collection
-    if collection_selection:
-        collection = db[collection_selection]
-        students = list(collection.find())  # Retrieve all documents (students)
-
-        # Show the count of students
-        st.write(f"Total Students in {collection_selection}: {len(students)}")
-
-        # Show the list of students with delete buttons
-        if students:
-            for student in students:
-                student_name = student.get('name')  # Adjust based on your schema
-                if student_name:
-                    # Display each student's name with a delete button
-                    if st.button(f"Delete {collection_selection} collection"):
-                        # Drop the entire collection
-                        db.drop_collection(collection_selection)
-                        st.success(f"The collection '{collection_selection}' has been dropped.")
-                        break  # Break after deletion to reload the page and reflect changes
-        else:
-            st.write("No students found in this collection.")
