@@ -143,7 +143,10 @@ def edit_question(db, question):
 
 
 
-def manage_students(db):
+import streamlit as st
+from pymongo import MongoClient
+
+def manage_students():
     st.subheader("Manage Students")
     
     # MongoDB credentials
@@ -166,15 +169,20 @@ def manage_students(db):
         collection = db[collection_selection]
         students = list(collection.find())  # Retrieve all documents (students)
 
-        # Show the list of students in the selected collection
+        # Show the count of students
+        st.write(f"Total Students: {len(students)}")
+
+        # Show the list of students with delete buttons
         if students:
             for student in students:
                 student_name = student.get('name')  # Adjust based on your schema
                 if student_name:
-                    # Display each student with a delete button
+                    # Display each student's name with a delete button
                     if st.button(f"Delete {student_name}"):
                         # Drop the student from the collection
                         collection.delete_one({"name": student_name})
                         st.success(f"Student {student_name} has been dropped.")
+                        break  # Break after deletion to reload the page and reflect changes
         else:
             st.write("No students found in this collection.")
+
