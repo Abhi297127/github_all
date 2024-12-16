@@ -63,7 +63,7 @@ def edit_question(db, question):
                 update_fields["class_name"] = new_class_name
 
             # Apply updates only if there are changes
-            if update_fields:
+            if submit_button:
                 try:
                     question_id = ObjectId(question["_id"]) if isinstance(question["_id"], str) else question["_id"]
 
