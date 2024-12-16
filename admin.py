@@ -1,5 +1,6 @@
 import streamlit as st
 from bson.objectid import ObjectId
+from pymongo import MongoClient
 
 def admin_dashboard(db):
     st.subheader("Admin Overview")
@@ -140,53 +141,40 @@ def edit_question(db, question):
     # Existing question management code remains the same as in the previous admin_dashboard
     # (Keep the existing form for adding, editing, and deleting questions)
 
+
+
 def manage_students(db):
     st.subheader("Manage Students")
     
-    # Add student functionality
-    st.write("Add New Student")
-    with st.form(key="add_student_form"):
-        username = st.text_input("Username")
-        full_name = st.text_input("Full Name")
-        email = st.text_input("Email")
-        class_name = st.text_input("Class")
-        
-        submit_button = st.form_submit_button("Add Student")
-        
-        if submit_button:
-            if username and full_name and email and class_name:
-                new_student = {
-                    "username": username,
-                    "full_name": full_name,
-                    "email": email,
-                    "class_name": class_name
-                }
-                try:
-                    db.users.insert_one(new_student)
-                    st.success(f"Student {full_name} added successfully!")
-                except Exception as e:
-                    st.error(f"Error adding student: {e}")
-            else:
-                st.warning("Please fill in all fields")
-
-    # List existing students
-    st.write("### Existing Students")
-    students = list(db.users.find())
+    # MongoDB credentials
+    username = "abhishelke297127"
+    password = "Abhi%402971"
+    connection_string = f"mongodb+srv://{username}:{password}@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
     
-    if students:
-        for student in students:
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                st.write(f"**{student.get('full_name', 'N/A')}**")
-                st.write(f"Username: {student.get('username', 'N/A')}")
-                st.write(f"Class: {student.get('class_name', 'N/A')}")
-            with col2:
-                if st.button("🗑️", key=f"delete_{student['_id']}"):
-                    try:
-                        db.users.delete_one({"_id": student['_id']})
-                        st.success("Student deleted successfully!")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Error deleting student: {e}")
-    else:
-        st.info("No students found.")
+    # Connect to MongoDB
+    client = MongoClient(connection_string)
+    db = client['your_database_name']  # Replace with your actual database name
+
+    # Get the list of collections
+    collections = db.list_collection_names()
+
+    # Display the collections in a list format
+    collection_selection = st.selectbox("Select a collection", collections)
+
+    # Display the students in the selected collection
+    if collection_selection:
+        collection = db[collection_selection]
+        students = list(collection.find())  # Retrieve all documents (students)
+
+        # Show the list of students in the selected collection
+        if students:
+            student_names = [student['name'] for student in students]  # Adjust based on your schema
+            selected_student = st.selectbox("Select a student to drop", student_names)
+
+            # If a student is selected, provide an option to drop the student
+            if st.button(f"Drop {selected_student}"):
+                # Drop the student from the collection
+                collection.delete_one({"name": selected_student})
+                st.success(f"Student {selected_student} has been dropped.")
+        else:
+            st.write("No students found in this collection.")
