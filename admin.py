@@ -35,7 +35,7 @@ def admin_dashboard(db):
             col1, col2, col3 = st.columns([7, 1, 1])  # Adjust column widths
             with col1:
                 st.markdown(
-                    f"**{question['question_name']}** <br> *Class: {question['class_name']}*",
+                    f"**{question['question_name']}** <br> *Class name: {question['class_name']}*",
                     unsafe_allow_html=True
                 )
             with col2:
