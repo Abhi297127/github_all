@@ -10,7 +10,9 @@ def student_dashboard(db):
 
     if questions:
         st.write("Your Questions:")
+        num=1
         for question in questions:
-            st.write(f"**{question['question_name']}** ({question['class_name']})")
+            st.write(f"{num}.**{question['question_name']}** ({question['class_name']})")
+            num += 1
     else:
         st.write("No questions available.")
