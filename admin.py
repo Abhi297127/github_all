@@ -46,10 +46,10 @@ def edit_question(db, question):
     with st.form(key=f"edit_question_form_{question['_id']}"):
         # Capture user input for fields
         new_question_name = st.text_input(
-            "Edit Question Name", value=question["question_name"], key=f"edit_name_{question['_id']}"
+            "Edit Question Name", value=question.get("question_name", ""), key=f"edit_name_{question['_id']}"
         )
         new_class_name = st.text_input(
-            "Edit Class Name", value=question["class_name"], key=f"edit_class_{question['_id']}"
+            "Edit Class Name", value=question.get("class_name", ""), key=f"edit_class_{question['_id']}"
         )
         submit_button = st.form_submit_button("Update Question")
 
@@ -57,27 +57,37 @@ def edit_question(db, question):
             # Build the `update_fields` dynamically based on changed values
             update_fields = {}
 
-            if new_question_name != question["question_name"]:
+            if new_question_name and new_question_name != question.get("question_name", ""):
                 update_fields["question_name"] = new_question_name
-            if new_class_name != question["class_name"]:
+            if new_class_name and new_class_name != question.get("class_name", ""):
                 update_fields["class_name"] = new_class_name
 
             # Apply updates only if there are changes
-            if submit_button:
+            if update_fields:
                 try:
+                    # Convert `_id` to ObjectId if needed
                     question_id = ObjectId(question["_id"]) if isinstance(question["_id"], str) else question["_id"]
+
+                    # Debugging: Display update fields for verification
+                    st.write("Update Fields:", update_fields)
 
                     # Update the question in the MongoDB database
                     result = questions_collection.update_one(
                         {"_id": question_id},  # Match the question by its unique ID
                         {"$set": update_fields}  # Dynamically update only changed fields
                     )
+
+                    # Debugging: Display the result of the update operation
+                    st.write("Update Result:", result.raw_result)
+
                     if result.modified_count > 0:
                         st.success("Question updated successfully!")
+                        st.experimental_rerun()  # Refresh the page to show updated data
                     else:
                         st.warning("No changes made to the question.")
-                    st.rerun()  # Refresh the page to show updated data
                 except Exception as e:
+                    # Debugging: Display the exception for troubleshooting
                     st.error(f"An error occurred while updating: {e}")
             else:
                 st.info("No changes detected.")
+
