@@ -9,10 +9,16 @@ def admin_dashboard(db):
     questions_collection = db.questions
 
     # Add new question form
+    # Clear session state for new question form values before rendering
+    if 'new_question_name' not in st.session_state:
+        st.session_state['new_question_name'] = ''
+    if 'new_class_name' not in st.session_state:
+        st.session_state['new_class_name'] = ''
+
     with st.form(key="send_question_form"):
         # Get the values from session state or use empty string as fallback
-        question_name = st.text_input("Question Name", key="new_question_name", value=st.session_state.get('new_question_name', ''))
-        class_name = st.text_input("Class Name", key="new_class_name", value=st.session_state.get('new_class_name', ''))
+        question_name = st.text_input("Question Name", key="new_question_name", value=st.session_state['new_question_name'])
+        class_name = st.text_input("Class Name", key="new_class_name", value=st.session_state['new_class_name'])
         submit_button = st.form_submit_button("Send Question")
 
         if submit_button:
