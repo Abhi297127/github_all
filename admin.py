@@ -3,8 +3,8 @@ from bson.objectid import ObjectId
 
 # Admin Dashboard function to handle sending, editing, and deleting questions
 def admin_dashboard(db):
-    st.subheader("Admin Dashboard")
-    st.write("Send, Edit, or Delete questions for all students:")
+    st.subheader("Assign Questions with classname")
+    st.write("Send or Delete questions for all students:")
 
     questions_collection = db.questions
 
