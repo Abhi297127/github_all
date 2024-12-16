@@ -43,11 +43,11 @@ def admin_dashboard(db):
             num=1
             st.write(f"{num} **{question['question_name']}** ({question['class_name']})")
             col1 = st.columns([1, 1])
-            num +=1
             # Delete button for each question
             with col1[0]:
                 if st.button(f"Delete Question{num}.", key=f"delete_button_{question['_id']}"):
                     try:
+                        num +=1
                         result = questions_collection.delete_one({"_id": ObjectId(question["_id"])})
                         if result.deleted_count > 0:
                             st.success("Question deleted successfully!")
