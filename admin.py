@@ -28,7 +28,7 @@ def admin_dashboard(db):
                     st.session_state['question_name'] = ""  # Reset the question name
                     st.session_state['class_name'] = ""  # Reset the class name
                     st.success("Question sent successfully!")
-                    st.rerun()  # Refresh the page to show updated data
+                    st.experimental_rerun()  # Refresh the page to show updated data
                 except Exception as e:
                     st.error(f"Error while sending the question: {e}")
             else:
@@ -49,7 +49,7 @@ def admin_dashboard(db):
                         result = questions_collection.delete_one({"_id": ObjectId(question["_id"])})
                         if result.deleted_count > 0:
                             st.success("Question deleted successfully!")
-                            st.rerun()  # Refresh the page to show updated data
+                            st.experimental_rerun()  # Refresh the page to show updated data
                         else:
                             st.warning("No question found to delete.")
                     except Exception as e:
