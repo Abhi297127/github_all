@@ -3,8 +3,8 @@ from bson.objectid import ObjectId
 
 # Admin Dashboard function to handle sending, editing, and deleting questions
 def admin_dashboard(db):
-    st.subheader("Assign Questions with classname")
-    st.write("Send or Delete questions for all students:")
+    st.subheader("Assign Questions with Class Name")
+    st.write("Send, Edit, or Delete questions for all students:")
 
     questions_collection = db.questions
 
@@ -35,17 +35,22 @@ def admin_dashboard(db):
             st.rerun()  # Refresh the page to show updated data
 
     # List existing questions
-    st.write("Sent Questions:")
+    st.write("### Sent Questions:")
     questions = list(questions_collection.find())
 
     if questions:
-        num=1
         for question in questions:
-            st.write(f"{num}.**{question['question_name']}** ({question['class_name']})")
-            col1 = st.columns([1, 1])
-            # Delete button for each question
-            with col1[0]:
-                if st.button(f"Delete Q{num}.", key=f"delete_button_{question['_id']}"):
+            st.write(f"**{question['question_name']}** (Class: {question['class_name']})")
+
+            # Display Edit and Delete buttons in columns
+            col1, col2 = st.columns([1, 1])
+
+            with col1:
+                if st.button("Edit", key=f"edit_button_{question['_id']}"):
+                    edit_question(db, question)  # Call edit functionality
+
+            with col2:
+                if st.button("Delete", key=f"delete_button_{question['_id']}"):
                     try:
                         result = questions_collection.delete_one({"_id": ObjectId(question["_id"])})
                         if result.deleted_count > 0:
@@ -55,43 +60,34 @@ def admin_dashboard(db):
                             st.warning("No question found to delete.")
                     except Exception as e:
                         st.error(f"Error while deleting the question: {e}")
-            num +=1
     else:
         st.info("No questions available.")
 
-
-# Delete question function to handle the deletion process in the form
-def delete_question(db, question):
+# Function to edit a question
+def edit_question(db, question):
     questions_collection = db.questions
 
-    # Display the current question data in the form
-    with st.form(key=f"delete_question_form_{question['_id']}"):
-        # Show the current question name and class name in text fields (read-only)
-        st.text_input("Question Name", value=question.get("question_name", ""), key=f"delete_name_{question['_id']}", disabled=True)
-        st.text_input("Class Name", value=question.get("class_name", ""), key=f"delete_class_{question['_id']}", disabled=True)
+    # Display the current question data in an editable form
+    with st.form(key=f"edit_question_form_{question['_id']}"):
+        new_question_name = st.text_input("Edit Question Name", value=question.get("question_name", ""), key=f"edit_name_{question['_id']}")
+        new_class_name = st.text_input("Edit Class Name", value=question.get("class_name", ""), key=f"edit_class_{question['_id']}")
 
-        # Submit button for deleting the question
-        submit_button = st.form_submit_button("Delete Question")
+        # Submit button for saving changes
+        save_button = st.form_submit_button("Save Changes")
 
-        if submit_button:
-            try:
-                # Convert `_id` to ObjectId if needed
-                question_id = ObjectId(question["_id"]) if isinstance(question["_id"], str) else question["_id"]
-
-                # Debugging: Display the ID to be deleted
-                st.write("Deleting Question with ID:", question_id)
-
-                # Delete the question from the MongoDB database
-                result = questions_collection.delete_one({"_id": question_id})
-
-                # Debugging: Display the result of the delete operation
-                st.write("Delete Result:", result.raw_result)
-
-                if result.deleted_count > 0:
-                    st.success("Question deleted successfully!")
-                    st.rerun()  # Refresh the page to show updated data
-                else:
-                    st.warning("No question found to delete.")
-            except Exception as e:
-                # Debugging: Display the exception for troubleshooting
-                st.error(f"An error occurred while deleting: {e}")
+        if save_button:
+            if new_question_name and new_class_name:
+                try:
+                    result = questions_collection.update_one(
+                        {"_id": ObjectId(question["_id"])},
+                        {"$set": {"question_name": new_question_name, "class_name": new_class_name}}
+                    )
+                    if result.modified_count > 0:
+                        st.success("Question updated successfully!")
+                        st.rerun()  # Refresh the page to show updated data
+                    else:
+                        st.warning("No changes were made.")
+                except Exception as e:
+                    st.error(f"Error while updating the question: {e}")
+            else:
+                st.warning("Both fields are required to update the question.")
