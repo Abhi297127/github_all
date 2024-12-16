@@ -168,13 +168,13 @@ def manage_students(db):
 
         # Show the list of students in the selected collection
         if students:
-            student_names = [student['name'] for student in students]  # Adjust based on your schema
-            selected_student = st.selectbox("Select a student to drop", student_names)
-
-            # If a student is selected, provide an option to drop the student
-            if st.button(f"Drop {selected_student}"):
-                # Drop the student from the collection
-                collection.delete_one({"name": selected_student})
-                st.success(f"Student {selected_student} has been dropped.")
+            for student in students:
+                student_name = student.get('name')  # Adjust based on your schema
+                if student_name:
+                    # Display each student with a delete button
+                    if st.button(f"Delete {student_name}"):
+                        # Drop the student from the collection
+                        collection.delete_one({"name": student_name})
+                        st.success(f"Student {student_name} has been dropped.")
         else:
             st.write("No students found in this collection.")
