@@ -40,7 +40,7 @@ def login():
             st.session_state.username = username
             st.success(f"Welcome {username}! You are logged in as {USERS[username]['role'].capitalize()}.")
             st.session_state.current_page = "Home"
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Invalid username or password")
 
@@ -50,7 +50,7 @@ def logout():
     st.session_state.role = None
     st.session_state.username = None
     st.session_state.current_page = "Home"
-    st.experimental_rerun()
+    st.rerun()
 
 # Sidebar toolbar
 def toolbar():
