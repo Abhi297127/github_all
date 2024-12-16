@@ -71,7 +71,7 @@ def toolbar():
 
 # Header with logout button
 def header():
-    cols = st.columns([8, 1])  # Adjust column widths
+    cols = st.columns([5, 1])  # Adjust column widths
     with cols[0]:
         st.title("Portal Header")
     with cols[1]:
