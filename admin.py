@@ -153,7 +153,7 @@ def manage_students(db):
     
     # Connect to MongoDB
     client = MongoClient(connection_string)
-    db = client['your_database_name']  # Replace with your actual database name
+    db = client["JavaFileAnalysis"]  # Replace with your actual database name
 
     # Get the list of collections
     collections = db.list_collection_names()
