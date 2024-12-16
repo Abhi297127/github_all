@@ -8,10 +8,16 @@ def admin_dashboard(db):
 
     questions_collection = db.questions
 
+    # Initialize session state variables to store input values
+    if 'question_name' not in st.session_state:
+        st.session_state['question_name'] = ""
+    if 'class_name' not in st.session_state:
+        st.session_state['class_name'] = ""
+
     # Add new question form
     with st.form(key="send_question_form"):
-        question_name = st.text_input("Question Name", key="new_question_name")
-        class_name = st.text_input("Class Name", key="new_class_name")
+        question_name = st.text_input("Question Name", key="new_question_name", value=st.session_state['question_name'])
+        class_name = st.text_input("Class Name", key="new_class_name", value=st.session_state['class_name'])
         submit_button = st.form_submit_button("Send Question")
 
         if submit_button:
@@ -19,8 +25,10 @@ def admin_dashboard(db):
                 new_question = {"question_name": question_name, "class_name": class_name}
                 try:
                     questions_collection.insert_one(new_question)
+                    st.session_state['question_name'] = ""  # Reset the question name
+                    st.session_state['class_name'] = ""  # Reset the class name
                     st.success("Question sent successfully!")
-                    st.rerun()  # Refresh the page to show updated data
+                    st.experimental_rerun()  # Refresh the page to show updated data
                 except Exception as e:
                     st.error(f"Error while sending the question: {e}")
             else:
@@ -41,13 +49,14 @@ def admin_dashboard(db):
                         result = questions_collection.delete_one({"_id": ObjectId(question["_id"])})
                         if result.deleted_count > 0:
                             st.success("Question deleted successfully!")
-                            st.rerun()  # Refresh the page to show updated data
+                            st.experimental_rerun()  # Refresh the page to show updated data
                         else:
                             st.warning("No question found to delete.")
                     except Exception as e:
                         st.error(f"Error while deleting the question: {e}")
     else:
         st.info("No questions available.")
+
 
 # Delete question function to handle the deletion process in the form
 def delete_question(db, question):
