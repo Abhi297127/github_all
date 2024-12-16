@@ -55,10 +55,19 @@ def edit_question(db, question):
         submit_button = st.form_submit_button("Update Question")
 
         if submit_button:
-            # Update the question in the MongoDB database
-            questions_collection.update_one(
-            {"_id": ObjectId(question["_id"])},
-            {"$set": {"question_name": new_question_name, "class_name": new_class_name}}
-            )
-            st.success("Question updated successfully!")
-            st.rerun()  # Refresh the page to show updated data
+            try:
+                # Ensure `_id` is properly handled as an ObjectId
+                question_id = ObjectId(question["_id"]) if isinstance(question["_id"], str) else question["_id"]
+
+                # Update the question in the MongoDB database
+                result = questions_collection.update_one(
+                    {"_id": question_id},  # Match the question by its unique ID
+                    {"$set": {"question_name": new_question_name, "class_name": new_class_name}}
+                )
+                if result.modified_count > 0:
+                    st.success("Question updated successfully!")
+                else:
+                    st.warning("No changes made to the question.")
+                st.rerun()  # Refresh the page to show updated data
+            except Exception as e:
+                st.error(f"An error occurred while updating: {e}")
