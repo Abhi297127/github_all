@@ -141,6 +141,9 @@ def edit_question(db, question):
     # Existing question management code remains the same as in the previous admin_dashboard
     # (Keep the existing form for adding, editing, and deleting questions)
 
+import streamlit as st
+from pymongo import MongoClient
+
 def manage_students(db):
     st.subheader("Manage Students")
     
@@ -156,17 +159,28 @@ def manage_students(db):
     # Get the list of collections
     collections = db.list_collection_names()
 
-    # Display the collections and a delete button for each one
     if collections:
+        num = 1
         for collection_name in collections:
-            # Show the collection name
-            st.write(f"Collection: {collection_name}")
-            # Create a delete button for each collection
-            if st.button(f"Delete {collection_name} collection"):
-                # Drop the entire collection
-                db.drop_collection(collection_name)
-                st.success(f"The collection '{collection_name}' has been dropped.")
-                break  # Break after deletion to reload the page and reflect changes
+            # Create two columns: one for the collection name and one for the delete button
+            col1, col2 = st.columns([3, 1])  # Adjust the widths of the columns as needed
+
+            # Show the collection name in the first column
+            with col1:
+                st.write(f"{collection_name}")
+            
+            # Create a delete button in the second column
+            with col2:
+                if st.button(f"Delete {collection_name} collection"):
+                    # Drop the entire collection
+                    db.drop_collection(collection_name)
+                    st.success(f"The collection '{collection_name}' has been dropped.")
+                    break  # Break after deletion to reload the page and reflect changes
+                
+            num += 1
+
+        st.write(f"Total Collections: {num}")
     else:
         st.write("No collections found in this database.")
+
 
