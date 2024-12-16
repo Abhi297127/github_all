@@ -141,7 +141,7 @@ def edit_question(db, question):
     # Existing question management code remains the same as in the previous admin_dashboard
     # (Keep the existing form for adding, editing, and deleting questions)
 
-def manage_students():
+def manage_students(db):
     st.subheader("Manage Students")
     
     # MongoDB credentials
