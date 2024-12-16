@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 # Admin Dashboard function
 def admin_dashboard(db):
     st.subheader("Assign Questions with Classname")
-    st.write("Send, Edit, or Delete questions for all students:")
+    st.write("Manage questions for all students:")
 
     questions_collection = db.questions
 
@@ -26,28 +26,28 @@ def admin_dashboard(db):
             else:
                 st.warning("Please fill in both fields to send the question.")
 
-    # List existing questions
-    st.write("Sent Questions:")
+    # List existing questions in a table format
+    st.write("### Sent Questions:")
     questions = list(questions_collection.find())
 
     if questions:
         for question in questions:
-            st.write(f"**{question['question_name']}** (Class: {question['class_name']})")
-
-            # Edit and Delete buttons
-            col1, col2 = st.columns([1, 1])
-
+            col1, col2, col3 = st.columns([7, 1, 1])  # Adjust column widths
             with col1:
-                if st.button("Edit", key=f"edit_button_{question['_id']}"):
-                    st.session_state[f"editing_{question['_id']}"] = True  # Track edit state
-
+                st.markdown(
+                    f"**{question['question_name']}** <br> *Class: {question['class_name']}*",
+                    unsafe_allow_html=True
+                )
             with col2:
-                if st.button("Delete", key=f"delete_button_{question['_id']}"):
+                if st.button("✏️", key=f"edit_button_{question['_id']}"):  # Edit Icon
+                    st.session_state[f"editing_{question['_id']}"] = True
+            with col3:
+                if st.button("🗑️", key=f"delete_button_{question['_id']}"):  # Delete Icon
                     try:
                         result = questions_collection.delete_one({"_id": ObjectId(question["_id"])})
                         if result.deleted_count > 0:
                             st.success("Question deleted successfully!")
-                            st.rerun()  # Refresh the page to show updated data
+                            st.rerun()
                         else:
                             st.warning("No question found to delete.")
                     except Exception as e:
