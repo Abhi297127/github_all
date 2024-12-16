@@ -28,11 +28,11 @@ def admin_dashboard(db):
                     st.session_state['question_name'] = ""  # Reset the question name
                     st.session_state['class_name'] = ""  # Reset the class name
                     st.success("Question sent successfully!")
-                    st.rerun()  # Refresh the page to show updated data
                 except Exception as e:
                     st.error(f"Error while sending the question: {e}")
             else:
                 st.warning("Please fill in both fields to send the question.")
+            st.rerun()  # Refresh the page to show updated data
 
     # List existing questions
     st.write("Sent Questions:")
@@ -40,11 +40,13 @@ def admin_dashboard(db):
 
     if questions:
         for question in questions:
-            st.write(f"**{question['question_name']}** ({question['class_name']})")
+            num=1
+            st.write(f"{num} **{question['question_name']}** ({question['class_name']})")
             col1 = st.columns([1, 1])
+            num +=1
             # Delete button for each question
             with col1[0]:
-                if st.button(f"Delete {question['question_name']}", key=f"delete_button_{question['_id']}"):
+                if st.button(f"Delete Question{num}.", key=f"delete_button_{question['_id']}"):
                     try:
                         result = questions_collection.delete_one({"_id": ObjectId(question["_id"])})
                         if result.deleted_count > 0:
