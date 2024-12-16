@@ -1,7 +1,7 @@
 import streamlit as st
 from pymongo import MongoClient
-from admin import admin_dashboard
-from student import student_dashboard
+from admin import admin_dashboard, manage_students, manage_questions
+from student import student_dashboard, student_assignments, student_data
 import os
 
 # MongoDB Connection
@@ -27,7 +27,7 @@ if "logged_in" not in st.session_state:
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
 
-# User credentials (dummy data)
+# User credentials (existing USERS dictionary remains the same)
 USERS = {
     "admin": {"password": "admin123", "role": "admin"},
     "AF0454940": {"password": "Adi123", "role": "Aditi_Sandbhor"},
@@ -76,7 +76,6 @@ USERS = {
     "AF0315573": {"password": "Mad123", "role": "Madhuri_Shinde"}
 }
 
-
 # Login functionality
 def login():
     st.title("Login")
@@ -106,24 +105,35 @@ def logout():
     st.session_state.current_page = "Home"
     st.rerun()
 
-# Sidebar toolbar
+# Sidebar toolbar with dynamic options
 def toolbar():
     st.sidebar.title("Navigation")
 
     if st.session_state.logged_in:
         if st.session_state.role == "admin":
-            options = ["Home", "Admin Dashboard"]
+            admin_options = [
+                "Home", 
+                "Manage Questions", 
+                "Manage Students", 
+                "Admin Dashboard"
+            ]
+            selected_option = st.sidebar.radio("Admin Options:", admin_options, key="admin_sidebar")
         else:
-            options = ["Home", "Student Dashboard"]
+            student_options = [
+                "Home", 
+                "My Assignments", 
+                "Student Dashboard", 
+                "My Data"
+            ]
+            selected_option = st.sidebar.radio("Student Options:", student_options, key="student_sidebar")
     else:
-        options = ["Home", "Login"]
+        selected_option = st.sidebar.radio("Go to:", ["Home", "Login"])
 
-    selected_option = st.sidebar.radio("Go to:", options, key="sidebar_navigation")
     st.session_state.current_page = selected_option
 
-# Header with logout button
+# Header with logout button (remains the same)
 def header():
-    cols = st.columns([4, 1])  # Adjust column widths
+    cols = st.columns([4, 1])
     with cols[0]:
         st.subheader("Welcome to the Portal")
     with cols[1]:
@@ -132,7 +142,7 @@ def header():
             if st.button("Logout", key="logout_button"):
                 logout()
 
-# Home page content
+# Homepage (remains the same)
 def homepage():
     st.title("Home Page")
 
@@ -142,21 +152,33 @@ def homepage():
     else:
         st.write("This is the public homepage. Please log in to access your dashboard.")
 
-# Main function
+# Main function with expanded routing
 def main():
     db = connect_to_mongo()  # Connect to the database
 
     header()  # Show header with logout button if logged in
     toolbar()  # Show navigation options based on role
 
+    # Enhanced routing
     if st.session_state.current_page == "Home":
         homepage()
     elif st.session_state.current_page == "Login":
         login()
-    elif st.session_state.current_page == "Admin Dashboard" and st.session_state.role == "admin":
-        admin_dashboard(db)
-    elif st.session_state.current_page == "Student Dashboard":
-        student_dashboard(db)
+    elif st.session_state.logged_in:
+        if st.session_state.role == "admin":
+            if st.session_state.current_page == "Manage Questions":
+                manage_questions(db)
+            elif st.session_state.current_page == "Manage Students":
+                manage_students(db)
+            elif st.session_state.current_page == "Admin Dashboard":
+                admin_dashboard(db)
+        else:
+            if st.session_state.current_page == "My Assignments":
+                student_assignments(db)
+            elif st.session_state.current_page == "Student Dashboard":
+                student_dashboard(db)
+            elif st.session_state.current_page == "My Data":
+                student_data(db)
     else:
         st.error("Page not found or access restricted.")
 
