@@ -1,5 +1,7 @@
 import streamlit as st
 from pymongo import MongoClient
+from admin import admin_dashboard
+from student import student_dashboard
 import os
 
 # MongoDB Connection
@@ -7,12 +9,14 @@ username = "abhishelke297127"
 password = "Abhi%402971"
 connection_string = f"mongodb+srv://{username}:{password}@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
 
-try:
-    client = MongoClient(connection_string)
-    db = client.Question  # Database name
-except Exception as e:
-    st.error(f"Error connecting to MongoDB: {e}")
-    db = None
+def connect_to_mongo():
+    try:
+        client = MongoClient(connection_string)
+        db = client.Question  # Database name
+        return db
+    except Exception as e:
+        st.error(f"Error connecting to MongoDB: {e}")
+        return None
 
 # Initialize session state
 if "logged_in" not in st.session_state:
@@ -25,7 +29,6 @@ if "current_page" not in st.session_state:
 
 # User credentials (dummy data)
 USERS = {
-    "admin": {"password": "admin123", "role": "admin"},
     "AF0454940": {"password": "Adi123", "role": "Aditi_Sandbhor"},
     "AF0454887": {"password": "Bhu123", "role": "Bhushan_Ingle"},
     "AF0454880": {"password": "Ath123", "role": "Atharv_Patekar"},
@@ -138,29 +141,10 @@ def homepage():
     else:
         st.write("This is the public homepage. Please log in to access your dashboard.")
 
-# Admin Dashboard
-def admin_dashboard(db):
-    st.title("Admin Dashboard")
-    st.write("Welcome to the Admin Dashboard.")
-    if db:
-        st.write("Connected to MongoDB.")
-        st.write(db.list_collection_names())
-    else:
-        st.error("Database connection not available.")
-
-# Student Dashboard
-def student_dashboard(db):
-    st.title("Student Dashboard")
-    st.write("Welcome to the Student Dashboard.")
-    if db:
-        st.write("Connected to MongoDB.")
-        st.write("Collections available:")
-        st.write(db.list_collection_names())
-    else:
-        st.error("Database connection not available.")
-
 # Main function
 def main():
+    db = connect_to_mongo()  # Connect to the database
+
     header()  # Show header with logout button if logged in
     toolbar()  # Show navigation options based on role
 
