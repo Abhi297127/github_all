@@ -39,26 +39,22 @@ def admin_dashboard(db):
                 st.success("Question deleted successfully!")
                 st.rerun()
 
-
-
 def edit_question(db, question):
+    st.write("Edit Question:")
     questions_collection = db.questions
 
-    # Display the current question data in the form
-    with st.form(key=f"edit_question_form_{question['_id']}"):
-        new_question_name = st.text_input(
-            "Edit Question Name", value=question["question_name"], key=f"edit_name_{question['_id']}"
-        )
-        new_class_name = st.text_input(
-            "Edit Class Name", value=question["class_name"], key=f"edit_class_{question['_id']}"
-        )
-        submit_button = st.form_submit_button("Update Question")
+    # Get current question details
+    new_question_name = st.text_input("Edit Question Name", value=question['question_name'])
+    new_class_name = st.text_input("Edit Class Name", value=question['class_name'])
 
-        if submit_button:
-            # Update the question in the MongoDB database
+    if st.button("Update Question", key=f"update_{question['_id']}"):
+        try:
+            # Ensure _id is handled as an ObjectId
             questions_collection.update_one(
-                {"_id": ObjectId(question["_id"])},  # Match the question by its unique ID
+                {"_id": ObjectId(question["_id"])},
                 {"$set": {"question_name": new_question_name, "class_name": new_class_name}}
             )
             st.success("Question updated successfully!")
-            st.rerun()  # Refresh the page to show updated data
+            st.rerun()
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
