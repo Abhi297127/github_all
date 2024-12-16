@@ -22,7 +22,6 @@ if "current_page" not in st.session_state:
 
 # Login functionality
 def login():
-    st.subheader("Login")
     username = st.text_input("Username", key="login_username")
     password = st.text_input("Password", type="password", key="login_password")
 
@@ -54,7 +53,7 @@ def logout():
 
 # Sidebar toolbar
 def toolbar():
-    st.sidebar.title("Navigation")
+    st.sidebar.title("Home Dashboard")
 
     # Sidebar options based on login state and role
     if st.session_state.logged_in:
@@ -73,7 +72,7 @@ def toolbar():
 def header():
     cols = st.columns([5, 1])  # Adjust column widths
     with cols[0]:
-        st.title("Portal Header")
+        st.title("Login")
     with cols[1]:
         if st.session_state.logged_in:
             st.markdown(f"**{st.session_state.username}**")
