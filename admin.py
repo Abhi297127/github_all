@@ -57,8 +57,8 @@ def edit_question(db, question):
         if submit_button:
             # Update the question in the MongoDB database
             questions_collection.update_one(
-                {"_id": ObjectId(question["_id"])},  # Match the question by its unique ID
-                {"$set": {"question_name": new_question_name, "class_name": new_class_name}}
+            {"_id": ObjectId(question["_id"])},
+            {"$set": {"question_name": new_question_name, "class_name": new_class_name}}
             )
             st.success("Question updated successfully!")
             st.rerun()  # Refresh the page to show updated data
