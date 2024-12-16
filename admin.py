@@ -55,7 +55,7 @@ def admin_dashboard(db):
                             st.warning("No question found to delete.")
                     except Exception as e:
                         st.error(f"Error while deleting the question: {e}")
-                    num +=1
+            num +=1
     else:
         st.info("No questions available.")
 
