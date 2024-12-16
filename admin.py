@@ -39,13 +39,12 @@ def admin_dashboard(db):
                 st.success("Question deleted successfully!")
                 st.rerun()
 
-
-
 def edit_question(db, question):
     questions_collection = db.questions
 
     # Display the current question data in the form
     with st.form(key=f"edit_question_form_{question['_id']}"):
+        # Capture user input for fields
         new_question_name = st.text_input(
             "Edit Question Name", value=question["question_name"], key=f"edit_name_{question['_id']}"
         )
@@ -55,19 +54,30 @@ def edit_question(db, question):
         submit_button = st.form_submit_button("Update Question")
 
         if submit_button:
-            try:
-                # Ensure `_id` is properly handled as an ObjectId
-                question_id = ObjectId(question["_id"]) if isinstance(question["_id"], str) else question["_id"]
+            # Build the `update_fields` dynamically based on changed values
+            update_fields = {}
 
-                # Update the question in the MongoDB database
-                result = questions_collection.update_one(
-                    {"_id": question_id},  # Match the question by its unique ID
-                    {"$set": {"question_name": new_question_name, "class_name": new_class_name}}
-                )
-                if result.modified_count > 0:
-                    st.success("Question updated successfully!")
-                else:
-                    st.warning("No changes made to the question.")
-                st.rerun()  # Refresh the page to show updated data
-            except Exception as e:
-                st.error(f"An error occurred while updating: {e}")
+            if new_question_name != question["question_name"]:
+                update_fields["question_name"] = new_question_name
+            if new_class_name != question["class_name"]:
+                update_fields["class_name"] = new_class_name
+
+            # Apply updates only if there are changes
+            if update_fields:
+                try:
+                    question_id = ObjectId(question["_id"]) if isinstance(question["_id"], str) else question["_id"]
+
+                    # Update the question in the MongoDB database
+                    result = questions_collection.update_one(
+                        {"_id": question_id},  # Match the question by its unique ID
+                        {"$set": update_fields}  # Dynamically update only changed fields
+                    )
+                    if result.modified_count > 0:
+                        st.success("Question updated successfully!")
+                    else:
+                        st.warning("No changes made to the question.")
+                    st.rerun()  # Refresh the page to show updated data
+                except Exception as e:
+                    st.error(f"An error occurred while updating: {e}")
+            else:
+                st.info("No changes detected.")
