@@ -3,6 +3,8 @@ import streamlit as st
 def student_dashboard(db):
     st.subheader("Student Dashboard")
     st.write(f"Welcome, {st.session_state.username}!")
+    if st.button("Refresh Data", key="refresh_button"):
+        st.rerun()  # Refresh the page to fetch the latest data
 
     # Fetch questions from MongoDB
     questions_collection = db.questions
