@@ -163,21 +163,11 @@ def manage_students(db):
         num = 1
         for collection_name in collections:
             # Create two columns: one for the collection name and one for the delete button
-            col1, col2 = st.columns([3, 1])  # Adjust the widths of the columns as needed
-
+            col1= st.columns([3, 1])  # Adjust the widths of the columns as needed
+            num+=1
             # Show the collection name in the first column
             with col1:
                 st.write(f"{collection_name}")
-            
-            # Create a delete button in the second column
-            with col2:
-                if st.button(f"Delete {collection_name} collection"):
-                    # Drop the entire collection
-                    db.drop_collection(collection_name)
-                    st.success(f"The collection '{collection_name}' has been dropped.")
-                    break  # Break after deletion to reload the page and reflect changes
-                
-            num += 1
 
         st.write(f"Total Collections: {num}")
     else:
