@@ -2,10 +2,13 @@ import streamlit as st
 from pymongo import MongoClient
 import admin
 import student
+import os
 
 # MongoDB Connection
-DATABASE_URL = "<your-mongodb-connection-url>"  # Replace with your connection URL
-client = MongoClient(DATABASE_URL)
+username = os.getenv("MONGO_USER", "abhishelke297127")
+password = os.getenv("MONGO_PASS", "Abhi%402971")
+connection_string = f"mongodb+srv://{username}:{password}@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
+client = MongoClient(connection_string)
 db = client.Question  # Database name
 
 # Initialize session state
