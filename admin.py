@@ -9,16 +9,9 @@ def admin_dashboard(db):
     questions_collection = db.questions
 
     # Add new question form
-    # Clear session state for new question form values before rendering
-    if 'new_question_name' not in st.session_state:
-        st.session_state['new_question_name'] = ''
-    if 'new_class_name' not in st.session_state:
-        st.session_state['new_class_name'] = ''
-
     with st.form(key="send_question_form"):
-        # Get the values from session state or use empty string as fallback
-        question_name = st.text_input("Question Name", key="new_question_name", value=st.session_state['new_question_name'])
-        class_name = st.text_input("Class Name", key="new_class_name", value=st.session_state['new_class_name'])
+        question_name = st.text_input("Question Name", key="new_question_name")
+        class_name = st.text_input("Class Name", key="new_class_name")
         submit_button = st.form_submit_button("Send Question")
 
         if submit_button:
@@ -27,9 +20,9 @@ def admin_dashboard(db):
                 try:
                     questions_collection.insert_one(new_question)
                     st.success("Question sent successfully!")
-                    # Reset session state after successful submission
-                    st.session_state['new_question_name'] = ""  # Clear the question name field
-                    st.session_state['new_class_name'] = ""  # Clear the class name field
+                    # Clear the form fields by resetting session state
+                    st.session_state['new_question_name'] = ""
+                    st.session_state['new_class_name'] = ""
                     st.rerun()  # Refresh the page to show updated data
                 except Exception as e:
                     st.error(f"Error while sending the question: {e}")
