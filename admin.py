@@ -23,12 +23,6 @@ def manage_questions(db):
 
     questions_collection = db.questions
 
-    # Add new question form
-    if 'new_question_name' not in st.session_state:
-        st.session_state['new_question_name'] = ''
-    if 'new_class_name' not in st.session_state:
-        st.session_state['new_class_name'] = ''
-
     with st.form(key="send_question_form"):
         # Use session state to store form inputs, but don't overwrite them
         question_name = st.text_input("Question Name", key="new_question_name", value=st.session_state['new_question_name'])
