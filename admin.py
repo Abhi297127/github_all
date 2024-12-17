@@ -60,7 +60,7 @@ def manage_questions(db):
 
     if questions:
         for question in questions:
-            col1, col2, col3 = st.columns([7, 1, 4])  # Adjust column widths
+            col1, col2, col3 = st.columns([7, 1, 2])  # Adjust column widths
             with col1:
                 st.markdown(
                     f"**{question['question_name']}** <br> *Class Name: {question['class_name']}*",
