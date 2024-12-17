@@ -134,12 +134,6 @@ def edit_question(db, question):
 
     # Existing question management code remains the same as in the previous admin_dashboard
     # (Keep the existing form for adding, editing, and deleting questions)
-import streamlit as st
-from pymongo import MongoClient
-
-import streamlit as st
-from pymongo import MongoClient
-
 def manage_students(db):
     st.subheader("Manage Students")
     
@@ -154,7 +148,7 @@ def manage_students(db):
 
     # Assuming db is already connected to the MongoDB database
     collections = db.list_collection_names()
-    st.write(f"Total Collections: {len(collections)}")
+    st.write(f"Total Students: {len(collections)}")
 
     if collections:
         selected_collection = st.selectbox("Select a collection", collections)
@@ -164,7 +158,7 @@ def manage_students(db):
         documents = list(db[selected_collection].find())  # Assuming you're using MongoDB
 
         # Show number of documents
-        st.write(f"Total Documents: {len(documents)}")
+        st.write(f"Total Commit: {len(documents)}")
 
         if documents:
             # Traverse all documents to collect unique keys from the 'added_java_files' field
