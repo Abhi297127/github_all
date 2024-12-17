@@ -6,8 +6,16 @@ def admin_dashboard(db):
     st.subheader("Admin Overview")
     st.write("Welcome to the Admin Dashboard")
     
+    username = "abhishelke297127"
+    password = "Abhi%402971"
+    connection_string = f"mongodb+srv://{username}:{password}@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
+    
+    # Connect to MongoDB
+    client = MongoClient(connection_string)
+    db = client["JavaFileAnalysis"]  # Replace with your actual database name
+
     # You can add admin summary statistics here
-    total_students = len(db.list_collection_names({}))
+    total_students = len(db.list_collection_names())
     total_questions = db.questions.count_documents({})
     
     col1, col2 = st.columns(2)
