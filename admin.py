@@ -62,15 +62,12 @@ def manage_questions(db):
                 else:
                     # Insert new question if no duplicates are found
                     new_question = {"question_name": question_name, "class_name": class_name}
-                    try:
-                        questions_collection.insert_one(new_question)
-                        st.success("Question sent successfully!")
-                        # Reset session state after successful submission
-                        st.session_state['new_question_name'] = ""  # Clear the question name field
-                        st.session_state['new_class_name'] = ""  # Clear the class name field
-                        st.rerun()  # Refresh the page to show updated data
-                    except Exception as e:
-                        st.error(f"Error while sending the question: {e}")
+                    questions_collection.insert_one(new_question)
+                    st.success("Question sent successfully!")
+                    # Reset session state after successful submission
+                    st.session_state['new_question_name'] = ""  # Clear the question name field
+                    st.session_state['new_class_name'] = ""  # Clear the class name field
+                    st.rerun()  # Refresh the page to show updated data
             else:
                 st.warning("Please fill in both fields to send the question.")
 
