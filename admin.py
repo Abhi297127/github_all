@@ -176,10 +176,10 @@ def manage_students(db):
 
             # Convert the set of keys to a list
             java_files_keys = list(java_files_keys)
-            print(f"Total .java Files are : {len(java_files_keys)}")
             if java_files_keys:
                 selected_key = st.selectbox("Select a key from 'added_java_files'", java_files_keys)
 
+                print(f"Total .java Files are : {len(java_files_keys)}")
                 # Once a key is selected, traverse all documents again to display the values for that key
                 if selected_key:
                     values = []
