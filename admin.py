@@ -163,15 +163,17 @@ def manage_students(db):
             # Get document count for each collection
             doc_count = collection.count_documents({})
             
-            # Get student name and total commits from the collection (assuming these fields exist)
-            student = collection.find_one({}, {"name": 1, "total_commits": 1})  # Assuming fields 'name' and 'total_commits'
+            # Debugging: Print the first document in the collection
+            first_doc = collection.find_one()
+            st.write(f"First document in collection {collection_name}: {first_doc}")  # Debugging line
             
-            if student:
-                student_name = student.get("name", "No Name")
-                total_commits = student.get("total_commits", 0)  # Default to 0 if not found
-            else:
-                student_name = "No Data"
-                total_commits = 0
+            # Get student name and total commits from the collection (assuming these fields exist)
+            student_name = "No Name"
+            total_commits = 0
+            
+            if first_doc:
+                student_name = first_doc.get("name", "No Name")
+                total_commits = first_doc.get("total_commits", 0)
             
             # Append row with serial number, student name, and total commits
             table_data.append([sr_no, student_name, total_commits, doc_count])
