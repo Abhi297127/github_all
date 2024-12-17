@@ -7,7 +7,7 @@ def admin_dashboard(db):
     st.write("Welcome to the Admin Dashboard")
     
     # You can add admin summary statistics here
-    total_students = db.JavaFileAnalysis.count_documents({})
+    total_students = db.JavaFileAnalysis.count_collections({})
     total_questions = db.questions.count_documents({})
     
     col1, col2 = st.columns(2)
