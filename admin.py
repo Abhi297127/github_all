@@ -162,7 +162,7 @@ def manage_students(db):
 
         if documents:
             # Traverse all documents to collect unique keys from the 'added_java_files' field
-            java_files_keys = set()
+            java_files_keys = list()
             
             for doc in documents:
                 if 'added_java_files' in doc:
@@ -175,8 +175,11 @@ def manage_students(db):
                     st.write(f"Warning: 'added_java_files' field is missing in document {doc['_id']}")
 
             # Convert the set of keys to a list
+            num =len(java_files_keys)
+            java_files_keys= set(java_files_keys)
             java_files_keys = list(java_files_keys)
             st.write(f"Total .java Files are : {len(java_files_keys)}")
+            st.write(f"Duplicate .java Files are : {(num-len(java_files_keys))}")
             if java_files_keys:
                 selected_key = st.selectbox("Select a key from 'added_java_files'", java_files_keys)
 
