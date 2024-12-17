@@ -155,35 +155,15 @@ def manage_students(db):
     # Prepare data for the table
     if collections:
         table_data = []
-        sr_no = 1  # Initialize serial number
-        
         for collection_name in collections:
-            collection = db[collection_name]
-            
             # Get document count for each collection
+            collection = db[collection_name]
             doc_count = collection.count_documents({})
-            
-            # Debugging: Print the first document in the collection
-            first_doc = collection.find_one()
-            st.write(f"First document in collection {collection_name}: {first_doc}")  # Debugging line
-            
-            # Get student name and total commits from the collection (assuming these fields exist)
-            student_name = "No Name"
-            total_commits = 0
-            
-            if first_doc:
-                student_name = first_doc.get("name", "No Name")
-                total_commits = first_doc.get("total_commits", 0)
-            
-            # Append row with serial number, student name, and total commits
-            table_data.append([sr_no, student_name, total_commits, doc_count])
-            sr_no += 1  # Increment serial number
+            table_data.append([collection_name, doc_count])
         
         # Show the collections in a tabular format
         st.write(f"Total Collections: {len(collections)}")
-        
-        # Display table with column headers: 'Sr No', 'Student Name', 'Total Commits', and 'Document Count'
-        st.table(table_data)
+        st.table(table_data)  # This will display the table
         
     else:
         st.write("No collections found in this database.")
