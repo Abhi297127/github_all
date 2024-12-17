@@ -17,13 +17,11 @@ def admin_dashboard(db):
     # Get the list of collections
     collections = db.list_collection_names()
 
-    if collections:
-        num = 1
-        for collection_name in collections:
-            num+=1
+    # Count the total number of collections
+    total_collections = len(collections)
 
     # You can add admin summary statistics here
-    total_students = num
+    total_students = total_collections
     total_questions = db.questions.count_documents({})
     
     col1, col2 = st.columns(2)
