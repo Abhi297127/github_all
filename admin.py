@@ -150,20 +150,32 @@ def manage_students(db):
     db = client["JavaFileAnalysis"]  # Replace with your actual database name
 
     # Get the list of collections
-    collections = db.list_collection_names()
-    
+    collections = db.list_collection_names()    
     # Prepare data for the table
     if collections:
         table_data = []
+        sr_no = 1  # Initialize serial number 
         for collection_name in collections:
-            # Get document count for each collection
             collection = db[collection_name]
-            doc_count = collection.count_documents({})
-            table_data.append([collection_name, doc_count])
+            # Get the student name and total commits from the collection
+            student = collection.find_one({}, {"name": 1, "total_commits": 1})  # Assuming fields 'name' and 'total_commits'
+            
+            if student:
+                student_name = student.get("name", "No Name")
+                total_commits = student.get("total_commits", 0)  # Default to 0 if not found
+            else:
+                student_name = "No Data"
+                total_commits = 0
+            
+            # Append row with serial number, student name, and total commits
+            table_data.append([sr_no, student_name, total_commits])
+            sr_no += 1  # Increment serial number
         
         # Show the collections in a tabular format
         st.write(f"Total Collections: {len(collections)}")
-        st.table(table_data)  # This will display the table
+        
+        # Display table with column headers: 'Sr No', 'Student Name', and 'Total Commits'
+        st.table(table_data)
         
     else:
         st.write("No collections found in this database.")
