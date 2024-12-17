@@ -146,7 +146,7 @@ def manage_students(db):
     client = MongoClient(connection_string)
     db = client["JavaFileAnalysis"]  # Replace with your actual database name
 
-    # Get the list of collections
+    # Assuming db is already connected to the MongoDB database
     collections = db.list_collection_names()
     st.write(f"Total Collections: {len(collections)}")
 
@@ -154,30 +154,43 @@ def manage_students(db):
         selected_collection = st.selectbox("Select a collection", collections)
         st.write(f"You selected: {selected_collection}")
 
-        # Fetch the documents from the selected collection
+        # Fetch all documents from the selected collection
         documents = list(db[selected_collection].find())  # Assuming you're using MongoDB
 
         # Show number of documents
         st.write(f"Total Documents: {len(documents)}")
 
         if documents:
-            # Assuming the field is 'added_java_files' in the documents
-            first_document = documents[0]
+            # Traverse all documents to collect unique keys from the 'added_java_files' field
+            java_files_keys = set()
             
-            if 'added_java_files' in first_document:
-                # Extract the keys of the 'added_java_files' object
-                java_files_keys = list(first_document['added_java_files'].keys())
+            for doc in documents:
+                if 'added_java_files' in doc:
+                    java_files_keys.update(doc['added_java_files'].keys())  # Collect unique keys
+
+            # Convert the set of keys to a list
+            java_files_keys = list(java_files_keys)
+
+            if java_files_keys:
                 selected_key = st.selectbox("Select a key from 'added_java_files'", java_files_keys)
-                
-                # Display the value corresponding to the selected key
+
+                # Once a key is selected, traverse all documents again to display the values for that key
                 if selected_key:
-                    selected_value = first_document['added_java_files'][selected_key]
-                    st.text_area("Selected value", value=str(selected_value), height=200)
+                    values = []
+                    for doc in documents:
+                        if 'added_java_files' in doc and selected_key in doc['added_java_files']:
+                            values.append(doc['added_java_files'][selected_key])
+                    
+                    # Display values for the selected key
+                    st.write(f"Values for the key '{selected_key}':")
+                    for value in values:
+                        st.text_area("Value", value=str(value), height=100)
 
             else:
-                st.write("No 'added_java_files' field found in the documents.")
+                st.write("No 'added_java_files' field found in any documents.")
         else:
             st.write("No documents found in the selected collection.")
     else:
         st.write("No collections found in this database.")
+
 
