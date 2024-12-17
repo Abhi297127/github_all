@@ -149,13 +149,13 @@ def manage_students(db):
     # Get the list of collections
     collections = db.list_collection_names()
     st.write(f"Total Collections: {len(collections)}")
+
     if collections:
-        num = 1
-        for collection_name in collections:
-            num+=1
-            # Show the collection name in the first column
-            st.write(f"{collection_name}")
+        collection_name = st.select_slider(
+            "Select a collection",
+            options=collections
+        )
+        st.write(f"You selected: {collection_name}")
     else:
         st.write("No collections found in this database.")
-
 
