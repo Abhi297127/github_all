@@ -10,16 +10,17 @@ def admin_dashboard(db):
 
     questions = db.questions.find()
 
-    # Create a list to store the question names
-    question_names = []
+    # Create a dictionary to store class_name as the key and question_name as the value
+    class_question_dict = {}
 
-    # Iterate through each document and extract the question name
+    # Iterate through each document and extract the class_name and question_name
     for question in questions:
-        # Assuming the question name is stored in a field called 'question_name'
-        if 'question_name' in question:
-            question_names.append(question['question_name'])
+        # Assuming 'class_name' and 'question_name' are fields in the document
+        if 'class_name' in question and 'question_name' in question:
+            class_question_dict[question['class_name']] = question['question_name']
 
-    st.write(question_names)
+# Display the dictionary
+    st.write("Class and Question Name Mapping: ", class_question_dict)
 
     username = "abhishelke297127"
     password = "Abhi%402971"
