@@ -151,11 +151,8 @@ def manage_students(db):
     st.write(f"Total Collections: {len(collections)}")
 
     if collections:
-        collection_name = st.select_slider(
-            "Select a collection",
-            options=collections
-        )
-        st.write(f"You selected: {collection_name}")
+        st.selectbox(collections)
+        st.write(f"You selected: {collections}")
     else:
         st.write("No collections found in this database.")
 
