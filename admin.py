@@ -160,7 +160,10 @@ def manage_students(db):
         for collection_name in collections:
             collection = db[collection_name]
             
-            # Get the student name and total commits from the collection
+            # Get document count for each collection
+            doc_count = collection.count_documents({})
+            
+            # Get student name and total commits from the collection (assuming these fields exist)
             student = collection.find_one({}, {"name": 1, "total_commits": 1})  # Assuming fields 'name' and 'total_commits'
             
             if student:
@@ -171,13 +174,13 @@ def manage_students(db):
                 total_commits = 0
             
             # Append row with serial number, student name, and total commits
-            table_data.append([sr_no, student_name, total_commits])
+            table_data.append([sr_no, student_name, total_commits, doc_count])
             sr_no += 1  # Increment serial number
         
         # Show the collections in a tabular format
         st.write(f"Total Collections: {len(collections)}")
         
-        # Display table with column headers: 'Sr No', 'Student Name', and 'Total Commits'
+        # Display table with column headers: 'Sr No', 'Student Name', 'Total Commits', and 'Document Count'
         st.table(table_data)
         
     else:
