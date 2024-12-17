@@ -134,6 +134,47 @@ def edit_question(db, question):
 
     # Existing question management code remains the same as in the previous admin_dashboard
     # (Keep the existing form for adding, editing, and deleting questions)
+import subprocess
+import tempfile
+import os
+from pymongo import MongoClient
+import streamlit as st
+
+def run_java_code(java_code):
+    """Run the Java code entered by the user and return the output."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Save the Java code to a .java file
+        java_file_path = os.path.join(tmpdir, "TempJavaCode.java")
+        with open(java_file_path, "w") as f:
+            f.write(java_code)
+
+        # Compile the Java file
+        compile_process = subprocess.Popen(
+            ["javac", java_file_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        stdout, stderr = compile_process.communicate()
+
+        if compile_process.returncode != 0:
+            # Compilation failed, return the error
+            return f"Compilation Error:\n{stderr.decode()}"
+
+        # Run the compiled Java code
+        class_name = "TempJavaCode"
+        run_process = subprocess.Popen(
+            ["java", "-cp", tmpdir, class_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        stdout, stderr = run_process.communicate()
+
+        if run_process.returncode != 0:
+            # Runtime error occurred, return the error
+            return f"Runtime Error:\n{stderr.decode()}"
+
+        return stdout.decode()  # Return the output of the Java program
+
 def manage_students(db):
     st.subheader("Manage Students")
     
@@ -208,6 +249,10 @@ def manage_students(db):
     else:
         st.write("No collections found in this database.")
 
-
-
+    # Java code execution section
+    java_code = st.text_area("Enter your Java code here", height=200)
+    if java_code:
+        if st.button("Run Java Code"):
+            result = run_java_code(java_code)
+            st.text(result)  # Display the output or error from the Java code
 
