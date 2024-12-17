@@ -150,13 +150,16 @@ def manage_students(db):
     db = client["JavaFileAnalysis"]  # Replace with your actual database name
 
     # Get the list of collections
-    collections = db.list_collection_names()    
+    collections = db.list_collection_names()
+    
     # Prepare data for the table
     if collections:
         table_data = []
-        sr_no = 1  # Initialize serial number 
+        sr_no = 1  # Initialize serial number
+        
         for collection_name in collections:
             collection = db[collection_name]
+            
             # Get the student name and total commits from the collection
             student = collection.find_one({}, {"name": 1, "total_commits": 1})  # Assuming fields 'name' and 'total_commits'
             
