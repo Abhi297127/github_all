@@ -130,7 +130,7 @@ def edit_question(db, question):
                     else:
                         st.warning("No changes were made.")
                 except Exception as e:
-                    st.error(f"Error while updating the question: {e}")
+                    pass
             else:
                 st.warning("Both fields are required to update the question.")
 
@@ -158,7 +158,16 @@ def manage_students(db):
 
     # Get the list of collections
     collections = db.list_collection_names()
-    st.write(f"Total Collections: {len(collections)}")
-    
+
+    if collections:
+        num = 1
+        for collection_name in collections:
+            num+=1
+            # Show the collection name in the first column
+            st.write(f"{collection_name}")
+
+        st.write(f"Total Collections: {num}")
+    else:
+        st.write("No collections found in this database.")
 
 
