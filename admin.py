@@ -23,8 +23,8 @@ def admin_dashboard(db):
             num+=1
 
     # You can add admin summary statistics here
-    total_students = db.users.count_documents({})
-    total_questions = num
+    total_students = num
+    total_questions = db.questions.count_documents({})
     
     col1, col2 = st.columns(2)
     with col1:
