@@ -45,7 +45,7 @@ def manage_questions(db):
 
     # Form to add new questions
     with st.form(key="send_question_form"):
-        st.text_input("Question Name", key="new_question_name")  # Relying on session state
+        st.text_input("Question Name", key="new_question_name")  # Use session state key
         st.text_input("Class Name", key="new_class_name")
         submit_button = st.form_submit_button("Send Question")
 
@@ -54,6 +54,7 @@ def manage_questions(db):
             class_name = st.session_state['new_class_name']
 
             if question_name and class_name:
+                # Check for duplicate questions
                 existing_question = questions_collection.find_one({
                     "class_name": class_name
                 })
@@ -61,14 +62,15 @@ def manage_questions(db):
                 if existing_question:
                     st.warning(f"The class '{class_name}' already has a question assigned.")
                 else:
+                    # Insert new question
                     new_question = {"question_name": question_name, "class_name": class_name}
                     try:
                         questions_collection.insert_one(new_question)
                         st.success("Question sent successfully!")
                         
-                        # Resetting state values by clearing the whole session state and re-running
-                        st.session_state.clear()  # Clear all session state to avoid conflicts
-                        st.rerun()  # Rerun the app to reset inputs
+                        # Reset session state and rerun app
+                        st.session_state.clear()  # Clear all session states
+                        st.rerun()  # Rerun app to refresh inputs
                         
                     except Exception as e:
                         st.error(f"Error while sending the question: {e}")
@@ -146,7 +148,6 @@ def delete_question(db, question_id):
             st.warning("No question found to delete.")
     except Exception as e:
         st.error(f"Error while deleting the question: {e}")
-
 
 def manage_students(db):
     st.subheader("Manage Students")
