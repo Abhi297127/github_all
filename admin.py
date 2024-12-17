@@ -134,12 +134,6 @@ def edit_question(db, question):
 
     # Existing question management code remains the same as in the previous admin_dashboard
     # (Keep the existing form for adding, editing, and deleting questions)
-import streamlit as st
-from pymongo import MongoClient
-
-import streamlit as st
-from pymongo import MongoClient
-
 def manage_students(db):
     st.subheader("Manage Students")
     
@@ -197,12 +191,15 @@ def manage_students(db):
                     # Display values for the selected key
                     st.write(f"Values for the key '{selected_key}':")
                     
-                    for value in values:
+                    for i, value in enumerate(values):
                         # Calculate the number of lines in the value (to adjust height)
                         num_lines = len(str(value).split('\n'))
                         # Estimate height based on the number of lines (adjust as needed)
                         height = max(100, num_lines * 20)  # Minimum height of 100, 20 pixels per line
-                        st.text_area("Value", value=str(value), height=height)
+                        
+                        # Pass a unique key for each text_area to avoid duplicate IDs
+                        key = f"value_{selected_key}_{i}"
+                        st.text_area(f"Value {i+1}", value=str(value), height=height, key=key)
 
             else:
                 st.write("No 'added_java_files' field found in any documents or no keys in 'added_java_files'.")
@@ -210,6 +207,7 @@ def manage_students(db):
             st.write("No documents found in the selected collection.")
     else:
         st.write("No collections found in this database.")
+
 
 
 
