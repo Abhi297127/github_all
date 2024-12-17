@@ -6,6 +6,7 @@ def admin_dashboard(db):
     st.subheader("Admin Overview")
     st.write("Welcome to the Admin Dashboard")
     
+    total_questions = db.questions.count_documents({})
     username = "abhishelke297127"
     password = "Abhi%402971"
     connection_string = f"mongodb+srv://{username}:{password}@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
@@ -16,7 +17,6 @@ def admin_dashboard(db):
 
     # You can add admin summary statistics here
     total_students = len(db.list_collection_names())
-    total_questions = db.questions.count_documents({})
     
     col1, col2 = st.columns(2)
     with col1:
