@@ -7,6 +7,20 @@ def admin_dashboard(db):
     st.write("Welcome to the Admin Dashboard")
     
     total_questions = db.questions.count_documents({})
+
+    questions = db.questions.find()
+
+    # Create a list to store the question names
+    question_names = []
+
+    # Iterate through each document and extract the question name
+    for question in questions:
+        # Assuming the question name is stored in a field called 'question_name'
+        if 'question_name' in question:
+            question_names.append(question['question_name'])
+
+    st.write(question_names)
+
     username = "abhishelke297127"
     password = "Abhi%402971"
     connection_string = f"mongodb+srv://{username}:{password}@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
