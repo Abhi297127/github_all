@@ -134,6 +134,9 @@ def edit_question(db, question):
 
     # Existing question management code remains the same as in the previous admin_dashboard
     # (Keep the existing form for adding, editing, and deleting questions)
+import streamlit as st
+from pymongo import MongoClient
+
 def manage_students(db):
     st.subheader("Manage Students")
     
@@ -166,7 +169,13 @@ def manage_students(db):
             
             for doc in documents:
                 if 'added_java_files' in doc:
-                    java_files_keys.update(doc['added_java_files'].keys())  # Collect unique keys
+                    # Ensure 'added_java_files' is a dictionary before accessing its keys
+                    if isinstance(doc['added_java_files'], dict):
+                        java_files_keys.update(doc['added_java_files'].keys())  # Collect unique keys
+                    else:
+                        st.write(f"Warning: 'added_java_files' in document {doc['_id']} is not a dictionary")
+                else:
+                    st.write(f"Warning: 'added_java_files' field is missing in document {doc['_id']}")
 
             # Convert the set of keys to a list
             java_files_keys = list(java_files_keys)
@@ -178,8 +187,9 @@ def manage_students(db):
                 if selected_key:
                     values = []
                     for doc in documents:
-                        if 'added_java_files' in doc and selected_key in doc['added_java_files']:
-                            values.append(doc['added_java_files'][selected_key])
+                        if 'added_java_files' in doc and isinstance(doc['added_java_files'], dict):
+                            if selected_key in doc['added_java_files']:
+                                values.append(doc['added_java_files'][selected_key])
                     
                     # Display values for the selected key
                     st.write(f"Values for the key '{selected_key}':")
@@ -187,10 +197,11 @@ def manage_students(db):
                         st.text_area("Value", value=str(value), height=100)
 
             else:
-                st.write("No 'added_java_files' field found in any documents.")
+                st.write("No 'added_java_files' field found in any documents or no keys in 'added_java_files'.")
         else:
             st.write("No documents found in the selected collection.")
     else:
         st.write("No collections found in this database.")
+
 
 
