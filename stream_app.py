@@ -114,7 +114,7 @@ def toolbar():
             admin_options = [
                 "Home", 
                 "Manage Questions", 
-                "Manage Students", 
+                "Student Codes", 
                 "Admin Dashboard"
             ]
             selected_option = st.sidebar.radio("Admin Options:", admin_options, key="admin_sidebar")
@@ -168,7 +168,7 @@ def main():
         if st.session_state.role == "admin":
             if st.session_state.current_page == "Manage Questions":
                 manage_questions(db)
-            elif st.session_state.current_page == "Manage Students":
+            elif st.session_state.current_page == "Student Codes":
                 manage_students(db)
             elif st.session_state.current_page == "Admin Dashboard":
                 admin_dashboard(db)
