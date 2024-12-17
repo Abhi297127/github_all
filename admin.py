@@ -25,8 +25,8 @@ def manage_questions(db):
 
     with st.form(key="send_question_form"):
         # Use session state to store form inputs, but don't overwrite them
-        question_name = st.text_input("Question Name", key="new_question_name", value=st.session_state['new_question_name'])
-        class_name = st.text_input("Class Name", key="new_class_name", value=st.session_state['new_class_name'])
+        question_name = st.text_input("Question Name")
+        class_name = st.text_input("Class Name")
         submit_button = st.form_submit_button("Send Question")
 
         if submit_button:
