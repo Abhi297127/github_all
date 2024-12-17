@@ -137,6 +137,9 @@ def edit_question(db, question):
 import streamlit as st
 from pymongo import MongoClient
 
+import streamlit as st
+from pymongo import MongoClient
+
 def manage_students(db):
     st.subheader("Manage Students")
     
@@ -193,8 +196,13 @@ def manage_students(db):
                     
                     # Display values for the selected key
                     st.write(f"Values for the key '{selected_key}':")
+                    
                     for value in values:
-                        st.text_area("Value", value=str(value), height=100)
+                        # Calculate the number of lines in the value (to adjust height)
+                        num_lines = len(str(value).split('\n'))
+                        # Estimate height based on the number of lines (adjust as needed)
+                        height = max(100, num_lines * 20)  # Minimum height of 100, 20 pixels per line
+                        st.text_area("Value", value=str(value), height=height)
 
             else:
                 st.write("No 'added_java_files' field found in any documents or no keys in 'added_java_files'.")
