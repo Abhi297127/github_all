@@ -5,24 +5,10 @@ from pymongo import MongoClient
 def admin_dashboard(db):
     st.subheader("Admin Overview")
     st.write("Welcome to the Admin Dashboard")
-    num=db.questions.count_documents({})
-    username = "abhishelke297127"
-    password = "Abhi%402971"
-    connection_string = f"mongodb+srv://{username}:{password}@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
     
-    # Connect to MongoDB
-    client = MongoClient(connection_string)
-    db = client["JavaFileAnalysis"]  # Replace with your actual database name
-
-    # Get the list of collections
-    collections = db.list_collection_names()
-
-    # Count the total number of collections
-    total_collections = len(collections)
-
     # You can add admin summary statistics here
-    total_students = total_collections
-    total_questions = num
+    total_students = db.users.count_documents({})
+    total_questions = db.questions.count_documents({})
     
     col1, col2 = st.columns(2)
     with col1:
@@ -45,7 +31,7 @@ def manage_questions(db):
 
     with st.form(key="send_question_form"):
         # Use session state to store form inputs, but don't overwrite them
-        question_name = st.text_input("Question Name", key="new_question_name")
+        question_name = st.text_input("Question Name", key="new_question_name", value=st.session_state['new_question_name'])
         class_name = st.text_input("Class Name", key="new_class_name", value=st.session_state['new_class_name'])
         submit_button = st.form_submit_button("Send Question")
 
@@ -70,7 +56,7 @@ def manage_questions(db):
                         st.session_state['new_class_name'] = ""  # Clear the class name field
                         st.rerun()  # Refresh the page to show updated data
                     except Exception as e:
-                        num=0
+                        st.error(f"Error while sending the question: {e}")
             else:
                 st.warning("Please fill in both fields to send the question.")
 
@@ -173,12 +159,6 @@ def manage_students(db):
     # Get the list of collections
     collections = db.list_collection_names()
     st.write(f"Total Collections: {len(collections)}")
-    if collections:
-        for collection_name in collections:
-            # Show the collection name in the first column
-            st.write(f"{collection_name}")
-    else:
-        st.write("No collections found in this database.")
     
 
 
