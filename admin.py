@@ -151,8 +151,8 @@ def manage_students(db):
     st.write(f"Total Collections: {len(collections)}")
 
     if collections:
-        st.selectbox(collections)
-        st.write(f"You selected: {collections}")
+        selected_collection = st.selectbox("Select a collection", collections)
+        st.write(f"You selected: {selected_collection}")
     else:
         st.write("No collections found in this database.")
 
