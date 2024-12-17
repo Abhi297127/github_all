@@ -68,9 +68,10 @@ def manage_questions(db):
                         questions_collection.insert_one(new_question)
                         st.success("Question sent successfully!")
                         
-                        # Reset session state and rerun app
-                        st.session_state.clear()  # Clear all session states
-                        st.rerun()  # Rerun app to refresh inputs
+                        # Reset only the relevant session state keys
+                        st.session_state['new_question_name'] = ""  # Clear input field
+                        st.session_state['new_class_name'] = ""     # Clear input field
+                        st.experimental_rerun()  # Refresh app to update UI
                         
                     except Exception as e:
                         st.error(f"Error while sending the question: {e}")
@@ -98,7 +99,7 @@ def manage_questions(db):
                         result = questions_collection.delete_one({"_id": ObjectId(question["_id"])})
                         if result.deleted_count > 0:
                             st.success("Question deleted successfully!")
-                            st.rerun()
+                            st.experimental_rerun()
                         else:
                             st.warning("No question found to delete.")
                     except Exception as e:
@@ -129,7 +130,7 @@ def edit_question(db, question):
                 questions_collection.update_one({"_id": ObjectId(question["_id"])}, updated_data)
                 st.success("Question updated successfully!")
                 st.session_state[f"editing_{question['_id']}"] = False  # Exit edit mode
-                st.rerun()
+                st.experimental_rerun()
             except Exception as e:
                 st.error(f"Error while updating the question: {e}")
 
@@ -143,7 +144,7 @@ def delete_question(db, question_id):
         result = questions_collection.delete_one({"_id": ObjectId(question_id)})
         if result.deleted_count > 0:
             st.success("Question deleted successfully!")
-            st.rerun()
+            st.experimental_rerun()
         else:
             st.warning("No question found to delete.")
     except Exception as e:
