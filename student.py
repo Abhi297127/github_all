@@ -27,7 +27,7 @@ def student_assignments(db):
         for question in questions:
             with st.expander(f"{question['question_name']} - {question['class_name']}"):
                 st.write("Assignment Details:")
-                st.write(f"**Class:** {question['class_name']}")
+                st.write(f"**Class Name :** {question['class_name']}")
                 
                 # Optional: File upload for submission
                 uploaded_file = st.file_uploader(
