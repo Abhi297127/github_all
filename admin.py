@@ -134,10 +134,6 @@ def edit_question(db, question):
 
     # Existing question management code remains the same as in the previous admin_dashboard
     # (Keep the existing form for adding, editing, and deleting questions)
-
-import streamlit as st
-from pymongo import MongoClient
-
 def manage_students(db):
     st.subheader("Manage Students")
     
@@ -152,16 +148,12 @@ def manage_students(db):
 
     # Get the list of collections
     collections = db.list_collection_names()
-
+    st.write(f"Total Collections: {len(collections)}")
     if collections:
         num = 1
         for collection_name in collections:
             num+=1
             # Show the collection name in the first column
             st.write(f"{collection_name}")
-
-        st.write(f"Total Collections: {num}")
     else:
         st.write("No collections found in this database.")
-
-
