@@ -153,6 +153,31 @@ def manage_students(db):
     if collections:
         selected_collection = st.selectbox("Select a collection", collections)
         st.write(f"You selected: {selected_collection}")
+
+        # Fetch the documents from the selected collection
+        documents = list(db[selected_collection].find())  # Assuming you're using MongoDB
+
+        # Show number of documents
+        st.write(f"Total Documents: {len(documents)}")
+
+        if documents:
+            # Assuming the field is 'added_java_files' in the documents
+            first_document = documents[0]
+            
+            if 'added_java_files' in first_document:
+                # Extract the keys of the 'added_java_files' object
+                java_files_keys = list(first_document['added_java_files'].keys())
+                selected_key = st.selectbox("Select a key from 'added_java_files'", java_files_keys)
+                
+                # Display the value corresponding to the selected key
+                if selected_key:
+                    selected_value = first_document['added_java_files'][selected_key]
+                    st.text_area("Selected value", value=str(selected_value), height=200)
+
+            else:
+                st.write("No 'added_java_files' field found in the documents.")
+        else:
+            st.write("No documents found in the selected collection.")
     else:
         st.write("No collections found in this database.")
 
