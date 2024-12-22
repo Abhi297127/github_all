@@ -16,30 +16,42 @@ def student_dashboard(db):
     else:
         st.info("No assignments available.")
 
-def student_assignments(db):
+def student_assignments(db,username):
     st.subheader("My Assignments")
     
     # Fetch and display questions
     questions_collection = db.questions
     questions = list(questions_collection.find())
-    
+
+    # Connect to JavaFileAnalysis database
+    java_db = db.client['JavaFileAnalysis']
+    student_collection = java_db[username]
+    student_files = list(student_collection.find())
+
+    # Extract class names from student files
+    class_names_in_files = {file['class_name'] for file in student_files}
+
     if questions:
         for question in questions:
-            with st.expander(f"{question['question_name']} - {question['class_name']}"):
+            class_name = question['class_name']
+            is_completed = class_name in class_names_in_files
+
+            # Display with tick if completed
+            tick = "\u2705" if is_completed else ""
+            with st.expander(f"{tick} {question['question_name']} - {class_name}"):
                 st.write("Assignment Details:")
-                st.write(f"**Class Name :** {question['class_name']}")
-                
-                # Optional: File upload for submission
-                uploaded_file = st.file_uploader(
-                    f"Submit assignment for {question['question_name']}", 
-                    key=f"file_{question['_id']}"
+                st.write(f"**Class Name :** {class_name}")
+
+                # Dropdown to mark status
+                status = st.selectbox(
+                    "Assignment Status",
+                    ["Pending", "Completed"],
+                    index=1 if is_completed else 0,
+                    key=f"status_{question['_id']}"
                 )
-                
-                if uploaded_file is not None:
-                    # Process file upload logic
-                    st.success(f"File {uploaded_file.name} uploaded successfully!")
     else:
         st.info("No assignments found.")
+
 
 def student_data(db):
     st.subheader("My Profile and Data")
