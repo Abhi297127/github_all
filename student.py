@@ -29,7 +29,7 @@ def student_assignments(db):
     student_collection = java_db['Abhishek_Shelke']  # Replace with the correct student collection
     student_files = list(student_collection.find({}, {"class_name": 1, "_id": 0}))
 
-    # Extract class names from student files
+    # Extract class names from student files, removing ".java" extension
     class_names_in_files = {file.get('class_name', '').replace('.java', '') for file in student_files}
 
     # Dropdown for filtering by status
@@ -37,6 +37,7 @@ def student_assignments(db):
 
     if questions:
         for question in questions:
+            # Remove the ".java" extension from the class_name in questions
             class_name = question.get('class_name', '').replace('.java', '')
             is_completed = class_name in class_names_in_files
 
