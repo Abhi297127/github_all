@@ -43,12 +43,11 @@ def student_assignments(db):
             if (filter_status == "Completed" and not is_completed) or (filter_status == "Pending" and is_completed):
                 continue
 
-            # Display question with tick/untick
-            col1, col2 = st.columns([0.8, 0.2])
+            # Display question with tick symbol if completed
+            col1, col2 = st.columns([0.9, 0.1])
             with col1:
-                st.write(f"{question.get('question_name', 'Unnamed Question')} - {class_name}")
-            with col2:
-                st.checkbox("", value=is_completed, key=f"check_{question.get('_id', '')}")
+                tick_symbol = "\u2705" if is_completed else "\u274C"
+                st.write(f"{tick_symbol} {question.get('question_name', 'Unnamed Question')} - {class_name}")
     else:
         st.info("No assignments found.")
 
