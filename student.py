@@ -25,31 +25,30 @@ def student_assignments(db):
 
     # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
-    student_collection = java_db['Abhishek_shelke']
+    student_collection = java_db['Abhishek_Shelke']
     student_files = list(student_collection.find())
 
     # Extract class names from student files
     class_names_in_files = {file.get('class_name', '') for file in student_files}
+
+    # Dropdown for filtering by status
+    filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
 
     if questions:
         for question in questions:
             class_name = question.get('class_name', '')
             is_completed = class_name in class_names_in_files
 
-            # Display question with tick/untick and dropdown
+            # Filter logic based on dropdown selection
+            if (filter_status == "Completed" and not is_completed) or (filter_status == "Pending" and is_completed):
+                continue
+
+            # Display question with tick/untick
             col1, col2 = st.columns([0.8, 0.2])
             with col1:
                 st.write(f"{question.get('question_name', 'Unnamed Question')} - {class_name}")
             with col2:
                 st.checkbox("", value=is_completed, key=f"check_{question.get('_id', '')}")
-
-            st.selectbox(
-                "Status",
-                ["Pending", "Completed"],
-                index=1 if is_completed else 0,
-                key=f"status_{question.get('_id', '')}"
-            )
-            st.write("---")
     else:
         st.info("No assignments found.")
 
