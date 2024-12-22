@@ -17,33 +17,34 @@ def student_dashboard(db):
         st.info("No assignments available.")
 
 def student_assignments(db):
+
     st.subheader("My Assignments")
     
     # Fetch and display questions
     questions_collection = db.questions
-    questions = list(questions_collection.find())
+    questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
 
     # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
-    student_collection = java_db['Abhishek_Shelke']
-    student_files = list(student_collection.find())
+    student_collection = java_db['Abhishek_Shelke']  # Replace with the correct student collection
+    student_files = list(student_collection.find({}, {"class_name": 1, "_id": 0}))
 
     # Extract class names from student files
-    class_names_in_files = {file.get('class_name', '').join('.java') for file in student_files}
+    class_names_in_files = {file.get('class_name', '').replace('.java', '') for file in student_files}
 
     # Dropdown for filtering by status
     filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
 
     if questions:
         for question in questions:
-            class_name = question.get('class_name', '').split('.')[0]
+            class_name = question.get('class_name', '').replace('.java', '')
             is_completed = class_name in class_names_in_files
 
             # Filter logic based on dropdown selection
             if (filter_status == "Completed" and not is_completed) or (filter_status == "Pending" and is_completed):
                 continue
 
-            # Display question with tick symbol if completed
+            # Display question with tick or cross symbol if completed
             col1, col2 = st.columns([0.9, 0.1])
             with col1:
                 tick_symbol = "\u2705" if is_completed else "\u274C"
