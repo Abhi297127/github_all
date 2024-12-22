@@ -160,6 +160,8 @@ def main():
         homepage()
     elif st.session_state.current_page == "Login":
         login()
+    elif st.session_state.current_page == "Register":
+        register_user()
     elif st.session_state.logged_in:
         if st.session_state.role == "admin":
             if st.session_state.current_page == "Manage Questions":
