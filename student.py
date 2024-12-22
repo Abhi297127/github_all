@@ -16,7 +16,7 @@ def student_dashboard(db):
     else:
         st.info("No assignments available.")
 
-def student_assignments(db,username):
+def student_assignments(db):
     st.subheader("My Assignments")
     
     # Fetch and display questions
@@ -25,20 +25,20 @@ def student_assignments(db,username):
 
     # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
-    student_collection = java_db[username]
+    student_collection = java_db['student_name']
     student_files = list(student_collection.find())
 
     # Extract class names from student files
-    class_names_in_files = {file['class_name'] for file in student_files}
+    class_names_in_files = {file.get('class_name', '') for file in student_files}
 
     if questions:
         for question in questions:
-            class_name = question['class_name']
+            class_name = question.get('class_name', '')
             is_completed = class_name in class_names_in_files
 
             # Display with tick if completed
             tick = "\u2705" if is_completed else ""
-            with st.expander(f"{tick} {question['question_name']} - {class_name}"):
+            with st.expander(f"{tick} {question.get('question_name', 'Unnamed Question')} - {class_name}"):
                 st.write("Assignment Details:")
                 st.write(f"**Class Name :** {class_name}")
 
@@ -47,7 +47,7 @@ def student_assignments(db,username):
                     "Assignment Status",
                     ["Pending", "Completed"],
                     index=1 if is_completed else 0,
-                    key=f"status_{question['_id']}"
+                    key=f"status_{question.get('_id', '')}"
                 )
     else:
         st.info("No assignments found.")
