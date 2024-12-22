@@ -1,8 +1,9 @@
 import streamlit as st
 from pymongo import MongoClient
+from urllib.parse import urlparse
 from admin import admin_dashboard, manage_students, manage_questions
 from student import student_dashboard, student_assignments, student_data
-import os
+from github import Github
 
 # MongoDB Connection
 username = "abhishelke297127"
@@ -78,24 +79,68 @@ USERS = {
 
 # Login functionality
 def login():
+    """Log in an existing user."""
+    client = MongoClient(connection_string)
+    # Access the specific databases
+    login_db = client["LoginData"]
     st.title("Login")
-
-    username = st.text_input("Username", key="login_username")
-    password = st.text_input("Password", type="password", key="login_password")
-
-    if st.button("Login", key="login_button"):
-        username = username.strip()
-        password = password.strip()
-
-        if username in USERS and USERS[username]["password"] == password:
-            st.session_state.logged_in = True
-            st.session_state.role = USERS[username]["role"]
-            st.session_state.username = username
-            st.success(f"Welcome {username}! You are logged in as {USERS[username]['role']}.")
-            st.session_state.current_page = "Home"
-            st.rerun()
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    if st.button("Login"):
+        user = login_db.users.find_one({"username": username, "password": password})
+        if user:
+            st.session_state["logged_in"] = True
+            st.session_state["username"] = username
+            st.success(f"Welcome {user['name']}!")
         else:
-            st.error("Invalid username or password")
+            st.error("Invalid Username or Password")
+
+
+
+def extract_owner_repo(github_url):
+    """Extract owner and repository name from GitHub URL."""
+    github_url = github_url.rstrip(".git")
+    parsed_url = urlparse(github_url)
+    path_parts = parsed_url.path.strip("/").split("/")
+    if len(path_parts) >= 2:
+        return path_parts[0], path_parts[1]
+    return None, None
+
+def register_user():
+    """Register a new user."""
+    st.title("Register")
+    name = st.text_input("Name")
+    username = st.text_input("Username")
+    github_link = st.text_input("GitHub Repository Link")
+    github_token = st.text_input("GitHub Token")
+    password = None
+    client = MongoClient(connection_string)
+    # Access the specific databases
+    login_db = client["LoginData"]
+
+    if github_link:
+        owner, repo = extract_owner_repo(github_link)
+        if owner and repo:
+            try:
+                # Validate GitHub token
+                g = Github(github_token)
+                user = g.get_user()
+                st.write("GitHub token is valid")
+            except Exception as e:
+                st.error("Invalid GitHub token")
+                return
+            st.success("GitHub Repository is Public")
+            password = st.text_input("Set Password", type="password")
+
+    if st.button("Submit"):
+        if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
+            st.error("Username or GitHub link already exists")
+        else:
+            # Add user to database
+            login_db["users"].insert_one({"name": name, "username": username, "github_link": github_link, "password": password, "github_token": github_token, "role": "student"})
+            st.success("Registration successful")
+            st.info("Please navigate to the login page to access your account")
+
 
 # Logout functionality
 def logout():
