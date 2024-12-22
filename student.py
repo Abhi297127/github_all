@@ -25,7 +25,7 @@ def student_assignments(db):
 
     # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
-    student_collection = java_db['student_name']
+    student_collection = java_db['Abhishek_shelke']
     student_files = list(student_collection.find())
 
     # Extract class names from student files
@@ -36,19 +36,20 @@ def student_assignments(db):
             class_name = question.get('class_name', '')
             is_completed = class_name in class_names_in_files
 
-            # Display with tick if completed
-            tick = "\u2705" if is_completed else ""
-            with st.expander(f"{tick} {question.get('question_name', 'Unnamed Question')} - {class_name}"):
-                st.write("Assignment Details:")
-                st.write(f"**Class Name :** {class_name}")
+            # Display question with tick/untick and dropdown
+            col1, col2 = st.columns([0.8, 0.2])
+            with col1:
+                st.write(f"{question.get('question_name', 'Unnamed Question')} - {class_name}")
+            with col2:
+                st.checkbox("", value=is_completed, key=f"check_{question.get('_id', '')}")
 
-                # Dropdown to mark status
-                status = st.selectbox(
-                    "Assignment Status",
-                    ["Pending", "Completed"],
-                    index=1 if is_completed else 0,
-                    key=f"status_{question.get('_id', '')}"
-                )
+            st.selectbox(
+                "Status",
+                ["Pending", "Completed"],
+                index=1 if is_completed else 0,
+                key=f"status_{question.get('_id', '')}"
+            )
+            st.write("---")
     else:
         st.info("No assignments found.")
 
