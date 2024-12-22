@@ -123,7 +123,7 @@ def toolbar():
             ]
             selected_option = st.sidebar.radio("Student Options:", student_options, key="student_sidebar")
     else:
-        selected_option = st.sidebar.radio("Go to:", ["Home", "Login"])
+        selected_option = st.sidebar.radio("Go to:", ["Home", "Login","Register"])
 
     st.session_state.current_page = selected_option
 
