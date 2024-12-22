@@ -29,14 +29,14 @@ def student_assignments(db):
     student_files = list(student_collection.find())
 
     # Extract class names from student files
-    class_names_in_files = {file.get('class_name', '') for file in student_files}
+    class_names_in_files = {file.get('class_name', '').split('.')[0] for file in student_files}
 
     # Dropdown for filtering by status
     filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
 
     if questions:
         for question in questions:
-            class_name = question.get('class_name', '')
+            class_name = question.get('class_name', '').split('.')[0]
             is_completed = class_name in class_names_in_files
 
             # Filter logic based on dropdown selection
