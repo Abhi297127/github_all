@@ -32,19 +32,32 @@ if "current_page" not in st.session_state:
 def login():
     """Log in an existing user."""
     client = MongoClient(connection_string)
-    # Access the specific databases
     login_db = client["LoginData"]
+    
     st.title("Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
+
+    if "clicked" not in st.session_state:
+        st.session_state.clicked = False
+    
     if st.button("Login"):
         user = login_db.users.find_one({"username": username, "password": password})
         if user:
-            st.session_state["logged_in"] = True
-            st.session_state["username"] = username
-            st.success(f"Welcome {user['name']}!")
+            if not st.session_state.clicked:
+                st.session_state.clicked = True
+                st.warning("Click again to confirm login")
+            else:
+                st.session_state["logged_in"] = True
+                st.session_state["username"] = username
+                st.success(f"Welcome {user['name']}!")
+                
+                # Simulate page switch after double-click
+                st.switch_page("dashboard.py")  # Ensure 'pages/dashboard.py' exists
+                
         else:
             st.error("Invalid Username or Password")
+            st.session_state.clicked = False
 
 
 
