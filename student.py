@@ -22,7 +22,7 @@ def student_assignments(db):
     
     # Fetch and display questions
     questions_collection = db.questions
-    questions = list(questions_collection.find({}, {"class_name"}))
+    questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
     st.write(questions)
 
     # Connect to JavaFileAnalysis database
