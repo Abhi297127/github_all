@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-def student_dashboard(db,username):
+def student_dashboard(db):
     st.subheader("Student Dashboard")
     st.write(f"Welcome, {st.session_state.role}")
     
@@ -17,19 +17,6 @@ def student_dashboard(db,username):
         st.info("No assignments available.")
         """Student dashboard with personalized data."""
     st.title("Student Dashboard")
-    
-    # Access the 'students' collection
-    students_collection = db["students"]
-    
-    # Find the logged-in student's data
-    student_data = students_collection.find_one({"username": username})
-    
-    if student_data:
-        st.write(f"Welcome, {student_data['name']}!")
-        st.write("Here is your personal data:")
-        st.json(student_data)
-    else:
-        st.error("Student data not found.")
 
 def student_assignments(db):
     st.subheader("My Assignments")
