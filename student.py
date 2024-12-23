@@ -22,8 +22,8 @@ def student_assignments(db):
     
     # Fetch and display questions
     questions_collection = db.questions
-    All_questions = list(questions_collection.find({}, {"class_name"}))
-    st.write(All_questions)
+    questions = list(questions_collection.find({}, {"class_name"}))
+    st.write(questions)
 
     # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
