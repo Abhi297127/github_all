@@ -28,9 +28,6 @@ def student_assignments(db):
         # Fetch and display questions
         questions_collection = db.questions
         questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
-    
-        # Extract class names
-        class_names_list = [question.get('class_name', '') for question in questions]
 
         # Connect to JavaFileAnalysis database
         java_db = db.client['JavaFileAnalysis']
