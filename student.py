@@ -18,8 +18,8 @@ def student_dashboard(db):
 
 def student_assignments(db):
     st.subheader("My Assignments")
-    st.write(f"Hello, {st.session_state['name']}!")
-    student_name=st.session_state['name']
+    # st.write(f"Hello, {st.session_state['name']}!")
+    # student_name=st.session_state['name']
     # Fetch and display questions
     questions_collection = db.questions
     questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
