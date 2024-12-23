@@ -176,7 +176,7 @@ def main():
             if st.session_state.current_page == "My Assignments":
                 student_assignments(db)
             elif st.session_state.current_page == "Student Dashboard":
-                student_dashboard(db)
+                student_dashboard(db,username)
             elif st.session_state.current_page == "My Data":
                 student_data(db)
     else:
