@@ -23,6 +23,9 @@ def student_assignments(db):
     # Fetch and display questions
     questions_collection = db.questions
     questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
+    # Extract only the class_name field
+    class_names = list(questions_collection.find({}, {"class_name": 1, "_id": 0}))
+
     # Use a list comprehension to save just the class_name values in a list
     class_names_list = [item['class_name'] for item in class_names]
 
