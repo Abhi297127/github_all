@@ -20,18 +20,19 @@ def student_dashboard(db):
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
 
-def student_assignments(db):
+
+def student_assignments(db, username):
     """Display student's assignments with filtering options."""
-    st.subheader("My Assignments")
+    st.subheader(f"My Assignments - {username}")  # Display username in subheader
     
     try:
         # Fetch and display questions
         questions_collection = db.questions
         questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
-
+        
         # Connect to JavaFileAnalysis database
         java_db = db.client['JavaFileAnalysis']
-        student_collection = java_db['Pooja_Yadav']  # Replace with the correct student collection
+        student_collection = java_db['Pooja_Yadav']  # Use dynamic username
 
         # Fetch documents from JavaFileAnalysis
         documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
