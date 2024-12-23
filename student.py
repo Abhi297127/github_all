@@ -63,7 +63,7 @@ def student_assignments(db):
                 continue
 
             # Display question with tick or cross symbol if completed
-            col1 = st.columns([0.9, 0.1])
+            col1, col2 = st.columns([0.9, 0.1])
             with col1:
                 tick_symbol = "\u2705" if is_completed else "\u274C"
                 st.write(f"{tick_symbol} {question.get('question_name', 'Unnamed Question')} - {class_name}")
