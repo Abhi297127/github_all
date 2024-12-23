@@ -42,6 +42,7 @@ def login():
         if user:
             st.session_state["logged_in"] = True
             st.session_state["username"] = username
+            st.session_state["name"] = user["name"]  # Store full name
             st.success(f"Welcome {user['name']}!")
         else:
             st.error("Invalid Username or Password")
