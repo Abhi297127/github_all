@@ -16,7 +16,6 @@ def student_dashboard(db):
     else:
         st.info("No assignments available.")
         """Student dashboard with personalized data."""
-    st.title("Student Dashboard")
 
 def student_assignments(db):
     st.subheader("My Assignments")
