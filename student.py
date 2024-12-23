@@ -19,9 +19,7 @@ def student_dashboard(db):
             st.info("No assignments available.")
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
-
 def student_assignments(db):
-    """Display student's assignments with filtering options."""
     st.subheader("My Assignments")
     
     try:
@@ -34,7 +32,10 @@ def student_assignments(db):
 
         # Connect to JavaFileAnalysis database
         java_db = db.client['JavaFileAnalysis']
-        student_collection = java_db['Pooja_Yadav']  # Replace with the correct student collection
+        
+        # Use the logged-in student's username dynamically to find their collection
+        student_username = st.session_state.username  # Get the logged-in student's username
+        student_collection = java_db[student_username]  # Access the collection with the student's username
 
         # Fetch documents from JavaFileAnalysis
         documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
@@ -73,7 +74,6 @@ def student_assignments(db):
         st.error(f"Error fetching assignments: {e}")
 
 def student_data(db):
-    """Display student's profile and submitted assignments."""
     st.subheader("My Profile and Data")
     
     try:
