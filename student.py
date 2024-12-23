@@ -31,21 +31,34 @@ def student_assignments(db):
 
     # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
+    # Connect to JavaFileAnalysis database
+    java_db = db.client['JavaFileAnalysis']
     student_collection = java_db['Abhishek_Shelke']  # Replace with the correct student collection
+
     # Fetch all documents and extract keys from the `added_java_files` field
-    documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
-    # Collect all keys from `added_java_files` across documents
-    added_java_keys = set()  # Using a set to avoid duplicates
-    for doc in documents:
-        added_files = doc.get("added_java_files", {})
-        if isinstance(added_files, dict):
-            added_java_keys.update(added_files.keys())
+    try:
+        documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
 
-    # Convert to a sorted list for easier display
-    added_java_keys_list = sorted(added_java_keys)
+        # Debug: Display the fetched documents
+        st.write("Fetched Documents:", documents)
 
-    # Display the keys
-    st.write("Class Names from `added_java_files`:", added_java_keys_list)
+        # Collect all keys from `added_java_files` across documents
+        added_java_keys = set()  # Using a set to avoid duplicates
+        for doc in documents:
+            added_files = doc.get("added_java_files", {})
+            if isinstance(added_files, dict):
+                added_java_keys.update(added_files.keys())
+            else:
+                st.warning(f"Invalid or missing `added_java_files` in document: {doc}")
+
+        # Convert to a sorted list for easier display
+        added_java_keys_list = sorted(added_java_keys)
+
+        # Display the keys
+        st.write("Class Names from `added_java_files`:", added_java_keys_list)
+
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
 
     # Dropdown for filtering by status
     filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
