@@ -19,7 +19,8 @@ def student_dashboard(db):
             st.info("No assignments available.")
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
-def student_assignments(db,username):
+
+def student_assignments(db):
     """Display student's assignments with filtering options."""
     st.subheader("My Assignments")
     
@@ -31,21 +32,9 @@ def student_assignments(db,username):
         # Connect to JavaFileAnalysis database
         java_db = db.client['JavaFileAnalysis']
 
-        # Fetch username from LoginData.users
-        login_db = db.client['LoginData']
-        users_collection = login_db['users']
-        
-        # Match the username and fetch the corresponding name
-        user_doc = users_collection.find_one({"username": username})  # Match by username
-        
-        if not user_doc:
-            st.warning("User with the specified username not found.")
-            return
-        
-        student_name = user_doc['name']  # Fetch the name dynamically
-        
-        # Use student's name to access their collection
-        student_collection = java_db[student_name]  
+        java_username=db.client['LoginData']
+        username=java_username['users']
+        student_collection = java_db['Pooja_Yadav']  # Replace with the correct student collection
 
         # Fetch documents from JavaFileAnalysis
         documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
