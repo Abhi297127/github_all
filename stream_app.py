@@ -43,6 +43,7 @@ def login():
             st.session_state["logged_in"] = True
             st.session_state["username"] = username
             st.session_state["name"] = user["name"]  # Store full name
+            st.session_state["role"] = user["role"]  # Assign role
             st.success(f"Welcome {user['name']}!")
         else:
             st.error("Invalid Username or Password")
