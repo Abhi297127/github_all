@@ -89,8 +89,10 @@ def register_user():
         else:
             # Add user to database
             login_db["users"].insert_one({"name": name, "username": username, "github_link": github_link, "password": password, "github_token": github_token, "role": "student"})
+            student_name=name
             st.success("Registration successful")
             st.info("Please navigate to the login page to access your account")
+            return student_name
 
 # Logout functionality
 def logout():
@@ -171,6 +173,7 @@ def main():
         login()
     elif st.session_state.current_page == "Register":
         register_user()
+        student_name=register_user()
     elif st.session_state.logged_in:
         if st.session_state.role == "admin":
             if st.session_state.current_page == "Manage Questions":
@@ -181,12 +184,11 @@ def main():
                 admin_dashboard(db)
         else:
             if st.session_state.current_page == "My Assignments":
-                student_assignments(db)
+                student_assignments(db,student_name)
             elif st.session_state.current_page == "Student Dashboard":
                 student_dashboard(db)
             elif st.session_state.current_page == "My Data":
-                students_data = get_all_students(db)
-                student_data(db, students_data)
+                student_data(db)
     else:
         st.error("Page not found or access restricted.")
 
