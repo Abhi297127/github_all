@@ -35,7 +35,7 @@ def student_assignments(db):
     student_files = list(student_collection.find({}, {"class_name": 1, "_id": 0}))
 
     # Extract class names from student files, removing ".java" extension
-    class_names_in_files = {file.get('class_nane') for file in student_files}
+    class_names_in_files = {file.get('class_nane','') for file in student_files}
     st.write(class_names_in_files)
 
     # Dropdown for filtering by status
