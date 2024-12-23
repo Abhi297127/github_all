@@ -48,8 +48,6 @@ def login():
         else:
             st.error("Invalid Username or Password")
 
-
-
 def extract_owner_repo(github_url):
     """Extract owner and repository name from GitHub URL."""
     github_url = github_url.rstrip(".git")
@@ -94,7 +92,6 @@ def register_user():
             st.success("Registration successful")
             st.info("Please navigate to the login page to access your account")
 
-
 # Logout functionality
 def logout():
     st.session_state.logged_in = False
@@ -125,11 +122,11 @@ def toolbar():
             ]
             selected_option = st.sidebar.radio("Student Options:", student_options, key="student_sidebar")
     else:
-        selected_option = st.sidebar.radio("Go to:", ["Home", "Login","Register"])
+        selected_option = st.sidebar.radio("Go to:", ["Home", "Login", "Register"])
 
     st.session_state.current_page = selected_option
 
-# Header with logout button (remains the same)
+# Header with logout button
 def header():
     cols = st.columns([4, 1])
     with cols[0]:
@@ -140,7 +137,7 @@ def header():
             if st.button("Logout", key="logout_button"):
                 logout()
 
-# Homepage (remains the same)
+# Homepage
 def homepage():
     st.title("Home Page")
 
@@ -149,6 +146,16 @@ def homepage():
         st.write("Use the sidebar to navigate to your dashboard.")
     else:
         st.write("This is the public homepage. Please log in to access your dashboard.")
+
+# Get all students data
+def get_all_students(db):
+    try:
+        students_collection = db["students"]
+        students = list(students_collection.find({}, {"_id": 0}))  # Exclude MongoDB's `_id` field
+        return students
+    except Exception as e:
+        st.error(f"Error fetching student data: {e}")
+        return []
 
 # Main function with expanded routing
 def main():
@@ -178,7 +185,8 @@ def main():
             elif st.session_state.current_page == "Student Dashboard":
                 student_dashboard(db)
             elif st.session_state.current_page == "My Data":
-                student_data(db)
+                students_data = get_all_students(db)
+                student_data(db, students_data)
     else:
         st.error("Page not found or access restricted.")
 

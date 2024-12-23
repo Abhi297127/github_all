@@ -2,101 +2,102 @@ import streamlit as st
 import pandas as pd
 
 def student_dashboard(db):
+    """Student Dashboard with personalized data."""
     st.subheader("Student Dashboard")
     st.write(f"Welcome, {st.session_state.role}")
     
-    # Fetch recent assignments
-    questions_collection = db.questions
-    questions = list(questions_collection.find())
-    
-    if questions:
-        st.write("Recent Assignments:")
-        for question in questions:
-            st.write(f"- **{question['question_name']}** (Class: {question['class_name']})")
-    else:
-        st.info("No assignments available.")
-        """Student dashboard with personalized data."""
+    try:
+        # Fetch recent assignments
+        questions_collection = db.questions
+        questions = list(questions_collection.find())
+        
+        if questions:
+            st.write("Recent Assignments:")
+            for question in questions:
+                st.write(f"- **{question['question_name']}** (Class: {question['class_name']})")
+        else:
+            st.info("No assignments available.")
+    except Exception as e:
+        st.error(f"Error fetching assignments: {e}")
 
 def student_assignments(db):
+    """Display student's assignments with filtering options."""
     st.subheader("My Assignments")
-    # st.write(f"Hello, {st.session_state['name']}!")
-    # student_name=st.session_state['name']
-    # Fetch and display questions
-    questions_collection = db.questions
-    questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
-
-    # Extract only the class_name field from questions
-    class_names_list = [question.get('class_name', '') for question in questions]
-
-    # Output the class names
-    # st.write("Class Names in Questions:", class_names_list)
+    
+    try:
+        # Fetch and display questions
+        questions_collection = db.questions
+        questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
+    
+        # Extract class names
+        class_names_list = [question.get('class_name', '') for question in questions]
 
         # Connect to JavaFileAnalysis database
-    java_db = db.client['JavaFileAnalysis']
+        java_db = db.client['JavaFileAnalysis']
+        student_collection = java_db['Pooja_Yadav']  # Replace with the correct student collection
 
-    student_collection = java_db['Pooja_Yadav']  # Replace with the correct student collection
+        # Fetch documents from JavaFileAnalysis
+        documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
 
-    # Fetch all documents and extract keys from the `added_java_files` field
-    documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
+        # Collect and sort Java keys
+        added_java_keys = []
+        for doc in documents:
+            added_files = doc.get("added_java_files", {})
+            if isinstance(added_files, dict):
+                added_java_keys.extend(added_files.keys())
 
-    # Collect all keys from `added_java_files` across documents
-    added_java_keys = []  # Using a list to store the keys
-    for doc in documents:
-        added_files = doc.get("added_java_files", {})
-        if isinstance(added_files, dict):
-            added_java_keys.extend(added_files.keys())  # Add keys to the list
+        # Remove duplicates and sort the keys
+        added_java_keys_list = sorted(set(added_java_keys))
 
-    # Remove duplicates (if necessary) and sort the keys
-    added_java_keys_list = sorted(set(added_java_keys))
+        # Dropdown for filtering by status
+        filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
 
-    # Display the keys
-    # st.write("Class Names from `added_java_files`:", added_java_keys_list)
+        if questions:
+            for question in questions:
+                # Remove ".java" extension from class_name
+                class_name = question.get('class_name', '').replace('.java', '')
+                is_completed = class_name in added_java_keys_list
 
-    # Dropdown for filtering by status
-    filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
+                # Filter based on dropdown selection
+                if (filter_status == "Completed" and not is_completed) or (filter_status == "Pending" and is_completed):
+                    continue
 
-    if questions:
-        for question in questions:
-            # Remove the ".java" extension from the class_name in questions
-            class_name = question.get('class_name', '').replace('.java', '')
-            is_completed = class_name in added_java_keys_list
-
-            # Filter logic based on dropdown selection
-            if (filter_status == "Completed" and not is_completed) or (filter_status == "Pending" and is_completed):
-                continue
-
-            # Display question with tick or cross symbol if completed
-            col1, col2 = st.columns([0.9, 0.1])
-            with col1:
-                tick_symbol = "\u2705" if is_completed else "\u274C"
-                st.write(f"{tick_symbol} {question.get('question_name', 'Unnamed Question')} - {class_name}")
-    else:
-        st.info("No assignments found.")
-
-
+                # Display question with tick or cross symbol
+                col1, col2 = st.columns([0.9, 0.1])
+                with col1:
+                    tick_symbol = "\u2705" if is_completed else "\u274C"
+                    st.write(f"{tick_symbol} {question.get('question_name', 'Unnamed Question')} - {class_name}")
+        else:
+            st.info("No assignments found.")
+    except Exception as e:
+        st.error(f"Error fetching assignments: {e}")
 
 def student_data(db):
+    """Display student's profile and submitted assignments."""
     st.subheader("My Profile and Data")
     
-    # Fetch student's own data
-    student_collection = db.users
-    student = student_collection.find_one({"username": st.session_state.username})
-    
-    if student:
-        st.write(f"**Name:** {student.get('full_name', 'N/A')}")
-        st.write(f"**Username:** {student.get('username', 'N/A')}")
-        st.write(f"**Class:** {student.get('class_name', 'N/A')}")
+    try:
+        # Fetch student's own data
+        student_collection = db.users
+        student = student_collection.find_one({"username": st.session_state.username})
         
-        # Optional: Fetch and display assignment submissions if you have a submissions collection
-        submissions_collection = db.submissions
-        submissions = list(submissions_collection.find({"username": st.session_state.username}))
-        
-        if submissions:
-            st.write("### Submitted Assignments")
-            for submission in submissions:
-                st.write(f"- {submission.get('assignment_name', 'Unknown Assignment')}")
-                st.write(f"  Submitted on: {submission.get('submission_date', 'N/A')}")
+        if student:
+            st.write(f"**Name:** {student.get('full_name', 'N/A')}")
+            st.write(f"**Username:** {student.get('username', 'N/A')}")
+            st.write(f"**Class:** {student.get('class_name', 'N/A')}")
+            
+            # Fetch and display assignment submissions
+            submissions_collection = db.submissions
+            submissions = list(submissions_collection.find({"username": st.session_state.username}))
+            
+            if submissions:
+                st.write("### Submitted Assignments")
+                for submission in submissions:
+                    st.write(f"- {submission.get('assignment_name', 'Unknown Assignment')}")
+                    st.write(f"  Submitted on: {submission.get('submission_date', 'N/A')}")
+            else:
+                st.info("No assignment submissions found.")
         else:
-            st.info("No assignment submissions found.")
-    else:
-        st.error("Student data not found.")
+            st.error("Student data not found.")
+    except Exception as e:
+        st.error(f"Error fetching student data: {e}")
