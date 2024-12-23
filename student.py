@@ -32,7 +32,7 @@ def student_assignments(db):
     # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
     student_collection = java_db['Abhishek_Shelke']  # Replace with the correct student collection
-    student_files = list(student_collection.find({}, {"class_name": 1, "_id": 0}))
+    student_files = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
     st.write(student_files)
 
     # Extract class names from student files, removing ".java" extension
