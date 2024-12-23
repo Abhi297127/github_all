@@ -17,20 +17,17 @@ def student_dashboard(db):
         st.info("No assignments available.")
 
 def student_assignments(db):
-
     st.subheader("My Assignments")
-    
+
     # Fetch and display questions
     questions_collection = db.questions
     questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
-    # Extract only the class_name field
-    class_names = list(questions_collection.find({}, {"class_name": 1, "_id": 0}))
 
-    # Use a list comprehension to save just the class_name values in a list
-    class_names_list = [item['class_name'] for item in class_names]
+    # Extract only the class_name field from questions
+    class_names_list = [question.get('class_name', '') for question in questions]
 
     # Output the class names
-    st.write(class_names_list)
+    st.write("Class Names in Questions:", class_names_list)
 
     # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
@@ -60,6 +57,7 @@ def student_assignments(db):
                 st.write(f"{tick_symbol} {question.get('question_name', 'Unnamed Question')} - {class_name}")
     else:
         st.info("No assignments found.")
+
 
 
 def student_data(db):
