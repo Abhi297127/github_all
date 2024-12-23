@@ -27,7 +27,7 @@ def student_assignments(db):
     class_names_list = [question.get('class_name', '') for question in questions]
 
     # Output the class names
-    st.write("Class Names in Questions:", class_names_list)
+    # st.write("Class Names in Questions:", class_names_list)
 
         # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
@@ -47,7 +47,7 @@ def student_assignments(db):
     added_java_keys_list = sorted(set(added_java_keys))
 
     # Display the keys
-    st.write("Class Names from `added_java_files`:", added_java_keys_list)
+    # st.write("Class Names from `added_java_files`:", added_java_keys_list)
 
     # Dropdown for filtering by status
     filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
@@ -63,7 +63,7 @@ def student_assignments(db):
                 continue
 
             # Display question with tick or cross symbol if completed
-            col1, col2 = st.columns([0.9, 0.1])
+            col1 = st.columns([0.9, 0.1])
             with col1:
                 tick_symbol = "\u2705" if is_completed else "\u274C"
                 st.write(f"{tick_symbol} {question.get('question_name', 'Unnamed Question')} - {class_name}")
