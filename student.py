@@ -36,6 +36,7 @@ def student_assignments(db):
 
     # Extract class names from student files, removing ".java" extension
     class_names_in_files = {file.get('class_name', '').replace('.java', '') for file in student_files}
+    st.write(class_names_in_files)
 
     # Dropdown for filtering by status
     filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
