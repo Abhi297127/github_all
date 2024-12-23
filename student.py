@@ -33,7 +33,7 @@ def student_assignments(db):
         # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
 
-    student_collection = java_db['Abhishek_Shelke']  # Replace with the correct student collection
+    student_collection = java_db['Pooja_Yadav']  # Replace with the correct student collection
 
     # Fetch all documents and extract keys from the `added_java_files` field
     documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
