@@ -31,9 +31,6 @@ def student_assignments(db):
 
         # Connect to JavaFileAnalysis database
         java_db = db.client['JavaFileAnalysis']
-
-        java_username=db.client['LoginData']
-        username=java_username['users']
         student_collection = java_db['Pooja_Yadav']  # Replace with the correct student collection
 
         # Fetch documents from JavaFileAnalysis
