@@ -19,6 +19,7 @@ def student_dashboard(db):
             st.info("No assignments available.")
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
+
 def student_assignments(db):
     st.subheader("My Assignments")
     
@@ -72,8 +73,8 @@ def student_assignments(db):
             st.info("No assignments found.")
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
-
 def student_data(db):
+    """Display student's profile and submitted assignments."""
     st.subheader("My Profile and Data")
     
     try:
