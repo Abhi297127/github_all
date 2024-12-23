@@ -32,12 +32,20 @@ def student_assignments(db):
     # Connect to JavaFileAnalysis database
     java_db = db.client['JavaFileAnalysis']
     student_collection = java_db['Abhishek_Shelke']  # Replace with the correct student collection
-    student_files = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
-    st.write(student_files)
+    # Fetch all documents and extract keys from the `added_java_files` field
+    documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
+    # Collect all keys from `added_java_files` across documents
+    added_java_keys = set()  # Using a set to avoid duplicates
+    for doc in documents:
+        added_files = doc.get("added_java_files", {})
+        if isinstance(added_files, dict):
+            added_java_keys.update(added_files.keys())
 
-    # Extract class names from student files, removing ".java" extension
-    class_names_in_files = {file.get('class_nane','') for file in student_files}
-    st.write(class_names_in_files)
+    # Convert to a sorted list for easier display
+    added_java_keys_list = sorted(added_java_keys)
+
+    # Display the keys
+    st.write("Class Names from `added_java_files`:", added_java_keys_list)
 
     # Dropdown for filtering by status
     filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
@@ -46,7 +54,7 @@ def student_assignments(db):
         for question in questions:
             # Remove the ".java" extension from the class_name in questions
             class_name = question.get('class_name', '').replace('.java', '')
-            is_completed = class_name in class_names_in_files
+            is_completed = class_name in added_java_keys_list
 
             # Filter logic based on dropdown selection
             if (filter_status == "Completed" and not is_completed) or (filter_status == "Pending" and is_completed):
