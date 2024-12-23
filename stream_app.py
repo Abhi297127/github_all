@@ -49,7 +49,6 @@ def login():
             st.error("Invalid Username or Password")
 
 
-
 def extract_owner_repo(github_url):
     """Extract owner and repository name from GitHub URL."""
     github_url = github_url.rstrip(".git")
@@ -150,6 +149,20 @@ def homepage():
     else:
         st.write("This is the public homepage. Please log in to access your dashboard.")
 
+# Student's Assignment Function (Sample Implementation)
+def student_assignments(db, username):
+    """Display student's assignments."""
+    st.title(f"Assignments for {username}")
+    assignments_collection = db.assignments  # Assuming the collection is called 'assignments'
+    assignments = assignments_collection.find({"username": username})
+    if assignments.count() == 0:
+        st.write("You have no assignments.")
+    else:
+        for assignment in assignments:
+            st.write(f"Assignment: {assignment['name']}")
+            st.write(f"Description: {assignment['description']}")
+            st.write(f"Due Date: {assignment['due_date']}")
+
 # Main function with expanded routing
 def main():
     db = connect_to_mongo()  # Connect to the database
@@ -174,7 +187,10 @@ def main():
                 admin_dashboard(db)
         else:
             if st.session_state.current_page == "My Assignments":
-                student_assignments(db,st.session_state.username)
+                if st.session_state.username:  # Ensure username exists
+                    student_assignments(db, st.session_state.username)
+                else:
+                    st.error("You must be logged in to view assignments.")
             elif st.session_state.current_page == "Student Dashboard":
                 student_dashboard(db)
             elif st.session_state.current_page == "My Data":
