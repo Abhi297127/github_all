@@ -91,11 +91,18 @@ def register_user():
         if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
             st.error("Username or GitHub link already exists")
         else:
-            
+            login_db["users"].insert_one({
+                "name": name, 
+                "username": username, 
+                "github_link": github_link, 
+                "password": password, 
+                "github_token": github_token, 
+                "role": "student"
+            })
             st.title("GitHub Repo Java File Extractor")
-            github_url = github_link
+            github_url = str(github_link)
             st.write(github_url)
-            GITHUB_TOKEN = github_token
+            GITHUB_TOKEN = str(github_token)
             st.write(GITHUB_TOKEN)
             HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
 
@@ -107,31 +114,11 @@ def register_user():
                         fetch_commits_and_files(owner, repo, db,HEADERS)
                         st.success("Data Fetch successfully")          
                         # Add user to database
-                        login_db["users"].insert_one({
-                "name": name, 
-                "username": username, 
-                "github_link": github_link, 
-                "password": password, 
-                "github_token": github_token, 
-                "role": "student"
-            })
+                        
                         st.success("Registration successful")
                         st.info("Please navigate to the login page to access your account")
 
 
-
-def extract_owner_repo(github_url):
-    github_url = github_url.rstrip(".git")
-    parsed_url = urlparse(github_url)
-    path_parts = parsed_url.path.strip("/").split("/")
-
-    if len(path_parts) >= 2:
-        owner = path_parts[0]
-        repo = path_parts[1]
-        return owner, repo
-    else:
-        st.error("Invalid GitHub URL format.")
-        return None, None
 
 def check_repo_visibility(owner, repo,HEADERS):
     repo_url = f"https://api.github.com/repos/{owner}/{repo}"
