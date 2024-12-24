@@ -101,7 +101,7 @@ def register_user():
                 "github_token": github_token,
             }
             # Redirect to success page
-            st.experimental_update_query_params(page="success")
+            st.experimental_set_query_params(page="success")
 
 
 
