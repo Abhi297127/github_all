@@ -9,4 +9,4 @@ def success_page():
         st.write("Registered Details:")
         st.json(st.session_state["user_data"])
 
-    st.button("Login", on_click=lambda: st.experimental_set_query_params(page="login"))
+    st.button("Login", on_click=lambda: st.query_params(page="login"))
