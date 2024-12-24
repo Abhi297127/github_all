@@ -108,7 +108,7 @@ def register_user():
             with st.spinner('Fetching data...'):
                 if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
                     db = client.github_data
-                    fetch_commits_and_files(owner, repo, db, HEADERS,username)  # Pass HEADERS here
+                    fetch_commits_and_files(owner, repo, db, HEADERS,name)  # Pass HEADERS here
                     st.success("Data Fetch successful")
 
 def check_repo_visibility(owner, repo, headers):
