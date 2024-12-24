@@ -3,10 +3,11 @@ from pymongo import MongoClient
 from urllib.parse import urlparse
 from admin import admin_dashboard, manage_students, manage_questions
 from student import student_dashboard, student_assignments, student_data
-from github import Github
+from github import BadCredentialsException, Github
 import requests
 from datetime import datetime
 import os
+import re
 
 # MongoDB Connection
 username = "abhishelke297127"
@@ -62,14 +63,30 @@ def extract_owner_repo(github_url):
         return path_parts[0], path_parts[1]
     return None, None
 
+# Function to validate username format
+def validate_username(username):
+    pattern = r"^AF0[3-4][0-7]\d{4}$"  # Matches AF0300000 to AF0470000
+    return bool(re.match(pattern, username))
+
+# Function to check if GitHub repo is public
+def is_github_repo_public(github_token, owner, repo):
+    try:
+        g = Github(github_token)
+        repository = g.get_repo(f"{owner}/{repo}")
+        return repository.private == False  # False means public
+    except Exception as e:
+        return False
+
 def register_user():
     """Register a new user."""
     st.title("Register")
     name = st.text_input("Name")
     username = st.text_input("Username")
     github_link = st.text_input("GitHub Repository Link")
-    github_token = st.text_input("GitHub Token")
+    github_token = st.text_input("GitHub Token", type="password")  # Hide GitHub token input
     password = None
+
+    # MongoDB connection
     client = MongoClient(connection_string)
     login_db = client["LoginData"]
 
@@ -81,11 +98,23 @@ def register_user():
                 g = Github(github_token)
                 user = g.get_user()
                 st.write("GitHub token is valid")
-            except Exception as e:
-                st.error("Invalid GitHub token")
+            except BadCredentialsException:
+                st.error("Invalid GitHub token. Please check your token and try again.")
                 return
-            st.success("GitHub Repository is Public")
-            password = st.text_input("Set Password", type="password")
+            except Exception as e:
+                st.error("Error connecting to GitHub: " + str(e))
+                return
+
+            # Check if the GitHub repository is public
+            if is_github_repo_public(github_token, owner, repo):
+                st.success("GitHub Repository is Public")
+                password = st.text_input("Set Password", type="password")
+            else:
+                st.error("GitHub repository is private or inaccessible.")
+                return
+        else:
+            st.error("Invalid GitHub repository link. Please make sure the link is in the correct format.")
+            return
 
     if st.button("Submit"):
         if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
@@ -99,7 +128,7 @@ def register_user():
                 "github_token": github_token, 
                 "role": "student"
             })
-            st.title("GitHub Repo Java File Extractor")
+            # st.title("GitHub Repo Java File Extractor")
             # github_url = str(github_link)
             # st.write(github_url)
             # st.write(GITHUB_TOKEN)
