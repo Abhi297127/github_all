@@ -105,18 +105,11 @@ def register_user():
             GITHUB_TOKEN = str(github_token)
             st.write(GITHUB_TOKEN)
             HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
-
-            if st.button("Fetch Data"):
-                if 'fetching_data' not in st.session_state:  # Prevent repeated operations
-                    st.session_state.fetching_data = True
-                    with st.spinner('Fetching data...'):
-                        if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
-                            db = client.github_data
-                            fetch_commits_and_files(owner, repo, db, HEADERS)  # Pass HEADERS here
-                            st.success("Data Fetch successful")          
-                    st.session_state.fetching_data = False  # Reset fetching flag
-                else:
-                    st.write("Data is not fetched. Please wait...")
+            with st.spinner('Fetching data...'):
+                if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
+                    db = client.github_data
+                    fetch_commits_and_files(owner, repo, db, HEADERS)  # Pass HEADERS here
+                    st.success("Data Fetch successful")
 
 def check_repo_visibility(owner, repo, headers):
     repo_url = f"https://api.github.com/repos/{owner}/{repo}"
