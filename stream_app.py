@@ -97,7 +97,7 @@ def register_user():
                 "github_token": github_token,
             }
             # Set query params to navigate to success page
-            st.experimental_set_query_params(page="success", user_data=f"{name},{username},{github_link}")
+            st.query_params = {"page": "success", "user_data": f"{name},{username},{github_link}"}
             # Add user to database
             login_db["users"].insert_one({
                 "name": name, 
@@ -109,7 +109,6 @@ def register_user():
             })
             st.success("Registration successful")
             st.info("Please navigate to the login page to access your account")
-
 
 
 # Logout functionality
