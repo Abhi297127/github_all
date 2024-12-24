@@ -94,7 +94,9 @@ def register_user():
             
             st.title("GitHub Repo Java File Extractor")
             github_url = github_link
+            st.write(github_url)
             GITHUB_TOKEN = github_token
+            st.write(GITHUB_TOKEN)
             HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
 
             if st.button("Fetch Data"):
