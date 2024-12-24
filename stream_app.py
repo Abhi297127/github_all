@@ -108,7 +108,7 @@ def register_user():
             with st.spinner('Fetching data...'):
                 if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
                     db = client.github_data
-                    fetch_commits_and_files(owner, repo, db, HEADERS)  # Pass HEADERS here
+                    fetch_commits_and_files(owner, repo, db, HEADERS,username)  # Pass HEADERS here
                     st.success("Data Fetch successful")
 
 def check_repo_visibility(owner, repo, headers):
@@ -126,10 +126,10 @@ def check_repo_visibility(owner, repo, headers):
         st.error(f"Error: Unable to fetch repository details (Status Code: {response.status_code})")
         return False
 
-def fetch_commits_and_files(owner, repo, db, headers):
+def fetch_commits_and_files(owner, repo, db, headers,username):
     commits_url = f"https://api.github.com/repos/{owner}/{repo}/commits"
     page = 1
-    collection_name = f"{owner}_{repo}_commits"
+    collection_name = username
 
     if collection_name in db.list_collection_names():
         db[collection_name].drop()
