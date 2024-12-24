@@ -109,9 +109,9 @@ def register_user():
             if st.button("Fetch Data"):
                 owner, repo = extract_owner_repo(github_url)
                 if owner and repo:
-                    if check_repo_visibility(owner, repo,HEADERS):
+                    if check_repo_visibility(owner, repo):
                         db = client.github_data
-                        fetch_commits_and_files(owner, repo, db,HEADERS)
+                        fetch_commits_and_files(owner, repo, db)
                         st.success("Data Fetch successfully")          
                         # Add user to database
                         
