@@ -4,7 +4,8 @@ def success_page():
     st.title("Registration Successful 🎉")
     
     # Retrieve user data from query parameters
-    user_data = st.query_params.get("user_data", [None])[0]
+    query_params = st.experimental_get_query_params()
+    user_data = query_params.get("user_data", [None])[0]
     
     if user_data:
         # Parse the user data from the query params
