@@ -9,4 +9,6 @@ def success_page():
         st.write("Registered Details:")
         st.json(st.session_state["user_data"])
 
-    st.button("Login", on_click=lambda: st.query_params(page="login"))
+    # Provide an option to navigate to the login page
+    if st.button("Go to Login"):
+        st.experimental_set_query_params(page="login")
