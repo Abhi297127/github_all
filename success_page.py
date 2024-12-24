@@ -1,14 +1,17 @@
 import streamlit as st
 
 def success_page():
-    """Show success page."""
-    st.title("Registration Successful 🎉")
-    st.write("Your registration was successful!")
+    """Display the success page based on query parameters."""
+    query_params = st.query_params  # Retrieve the current query parameters
+    page = query_params.get("page", "default")  # Get the "page" parameter
+    
+    if page == "success":
+        st.title("Registration Successful 🎉")
+        st.write("Your registration was successful!")
 
-    if "user_data" in st.session_state:
-        st.write("Registered Details:")
-        st.json(st.session_state["user_data"])
-
-    # Provide an option to navigate to the login page
-    if st.button("Go to Login"):
-        st.experimental_set_query_params(page="login")
+        # Optionally show user data stored in session state
+        if "user_data" in st.session_state:
+            st.write("Registered Details:")
+            st.json(st.session_state["user_data"])
+    else:
+        st.error("Invalid page parameter!")
