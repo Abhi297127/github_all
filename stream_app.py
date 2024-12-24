@@ -106,8 +106,8 @@ def register_user():
                         db = client.github_data
                         fetch_commits_and_files(owner, repo, db,HEADERS)
                         st.success("Data Fetch successfully")          
-            # Add user to database
-            login_db["users"].insert_one({
+                        # Add user to database
+                        login_db["users"].insert_one({
                 "name": name, 
                 "username": username, 
                 "github_link": github_link, 
@@ -115,8 +115,8 @@ def register_user():
                 "github_token": github_token, 
                 "role": "student"
             })
-            st.success("Registration successful")
-            st.info("Please navigate to the login page to access your account")
+                        st.success("Registration successful")
+                        st.info("Please navigate to the login page to access your account")
 
 
 
