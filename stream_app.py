@@ -109,20 +109,18 @@ def register_user():
             if st.button("Fetch Data"):
                 owner, repo = extract_owner_repo(github_url)
                 if owner and repo:
-                    if check_repo_visibility(owner, repo):
+                    if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
                         db = client.github_data
-                        fetch_commits_and_files(owner, repo, db)
+                        fetch_commits_and_files(owner, repo, db, HEADERS)  # Pass HEADERS here
                         st.success("Data Fetch successfully")          
                         # Add user to database
                         
                         st.success("Registration successful")
                         st.info("Please navigate to the login page to access your account")
 
-
-
-def check_repo_visibility(owner, repo,HEADERS):
+def check_repo_visibility(owner, repo, headers):
     repo_url = f"https://api.github.com/repos/{owner}/{repo}"
-    response = requests.get(repo_url, headers=HEADERS)
+    response = requests.get(repo_url, headers=headers)  # Use passed headers here
     if response.status_code == 200:
         repo_data = response.json()
         if repo_data.get("private"):
@@ -135,7 +133,7 @@ def check_repo_visibility(owner, repo,HEADERS):
         st.error(f"Error: Unable to fetch repository details (Status Code: {response.status_code})")
         return False
 
-def fetch_commits_and_files(owner, repo, db,HEADERS):
+def fetch_commits_and_files(owner, repo, db, headers):
     commits_url = f"https://api.github.com/repos/{owner}/{repo}/commits"
     page = 1
     collection_name = f"{owner}_{repo}_commits"
@@ -145,7 +143,7 @@ def fetch_commits_and_files(owner, repo, db,HEADERS):
         st.info(f"Dropped existing collection: {collection_name}")
 
     while True:
-        response = requests.get(f"{commits_url}?page={page}&per_page=100", headers=HEADERS)
+        response = requests.get(f"{commits_url}?page={page}&per_page=100", headers=headers)  # Use passed headers here
         if response.status_code == 200:
             commits = response.json()
             if not commits:
@@ -161,7 +159,7 @@ def fetch_commits_and_files(owner, repo, db,HEADERS):
                 commit_message = commit["commit"]["message"]
 
                 commit_detail_url = f"https://api.github.com/repos/{owner}/{repo}/commits/{sha}"
-                commit_detail_response = requests.get(commit_detail_url, headers=HEADERS)
+                commit_detail_response = requests.get(commit_detail_url, headers=headers)  # Use passed headers here
                 if commit_detail_response.status_code == 200:
                     commit_data = commit_detail_response.json()
                     files = commit_data.get("files", [])
@@ -181,14 +179,14 @@ def fetch_commits_and_files(owner, repo, db,HEADERS):
                                 renamed_java_files[previous_filename] = filename
                                 raw_url = file.get("raw_url")
                                 if raw_url:
-                                    file_response = requests.get(raw_url, headers=HEADERS)
+                                    file_response = requests.get(raw_url, headers=headers)  # Use passed headers here
                                     if file_response.status_code == 200:
                                         modified_java_files[filename] = file_response.text
 
                             elif status in ["added", "modified"]:
                                 raw_url = file.get("raw_url")
                                 if raw_url:
-                                    file_response = requests.get(raw_url, headers=HEADERS)
+                                    file_response = requests.get(raw_url, headers=headers)  # Use passed headers here
                                     if file_response.status_code == 200:
                                         file_content = file_response.text
                                 if status == "added":
@@ -216,6 +214,7 @@ def fetch_commits_and_files(owner, repo, db,HEADERS):
             break
 
     st.success("Data has been inserted into MongoDB.")
+
 # Logout functionality
 def logout():
     st.session_state.logged_in = False
