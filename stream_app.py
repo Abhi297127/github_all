@@ -89,7 +89,7 @@ def register_user():
         if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
             st.error("Username or GitHub link already exists")
         else:
-            # Redirect to success page
+            # Save data in session state
             st.session_state["registration_success"] = True
             st.session_state["user_data"] = {
                 "name": name,
@@ -97,11 +97,20 @@ def register_user():
                 "github_link": github_link,
                 "github_token": github_token,
             }
+            st.write("Data sent to session_state:", st.session_state["user_data"])  # Debugging output
             st.query_params.page = "success"
+
             # Add user to database
-            st.info("Please navigate to the login page to access your account")
-            login_db["users"].insert_one({"name": name, "username": username, "github_link": github_link, "password": password, "github_token": github_token, "role": "student"})
+            login_db["users"].insert_one({
+                "name": name,
+                "username": username,
+                "github_link": github_link,
+                "password": password,
+                "github_token": github_token,
+                "role": "student",
+            })
             st.success("Registration successful")
+
 
 
 
