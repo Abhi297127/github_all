@@ -100,10 +100,10 @@ def register_user():
                 "role": "student"
             })
             st.title("GitHub Repo Java File Extractor")
-            github_url = str(github_link)
-            st.write(github_url)
+            # github_url = str(github_link)
+            # st.write(github_url)
+            # st.write(GITHUB_TOKEN)
             GITHUB_TOKEN = str(github_token)
-            st.write(GITHUB_TOKEN)
             HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
             with st.spinner('Fetching data...'):
                 if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
