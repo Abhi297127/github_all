@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from urllib.parse import urlparse
 from admin import admin_dashboard, manage_students, manage_questions
 from student import student_dashboard, student_assignments, student_data
-from github import BadCredentialsException, Github
+from github import BadCredentialsException, Github, UnknownObjectException
 import requests
 from datetime import datetime
 import os
@@ -70,11 +70,25 @@ def validate_username(username):
 
 # Function to check if GitHub repo is public
 def is_github_repo_public(github_token, owner, repo):
+    """Check if the GitHub repository is public and token has access."""
     try:
         g = Github(github_token)
         repository = g.get_repo(f"{owner}/{repo}")
-        return repository.private == False  # False means public
+        
+        # Check if the repository is public
+        if repository.private:
+            st.error("GitHub repository is private.")
+            return False
+
+        # Check if the user has access to the repository
+        # If the user has no access, an UnknownObjectException will be raised
+        repository.get_contents("")
+        return True
+    except UnknownObjectException:
+        st.error("Token does not have access to this repository.")
+        return False
     except Exception as e:
+        st.error("Error accessing GitHub repository. Ensure the repository exists and the token is correct.")
         return False
 
 def register_user():
@@ -120,14 +134,6 @@ def register_user():
         if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
             st.error("Username or GitHub link already exists")
         else:
-            login_db["users"].insert_one({
-                "name": name, 
-                "username": username, 
-                "github_link": github_link, 
-                "password": password, 
-                "github_token": github_token, 
-                "role": "student"
-            })
             # st.title("GitHub Repo Java File Extractor")
             # github_url = str(github_link)
             # st.write(github_url)
@@ -138,6 +144,14 @@ def register_user():
                 if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
                     db = client.github_data
                     fetch_commits_and_files(owner, repo, db, HEADERS,name)  # Pass HEADERS here
+                    login_db["users"].insert_one({
+                "name": name, 
+                "username": username, 
+                "github_link": github_link, 
+                "password": password, 
+                "github_token": github_token, 
+                "role": "student"
+                })
                     st.success("Data Fetch successful")
 
 def check_repo_visibility(owner, repo, headers):
