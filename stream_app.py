@@ -107,18 +107,6 @@ def register_user():
     if github_link:
         owner, repo = extract_owner_repo(github_link)
         if owner and repo:
-            try:
-                # Validate GitHub token
-                g = Github(github_token)
-                user = g.get_user()
-                st.write("GitHub token is valid")
-            except BadCredentialsException:
-                st.error("Invalid GitHub token. Please check your token and try again.")
-                return
-            except Exception as e:
-                st.error("Error connecting to GitHub: " + str(e))
-                return
-
             # Check if the GitHub repository is public
             if is_github_repo_public(github_token, owner, repo):
                 st.success("GitHub Repository is Public")
