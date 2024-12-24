@@ -4,6 +4,9 @@ from urllib.parse import urlparse
 from admin import admin_dashboard, manage_students, manage_questions
 from student import student_dashboard, student_assignments, student_data
 from github import Github
+import requests
+from datetime import datetime
+import os
 
 # MongoDB Connection
 username = "abhishelke297127"
@@ -88,14 +91,6 @@ def register_user():
         if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
             st.error("Username or GitHub link already exists")
         else:
-            # Store user data in session state
-            st.session_state["registration_success"] = True
-            st.session_state["user_data"] = {
-                "name": name,
-                "username": username,
-                "github_link": github_link,
-                "github_token": github_token,
-            }
             # Add user to database
             login_db["users"].insert_one({
                 "name": name, 
@@ -105,11 +100,132 @@ def register_user():
                 "github_token": github_token, 
                 "role": "student"
             })
+            st.title("GitHub Repo Java File Extractor")
+            github_url = github_link
+            GITHUB_TOKEN = github_token
+            HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
+
+            if st.button("Fetch Data"):
+                with st.spinner('Processing...'):
+                    owner, repo = extract_owner_repo(github_url)
+                    if owner and repo:
+                        if check_repo_visibility(owner, repo,HEADERS):
+                            db = client.github_data
+                            fetch_commits_and_files(owner, repo, db,HEADERS)
             st.success("Registration successful")
             st.info("Please navigate to the login page to access your account")
-            # Redirect to success page
-            st.session_state.current_page = "Success"
 
+
+
+def extract_owner_repo(github_url):
+    github_url = github_url.rstrip(".git")
+    parsed_url = urlparse(github_url)
+    path_parts = parsed_url.path.strip("/").split("/")
+
+    if len(path_parts) >= 2:
+        owner = path_parts[0]
+        repo = path_parts[1]
+        return owner, repo
+    else:
+        st.error("Invalid GitHub URL format.")
+        return None, None
+
+def check_repo_visibility(owner, repo,HEADERS):
+    repo_url = f"https://api.github.com/repos/{owner}/{repo}"
+    response = requests.get(repo_url, headers=HEADERS)
+    if response.status_code == 200:
+        repo_data = response.json()
+        if repo_data.get("private"):
+            st.warning("The repository is private.")
+            return False
+        else:
+            st.success("The repository is public.")
+            return True
+    else:
+        st.error(f"Error: Unable to fetch repository details (Status Code: {response.status_code})")
+        return False
+
+def fetch_commits_and_files(owner, repo, db,HEADERS):
+    commits_url = f"https://api.github.com/repos/{owner}/{repo}/commits"
+    page = 1
+    collection_name = f"{owner}_{repo}_commits"
+
+    if collection_name in db.list_collection_names():
+        db[collection_name].drop()
+        st.info(f"Dropped existing collection: {collection_name}")
+
+    while True:
+        response = requests.get(f"{commits_url}?page={page}&per_page=100", headers=HEADERS)
+        if response.status_code == 200:
+            commits = response.json()
+            if not commits:
+                break
+
+            for commit in commits:
+                sha = commit["sha"]
+                commit_date = commit["commit"]["committer"]["date"]
+
+                commit_datetime = datetime.strptime(commit_date, "%Y-%m-%dT%H:%M:%SZ")
+                formatted_date = commit_datetime.strftime("%Y-%m-%d")
+                formatted_time = commit_datetime.strftime("%H:%M:%S")
+                commit_message = commit["commit"]["message"]
+
+                commit_detail_url = f"https://api.github.com/repos/{owner}/{repo}/commits/{sha}"
+                commit_detail_response = requests.get(commit_detail_url, headers=HEADERS)
+                if commit_detail_response.status_code == 200:
+                    commit_data = commit_detail_response.json()
+                    files = commit_data.get("files", [])
+
+                    added_java_files = {}
+                    modified_java_files = {}
+                    renamed_java_files = {}
+                    deleted_java_files = {}
+
+                    for file in files:
+                        if file["filename"].endswith(".java"):
+                            status = file["status"]
+                            filename = os.path.splitext(os.path.basename(file["filename"]))[0]
+
+                            if status == "renamed":
+                                previous_filename = os.path.splitext(os.path.basename(file.get("previous_filename", "")))[0]
+                                renamed_java_files[previous_filename] = filename
+                                raw_url = file.get("raw_url")
+                                if raw_url:
+                                    file_response = requests.get(raw_url, headers=HEADERS)
+                                    if file_response.status_code == 200:
+                                        modified_java_files[filename] = file_response.text
+
+                            elif status in ["added", "modified"]:
+                                raw_url = file.get("raw_url")
+                                if raw_url:
+                                    file_response = requests.get(raw_url, headers=HEADERS)
+                                    if file_response.status_code == 200:
+                                        file_content = file_response.text
+                                if status == "added":
+                                    added_java_files[filename] = file_content
+                                elif status == "modified":
+                                    modified_java_files[filename] = file_content
+
+                            elif status == "removed":
+                                deleted_java_files[filename] = ""
+
+                    commit_doc = {
+                        "commit_id": sha,
+                        "commit_date": formatted_date,
+                        "commit_time": formatted_time,
+                        "commit_message": commit_message,
+                        "added_java_files": added_java_files,
+                        "modified_java_files": modified_java_files,
+                        "renamed_java_files": renamed_java_files,
+                        "deleted_java_files": deleted_java_files
+                    }
+                    db[collection_name].insert_one(commit_doc)
+            page += 1
+        else:
+            st.error(f"Error fetching commits: {response.status_code}")
+            break
+
+    st.success("Data has been inserted into MongoDB.")
 # Logout functionality
 def logout():
     st.session_state.logged_in = False
