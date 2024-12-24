@@ -11,4 +11,4 @@ def success_page():
 
     # Provide an option to navigate to the login page
     if st.button("Go to Login"):
-        st.query_params(page="login")
+        st.experimental_update_query_params(page="login")
