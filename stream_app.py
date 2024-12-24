@@ -91,6 +91,19 @@ def register_user():
         if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
             st.error("Username or GitHub link already exists")
         else:
+            
+            st.title("GitHub Repo Java File Extractor")
+            github_url = github_link
+            GITHUB_TOKEN = github_token
+            HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
+
+            if st.button("Fetch Data"):
+                owner, repo = extract_owner_repo(github_url)
+                if owner and repo:
+                    if check_repo_visibility(owner, repo,HEADERS):
+                        db = client.github_data
+                        fetch_commits_and_files(owner, repo, db,HEADERS)
+                        st.success("Data Fetch successfully")          
             # Add user to database
             login_db["users"].insert_one({
                 "name": name, 
@@ -100,18 +113,6 @@ def register_user():
                 "github_token": github_token, 
                 "role": "student"
             })
-            st.title("GitHub Repo Java File Extractor")
-            github_url = github_link
-            GITHUB_TOKEN = github_token
-            HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
-
-            if st.button("Fetch Data"):
-                with st.spinner('Processing...'):
-                    owner, repo = extract_owner_repo(github_url)
-                    if owner and repo:
-                        if check_repo_visibility(owner, repo,HEADERS):
-                            db = client.github_data
-                            fetch_commits_and_files(owner, repo, db,HEADERS)
             st.success("Registration successful")
             st.info("Please navigate to the login page to access your account")
 
