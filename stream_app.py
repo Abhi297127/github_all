@@ -115,6 +115,8 @@ def register_user():
                             fetch_commits_and_files(owner, repo, db, HEADERS)  # Pass HEADERS here
                             st.success("Data Fetch successful")          
                     st.session_state.fetching_data = False  # Reset fetching flag
+                else:
+                    st.write("Data is not fetched. Please wait...")
 
 def check_repo_visibility(owner, repo, headers):
     repo_url = f"https://api.github.com/repos/{owner}/{repo}"
