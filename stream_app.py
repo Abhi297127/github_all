@@ -53,6 +53,16 @@ def login():
 
 
 
+import streamlit as st
+import requests
+from datetime import datetime
+from github import Github
+import os
+from pymongo import MongoClient
+from urllib.parse import urlparse
+
+# Assuming 'connection_string' and MongoDB client setup are already defined
+
 def extract_owner_repo(github_url):
     """Extract owner and repository name from GitHub URL."""
     github_url = github_url.rstrip(".git")
@@ -107,16 +117,16 @@ def register_user():
             HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
 
             if st.button("Fetch Data"):
-                owner, repo = extract_owner_repo(github_url)
-                if owner and repo:
-                    if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
-                        db = client.github_data
-                        fetch_commits_and_files(owner, repo, db, HEADERS)  # Pass HEADERS here
-                        st.success("Data Fetch successfully")          
-                        # Add user to database
-                        
-                        st.success("Registration successful")
-                        st.info("Please navigate to the login page to access your account")
+                if 'fetching_data' not in st.session_state:  # Prevent repeated operations
+                    st.session_state.fetching_data = True
+                    with st.spinner('Fetching data...'):
+                        owner, repo = extract_owner_repo(github_url)
+                        if owner and repo:
+                            if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
+                                db = client.github_data
+                                fetch_commits_and_files(owner, repo, db, HEADERS)  # Pass HEADERS here
+                                st.success("Data Fetch successful")          
+                        st.session_state.fetching_data = False  # Reset fetching flag
 
 def check_repo_visibility(owner, repo, headers):
     repo_url = f"https://api.github.com/repos/{owner}/{repo}"
