@@ -31,7 +31,7 @@ if "logged_in" not in st.session_state:
 
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
-    
+
 def login():
     """Log in an existing user."""
     client = MongoClient(connection_string)
@@ -48,16 +48,19 @@ def login():
     if "logged_in" not in st.session_state:
         st.session_state["logged_in"] = False
 
-    # Conditionally display login button or spinner
+    # Conditionally display login button
     if not st.session_state["login_clicked"]:
-        if st.button("Login"):
+        login_button = st.button("Login")  # Display login button
+
+        if login_button:
             st.session_state["login_clicked"] = True  # Mark button as clicked
 
-    # Perform login operation
-    if st.session_state["login_clicked"] and not st.session_state["logged_in"]:
-        with st.spinner("Logging in..."):
+    # If the login button is clicked, start the login process and show the loader
+    if st.session_state["login_clicked"]:
+        with st.spinner("Logging in and fetching data..."):
             # Verify user credentials
             user = login_db.users.find_one({"username": username, "password": password})
+            
             if user:
                 # Store session details
                 st.session_state["logged_in"] = True
@@ -75,17 +78,16 @@ def login():
                 if user["role"] == "admin":
                     st.session_state["current_page"] = "Admin Dashboard"
                 else:
-                    with st.spinner('Fetching data...'):
-                        if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
-                            db = client.github_data
-                            fetch_commits_and_files(owner, repo, db, HEADERS, name)  # Pass HEADERS here
-                            st.success("Data Fetch successful")
+                    if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
+                        db = client.github_data
+                        fetch_commits_and_files(owner, repo, db, HEADERS, name)  # Pass HEADERS here
+                        st.success("Data Fetch successful")
                     st.session_state["current_page"] = "Student Dashboard"
+                st.session_state["login_clicked"] = False  # Reset the login button state
                 st.rerun()  # Rerun the app to apply changes
             else:
                 st.error("Invalid Username or Password")
-                st.session_state["login_clicked"] = False  # Reset button if login fails
-
+                st.session_state["login_clicked"] = False  # Reset the button state if login fails
 
 # Assuming 'connection_string' and MongoDB client setup are already defined
 
