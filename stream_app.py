@@ -139,7 +139,7 @@ def register_user():
     login_db = client["LoginData"]
 
     # Input fields
-    name = st.text_input("Name", placeholder="Enter your name")
+    name = st.text_input("Name", placeholder="Enter your full name")
     username = st.text_input("Username", placeholder="Enter username (e.g., AF0300000)")
     github_link = st.text_input("GitHub Repository Link", placeholder="Enter your GitHub repository link")
     github_token = st.text_input("GitHub Token", type="password", placeholder="Enter your GitHub token")
@@ -179,8 +179,14 @@ def register_user():
     # Show Submit button if all fields are valid
     if valid_name and valid_username and valid_github and valid_token and password:
         if st.button("Submit"):
-            if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
-                st.error("Username or GitHub link already exists")
+            existing_user = login_db["users"].find_one({"username": username})
+            existing_repo = login_db["users"].find_one({"github_link": github_link})
+            if existing_user and existing_repo:
+                st.error("Both username and GitHub link already exist.")
+            elif existing_user:
+                st.error("Username already exists.")
+            elif existing_repo:
+                st.error("GitHub link already exists.")
             else:
                 login_db["users"].insert_one({
                     "name": name,
@@ -193,6 +199,7 @@ def register_user():
                 st.success("Data added successfully")
     else:
         st.info("Please complete all fields and ensure the repository is valid to enable submission.")
+
 
 def check_repo_visibility(owner, repo, headers):
     repo_url = f"https://api.github.com/repos/{owner}/{repo}"
