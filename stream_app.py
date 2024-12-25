@@ -39,18 +39,35 @@ def login():
     # Access the specific databases
     login_db = client["LoginData"]
     st.title("Login")
+    
+    # User inputs for login
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
+    
     if st.button("Login"):
+        # Verify user credentials
         user = login_db.users.find_one({"username": username, "password": password})
         if user:
+            # Store session details
             st.session_state["logged_in"] = True
             st.session_state["username"] = username
             st.session_state["name"] = user["name"]  # Store full name
             st.session_state["role"] = user["role"]  # Assign role
+            
             st.success(f"Welcome {user['name']}!")
+            
+            # Fetch and display all data from the database
+            st.write("### All Registered Users Data:")
+            all_users = list(login_db.users.find())  # Get all user documents
+            for user_data in all_users:
+                # Display each user's details
+                st.write(f"**Name**: {user_data['name']}")
+                st.write(f"**Username**: {user_data['username']}")
+                st.write(f"**Role**: {user_data['role']}")
+                st.write("---")
         else:
             st.error("Invalid Username or Password")
+
 
 # Assuming 'connection_string' and MongoDB client setup are already defined
 
