@@ -63,7 +63,7 @@ def login():
             st.write(f"**Name**: {user['name']}")
             st.write(f"**Username**: {user['username']}")
             st.write(f"**Github_link**: {user['github_link']}")
-            st.write(f"**Tocken**: {user['github_tocken']}")
+            st.write(f"**Tocken**: {user['github_token']}")
             st.write(f"**Password**: {user['password']}")
         else:
             st.error("Invalid Username or Password")
