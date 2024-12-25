@@ -382,7 +382,7 @@ def main():
                 admin_dashboard(db)
         else:
             if st.session_state.current_page == "My Assignments":
-                users = value()
+                users = value(user=users)
                 student_assignments(db,users)
             elif st.session_state.current_page == "Student Dashboard":
                 student_dashboard(db)
