@@ -65,6 +65,17 @@ def login():
             st.write(f"**Github_link**: {user['github_link']}")
             st.write(f"**Tocken**: {user['github_token']}")
             st.write(f"**Password**: {user['password']}")
+            github_link = user['github_link']
+            github_token= user['github_token']
+            name =user['name']
+            owner, repo = extract_owner_repo(github_link)
+            GITHUB_TOKEN = str(github_token)
+            HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
+            with st.spinner('Fetching data...'):
+                if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
+                    db = client.github_data
+                    fetch_commits_and_files(owner, repo, db, HEADERS,name)  # Pass HEADERS here
+                    st.success("Data Fetch successful")
         else:
             st.error("Invalid Username or Password")
 
@@ -139,17 +150,7 @@ def register_user():
         if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
             st.error("Username or GitHub link already exists")
         else:
-            # st.title("GitHub Repo Java File Extractor")
-            # github_url = str(github_link)
-            # st.write(github_url)
-            # st.write(GITHUB_TOKEN)
-            GITHUB_TOKEN = str(github_token)
-            HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
-            with st.spinner('Fetching data...'):
-                if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
-                    db = client.github_data
-                    fetch_commits_and_files(owner, repo, db, HEADERS,name)  # Pass HEADERS here
-                    login_db["users"].insert_one({
+            login_db["users"].insert_one({
                 "name": name, 
                 "username": username, 
                 "github_link": github_link, 
@@ -157,7 +158,7 @@ def register_user():
                 "github_token": github_token, 
                 "role": "student"
                 })
-                    st.success("Data Fetch successful")
+            st.success("Data add successfully")
 
 def check_repo_visibility(owner, repo, headers):
     repo_url = f"https://api.github.com/repos/{owner}/{repo}"
