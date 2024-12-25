@@ -132,7 +132,7 @@ def register_user():
     client = MongoClient(connection_string)
     login_db = client["LoginData"]
 
-    if github_link:
+    if github_link and github_token:
         owner, repo = extract_owner_repo(github_link)
         if owner and repo:
             # Check if the GitHub repository is public
