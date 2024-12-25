@@ -32,7 +32,6 @@ if "logged_in" not in st.session_state:
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
 
-# Login functionality
 def login():
     """Log in an existing user."""
     client = MongoClient(connection_string)
@@ -53,18 +52,19 @@ def login():
             st.session_state["username"] = username
             st.session_state["name"] = user["name"]  # Store full name
             st.session_state["role"] = user["role"]  # Assign role
+            st.session_state["github_link"] = user["github_link"]  # link
+            st.session_state["password"] = user["password"]  # password
+            st.session_state["github_token"] = user["github_token"]  # tocken
             
             st.success(f"Welcome {user['name']}!")
             
-            # Fetch and display all data from the database
-            st.write("### All Registered Users Data:")
-            all_users = list(login_db.users.find())  # Get all user documents
-            for user_data in all_users:
-                # Display each user's details
-                st.write(f"**Name**: {user_data['name']}")
-                st.write(f"**Username**: {user_data['username']}")
-                st.write(f"**Role**: {user_data['role']}")
-                st.write("---")
+            # Fetch and display only the logged-in user's data
+            st.write("### Your Details:")
+            st.write(f"**Name**: {user['name']}")
+            st.write(f"**Username**: {user['username']}")
+            st.write(f"**Github_link**: {user['github_link']}")
+            st.write(f"**Tocken**: {user['github_tocken']}")
+            st.write(f"**Password**: {user['password']}")
         else:
             st.error("Invalid Username or Password")
 
