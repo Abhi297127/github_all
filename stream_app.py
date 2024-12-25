@@ -32,10 +32,6 @@ if "logged_in" not in st.session_state:
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
 
-def value(a):
-    user=a
-    return user
-
 def login():
     """Log in an existing user."""
     client = MongoClient(connection_string)
@@ -71,8 +67,6 @@ def login():
                 st.session_state["logged_in"] = True
                 st.session_state["username"] = username
                 st.success(f"Welcome {user['name']}!")
-                # passing this values
-                value(user)
                 # Extract owner and repository from GitHub link
                 github_link = user['github_link']
                 github_token = user['github_token']
@@ -383,8 +377,7 @@ def main():
                 admin_dashboard(db)
         else:
             if st.session_state.current_page == "My Assignments":
-                users = value(any)
-                student_assignments(db,users)
+                student_assignments(db)
             elif st.session_state.current_page == "Student Dashboard":
                 student_dashboard(db)
             elif st.session_state.current_page == "My Data":
