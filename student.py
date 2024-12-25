@@ -20,9 +20,10 @@ def student_dashboard(db):
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
 
-def student_assignments(db):
+def student_assignments(db,users):
     """Display student's assignments with filtering options."""
     st.subheader("My Assignments")
+    st.write(users)
     
     try:
         # Fetch and display questions
