@@ -334,10 +334,10 @@ def main():
     header()  # Show header with logout button if logged in
     toolbar()  # Show navigation options based on role
 
-    # Enhanced routing
+    # Direct the user based on the current page
     if st.session_state.current_page == "Home":
         homepage()
-    elif st.session_state.current_page == "Login":
+    elif st.session_state.current_page == "Login" and not st.session_state.logged_in:
         login()
     elif st.session_state.current_page == "Register":
         register_user()
@@ -349,7 +349,7 @@ def main():
                 manage_students(db)
             elif st.session_state.current_page == "Admin Dashboard":
                 admin_dashboard(db)
-        else:
+        elif st.session_state.role == "student":
             if st.session_state.current_page == "My Assignments":
                 student_assignments(db)
             elif st.session_state.current_page == "Student Dashboard":
