@@ -23,6 +23,14 @@ def connect_to_mongo():
         st.error(f"Error connecting to MongoDB: {e}")
         return None
 
+# Initialize session state
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+    st.session_state.role = None
+    st.session_state.username = None
+
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "Home"
 
 
 def login():
@@ -41,21 +49,17 @@ def login():
     if "logged_in" not in st.session_state:
         st.session_state["logged_in"] = False
 
-    # Conditionally display login button
-    if not st.session_state["login_clicked"]:
-        login_button = st.button("Login")  # Display login button
-
-        if login_button:
-            st.session_state["login_clicked"] = True  # Mark button as clicked
+    # Display login button (always visible)
+    login_button = st.button("Login")
 
     # If the login button is clicked, start the login process and show the loader
-    if st.session_state["login_clicked"]:
+    if login_button or st.session_state["login_clicked"]:
+        st.session_state["login_clicked"] = True
         with st.spinner("Logging in and fetching data..."):
             # Verify user credentials
             user = login_db.users.find_one({"username": username, "password": password})
             
             if user:
-
                 # Store session details
                 st.session_state["logged_in"] = True
                 st.session_state["username"] = username
@@ -76,11 +80,11 @@ def login():
                         fetch_commits_and_files(owner, repo, db, HEADERS, name)  # Pass HEADERS here
                         st.success("Data Fetch successfully")
                     st.session_state["current_page"] = "Student Dashboard"
-                st.session_state["login_clicked"] = False  # Reset the login button state
+                
                 st.rerun()  # Rerun the app to apply changes
             else:
                 st.error("Invalid Username or Password")
-                st.session_state["login_clicked"] = False  # Reset the button state if login fails
+
 
 # Assuming 'connection_string' and MongoDB client setup are already defined
 
