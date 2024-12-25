@@ -132,33 +132,44 @@ def register_user():
     client = MongoClient(connection_string)
     login_db = client["LoginData"]
 
+    # Flags to check conditions
+    valid_name = bool(name.strip())
+    valid_username = bool(username.strip())
+    valid_github = False
+    valid_token = False
+
+    # Validate GitHub link and token
     if github_link and github_token:
         owner, repo = extract_owner_repo(github_link)
         if owner and repo:
-            # Check if the GitHub repository is public
             if is_github_repo_public(github_token, owner, repo):
                 st.success("GitHub Repository is Public")
+                valid_github = True
+                valid_token = True
                 password = st.text_input("Set Password", type="password")
             else:
                 st.error("GitHub repository is private or inaccessible.")
-                return
         else:
             st.error("Invalid GitHub repository link. Please make sure the link is in the correct format.")
-            return
 
-    if st.button("Submit"):
-        if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
-            st.error("Username or GitHub link already exists")
-        else:
-            login_db["users"].insert_one({
-                "name": name, 
-                "username": username, 
-                "github_link": github_link, 
-                "password": password, 
-                "github_token": github_token, 
-                "role": "student"
+    # Show the "Submit" button only if all conditions are met
+    if valid_name and valid_username and valid_github and valid_token and password:
+        if st.button("Submit"):
+            if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
+                st.error("Username or GitHub link already exists")
+            else:
+                login_db["users"].insert_one({
+                    "name": name,
+                    "username": username,
+                    "github_link": github_link,
+                    "password": password,
+                    "github_token": github_token,
+                    "role": "student"
                 })
-            st.success("Data add successfully")
+                st.success("Data added successfully")
+    else:
+        st.info("Please complete all fields and ensure the repository is valid to enable submission.")
+
 
 def check_repo_visibility(owner, repo, headers):
     repo_url = f"https://api.github.com/repos/{owner}/{repo}"
