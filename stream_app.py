@@ -138,50 +138,45 @@ def register_user():
     client = MongoClient(connection_string)
     login_db = client["LoginData"]
 
-    # Flags to check conditions
-    name = st.text_input("Name", placeholder="Enter your full name")
+    # Input fields
+    name = st.text_input("Name", placeholder="Enter your name")
     username = st.text_input("Username", placeholder="Enter username (e.g., AF0300000)")
     github_link = st.text_input("GitHub Repository Link", placeholder="Enter your GitHub repository link")
-    github_token = st.text_input("GitHub Token", type="password", placeholder="Enter your GitHub token")  # Hide GitHub token input
+    github_token = st.text_input("GitHub Token", type="password", placeholder="Enter your GitHub token")
+    
+    # Validation flags
+    valid_name = bool(name.strip())
+    valid_username = validate_username(username)
+    valid_github = False
+    valid_token = bool(github_token)
     password = None
 
-    valid_name = bool(name.strip())
-    valid_username = validate_username(username)  # Validate the username against the pattern
-    valid_github = False
-    valid_token = False
-
-    # Validate GitHub link and token
+    # Validate GitHub link
     if github_link and github_token:
         owner, repo = extract_owner_repo(github_link)
-        if owner and repo:
-            if is_github_repo_public(github_token, owner, repo):
-                st.success("GitHub Repository is Public")
-                valid_github = True
-                valid_token = True
-                password = st.text_input("Set Password", type="password", placeholder="Enter your password")
-            else:
-                st.error("GitHub repository is private or inaccessible.")
+        if owner and repo and is_github_repo_public(github_token, owner, repo):
+            st.success("GitHub Repository is Public")
+            valid_github = True
+            password = st.text_input("Set Password", type="password", placeholder="Enter your password")
         else:
-            st.error("Invalid GitHub repository link. Please make sure the link is in the correct format.")
+            st.error("GitHub repository is private or inaccessible.")
 
-    # Highlight errors and add placeholders
+    # Error handling (single error message per field)
+    errors = []
     if not valid_name:
-        st.error("Name cannot be empty.")
-        name = st.text_input("Name", placeholder="Enter your full name", key="name_error", value=name)
-        
+        errors.append("Name cannot be empty.")
     if not valid_username:
-        st.error("Invalid username format. Please use the correct format (e.g., AF0300000).")
-        username = st.text_input("Username", placeholder="Enter username (e.g., AF0300000)", key="username_error", value=username)
-        
-    if not valid_github:
-        st.error("GitHub link is invalid or inaccessible.")
-        github_link = st.text_input("GitHub Repository Link", placeholder="Enter your GitHub repository link", key="github_link_error", value=github_link)
-        
+        errors.append("Invalid username format. Use format like AF0300000.")
+    if not github_link:
+        errors.append("GitHub link is required.")
     if not valid_token:
-        st.error("GitHub token is required.")
-        github_token = st.text_input("GitHub Token", type="password", placeholder="Enter your GitHub token", key="github_token_error", value=github_token)
+        errors.append("GitHub token is required.")
 
-    # Show the "Submit" button only if all conditions are met
+    # Show errors collectively
+    if errors:
+        st.error("\n".join(errors))
+
+    # Show Submit button if all fields are valid
     if valid_name and valid_username and valid_github and valid_token and password:
         if st.button("Submit"):
             if login_db["users"].find_one({"username": username}) or login_db["users"].find_one({"github_link": github_link}):
@@ -198,8 +193,6 @@ def register_user():
                 st.success("Data added successfully")
     else:
         st.info("Please complete all fields and ensure the repository is valid to enable submission.")
-
-
 
 def check_repo_visibility(owner, repo, headers):
     repo_url = f"https://api.github.com/repos/{owner}/{repo}"
