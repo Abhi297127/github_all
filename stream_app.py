@@ -81,7 +81,7 @@ def login():
                     if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
                         db = client.github_data
                         fetch_commits_and_files(owner, repo, db, HEADERS, name)  # Pass HEADERS here
-                        st.success("Data Fetch successful")
+                        st.success("Data Fetch successfully")
                     st.session_state["current_page"] = "Student Dashboard"
                 st.session_state["login_clicked"] = False  # Reset the login button state
                 st.rerun()  # Rerun the app to apply changes
@@ -101,9 +101,6 @@ def extract_owner_repo(github_url):
     return None, None
 
 # Function to validate username format
-def validate_username(username):
-    pattern = r"^AF0[3-4][0-7]\d{4}$"  # Matches AF0300000 to AF0470000
-    return bool(re.match(pattern, username))
 
 # Function to check if GitHub repo is public
 def is_github_repo_public(github_token, owner, repo):
@@ -128,6 +125,15 @@ def is_github_repo_public(github_token, owner, repo):
         st.error("Error accessing GitHub repository. Ensure the repository exists and the token is correct.")
         return False
 
+import re
+import streamlit as st
+from pymongo import MongoClient
+
+# Username validation pattern
+def validate_username(username):
+    pattern = r"^AF0[3-4][0-7]\d{4}$"  # Matches AF0300000 to AF0470000
+    return bool(re.match(pattern, username))
+
 def register_user():
     """Register a new user."""
     st.title("Register")
@@ -143,7 +149,7 @@ def register_user():
 
     # Flags to check conditions
     valid_name = bool(name.strip())
-    valid_username = bool(username.strip())
+    valid_username = validate_username(username)  # Validate the username against the pattern
     valid_github = False
     valid_token = False
 
@@ -189,7 +195,7 @@ def check_repo_visibility(owner, repo, headers):
             st.warning("The repository is private.")
             return False
         else:
-            st.info("The repository is public.")
+            # st.info("The repository is public.")
             return True
     else:
         st.error(f"Error: Unable to fetch repository details (Status Code: {response.status_code})")
@@ -202,7 +208,7 @@ def fetch_commits_and_files(owner, repo, db, headers,username):
 
     if collection_name in db.list_collection_names():
         db[collection_name].drop()
-        st.info(f"Dropped existing collection: {collection_name}")
+        # st.info(f"Dropped existing collection: {collection_name}")
 
     while True:
         response = requests.get(f"{commits_url}?page={page}&per_page=100", headers=headers)  # Use passed headers here
@@ -275,7 +281,7 @@ def fetch_commits_and_files(owner, repo, db, headers,username):
             st.error(f"Error fetching commits: {response.status_code}")
             break
 
-    st.info("Data has been inserted into MongoDB.")
+    # st.info("Data has been inserted into MongoDB.")
 
 # Logout functionality
 def logout():
