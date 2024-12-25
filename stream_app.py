@@ -31,7 +31,7 @@ if "logged_in" not in st.session_state:
 
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
-    
+
 def login():
     """Log in an existing user."""
     client = MongoClient(connection_string)
@@ -57,7 +57,7 @@ def login():
         user = login_db.users.find_one({"username": username, "password": password})
         if user:
             # Store session details
-            st.session_state["logged_in"] = True
+            st.session_state["logged_in"] = False
             st.session_state["username"] = username
             st.success(f"Welcome {user['name']}!")
 
@@ -72,6 +72,7 @@ def login():
             if user["role"] == "admin":
                 st.session_state["current_page"] = "Admin Dashboard"
             else:
+
                 with st.spinner('Fetching data...'):
                     if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
                         db = client.github_data
