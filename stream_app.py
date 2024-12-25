@@ -43,45 +43,38 @@ def login():
     password = st.text_input("Password", type="password")
 
     # Initialize session state for the button
-    if "login_clicked" not in st.session_state:
-        st.session_state["login_clicked"] = False
+    if "login_verified" not in st.session_state:
+        st.session_state["login_verified"] = False
 
-    if not st.session_state["login_clicked"]:
-        # Display the login button if it hasn't been clicked
+    if not st.session_state["login_verified"]:
         if st.button("Login"):
-            st.session_state["login_clicked"] = True  # Mark button as clicked
+            # Verify user credentials
+            user = login_db.users.find_one({"username": username, "password": password})
+            if user:
+                st.success(f"Welcome {user['name']}!")
+                # Mark the login as verified
+                st.session_state["login_verified"] = True
 
-    if st.session_state["login_clicked"]:
-        # Verify user credentials
-        user = login_db.users.find_one({"username": username, "password": password})
-        if user:
-            # Store session details
-            st.session_state["logged_in"] = True
-            st.session_state["username"] = username
-            st.success(f"Welcome {user['name']}!")
+                # Extract owner and repository from GitHub link
+                github_link = user['github_link']
+                github_token = user['github_token']
+                name = user['name']
+                owner, repo = extract_owner_repo(github_link)
+                GITHUB_TOKEN = str(github_token)
+                HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
 
-            # Extract owner and repository from GitHub link
-            github_link = user['github_link']
-            github_token = user['github_token']
-            name = user['name']
-            owner, repo = extract_owner_repo(github_link)
-            GITHUB_TOKEN = str(github_token)
-            HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
-
-            if user["role"] == "admin":
-                st.session_state["current_page"] = "Admin Dashboard"
+                if user["role"] == "admin":
+                    st.session_state["current_page"] = "Admin Dashboard"
+                else:
+                    with st.spinner('Fetching data...'):
+                        if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
+                            db = client.github_data
+                            fetch_commits_and_files(owner, repo, db, HEADERS, name)  # Pass HEADERS here
+                            st.success("Data Fetch successful")
+                    st.session_state["current_page"] = "Student Dashboard"
+                st.rerun()  # Rerun the app to apply changes
             else:
-                with st.spinner('Fetching data...'):
-                    if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
-                        db = client.github_data
-                        fetch_commits_and_files(owner, repo, db, HEADERS, name)  # Pass HEADERS here
-                        st.success("Data Fetch successful")
-                st.session_state["current_page"] = "Student Dashboard"
-            st.rerun()  # Rerun the app to apply changes
-        else:
-            st.error("Invalid Username or Password")
-            st.session_state["login_clicked"] = False  # Reset the button state if login fails
-
+                st.error("Invalid Username or Password")
 
 # Assuming 'connection_string' and MongoDB client setup are already defined
 
