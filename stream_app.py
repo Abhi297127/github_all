@@ -27,7 +27,7 @@ def connect_to_mongo():
 def login():
     """Log in an existing user."""
     client = MongoClient(connection_string)
-    login_db = client["LoginData"]
+    login_db = client["JavaFileAnalysis"]
     st.title("Login")
 
     # User inputs for login
