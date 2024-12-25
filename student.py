@@ -29,14 +29,22 @@ def student_assignments(db,username):
         # Fetch and display questions
         questions_collection = db.questions
         questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
+
         # Connect to JavaFileAnalysis database
         java_db = db.client['JavaFileAnalysis']
+
         user = java_db.users.find_one({"username": username})
         if user:
-            name = user['name']
-            student_collection = java_db[name]
+            name = user.get('name')
+            allowed_collections = java_db.list_collection_names()
+            
+            if name and name in allowed_collections:
+                student_collection = java_db[name]
+            else:
+                raise ValueError(f"Collection '{name}' not found or user has no associated collection")
         else:
             raise ValueError(f"User with username '{username}' not found")
+
 
         # Fetch documents from JavaFileAnalysis
         documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
