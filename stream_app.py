@@ -23,19 +23,12 @@ def connect_to_mongo():
         st.error(f"Error connecting to MongoDB: {e}")
         return None
 
-# Initialize session state
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-    st.session_state.role = None
-    st.session_state.username = None
 
-if "current_page" not in st.session_state:
-    st.session_state.current_page = "Home"
 
 def login():
     """Log in an existing user."""
     client = MongoClient(connection_string)
-    login_db = client["LoginData"]
+    login_db = client["JavaFileAnalysis"]
     st.title("Login")
 
     # User inputs for login
