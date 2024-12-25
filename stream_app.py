@@ -32,7 +32,8 @@ if "logged_in" not in st.session_state:
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
 
-def value(user):
+def value(a):
+    user=a
     return user
 
 def login():
@@ -382,7 +383,7 @@ def main():
                 admin_dashboard(db)
         else:
             if st.session_state.current_page == "My Assignments":
-                users = value(user=users)
+                users = value(any)
                 student_assignments(db,users)
             elif st.session_state.current_page == "Student Dashboard":
                 student_dashboard(db)
