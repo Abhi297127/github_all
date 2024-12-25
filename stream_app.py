@@ -42,7 +42,16 @@ def login():
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
-    if st.button("Login"):
+    # Initialize session state for the button
+    if "login_clicked" not in st.session_state:
+        st.session_state["login_clicked"] = False
+
+    if not st.session_state["login_clicked"]:
+        # Display the login button if it hasn't been clicked
+        if st.button("Login"):
+            st.session_state["login_clicked"] = True  # Mark button as clicked
+
+    if st.session_state["login_clicked"]:
         # Verify user credentials
         user = login_db.users.find_one({"username": username, "password": password})
         if user:
@@ -50,21 +59,15 @@ def login():
             st.session_state["logged_in"] = True
             st.session_state["username"] = username
             st.success(f"Welcome {user['name']}!")
-            # Fetch and display only the logged-in user's data
-            # st.write("### Your Details:")
-            # st.write(f"**Name**: {user['name']}")
-            # st.write(f"**Username**: {user['username']}")
-            # st.write(f"**Github Link**: {user['github_link']}")
-            # st.write(f"**Token**: {user['github_token']}")
-            # st.write(f"**Password**: {user['password']}")
-            # Extract owner and repository from GitHub link
 
+            # Extract owner and repository from GitHub link
             github_link = user['github_link']
             github_token = user['github_token']
             name = user['name']
             owner, repo = extract_owner_repo(github_link)
             GITHUB_TOKEN = str(github_token)
             HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
+
             if user["role"] == "admin":
                 st.session_state["current_page"] = "Admin Dashboard"
             else:
@@ -74,12 +77,10 @@ def login():
                         fetch_commits_and_files(owner, repo, db, HEADERS, name)  # Pass HEADERS here
                         st.success("Data Fetch successful")
                 st.session_state["current_page"] = "Student Dashboard"
-            st.rerun()
-            # Perform additional operations (fetching GitHub data)
-            
+            st.rerun()  # Rerun the app to apply changes
         else:
             st.error("Invalid Username or Password")
-
+            st.session_state["login_clicked"] = False  # Reset the button state if login fails
 
 
 # Assuming 'connection_string' and MongoDB client setup are already defined
