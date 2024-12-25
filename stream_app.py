@@ -65,6 +65,7 @@ def login():
                 # Store session details
                 st.session_state["logged_in"] = True
                 st.session_state["username"] = username
+                st.session_state["name"] = name
                 st.success(f"Welcome {user['name']}!")
 
                 # Extract owner and repository from GitHub link
