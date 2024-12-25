@@ -27,7 +27,7 @@ def connect_to_mongo():
 def login():
     """Log in an existing user."""
     client = MongoClient(connection_string)
-    login_db = client["JavaFileAnalysis"]
+    login_db = client["LoginData"]
     st.title("Login")
 
     # User inputs for login
@@ -62,7 +62,7 @@ def login():
             else:
                 with st.spinner('Fetching data...'):
                     if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
-                        db = client.github_data
+                        db = client.JavaFileAnalysis
                         fetch_commits_and_files(owner, repo, db, HEADERS, name)  # Pass HEADERS here
                         st.success("Data Fetch successful")
                 st.session_state["current_page"] = "Student Dashboard"
