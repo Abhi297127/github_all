@@ -125,10 +125,6 @@ def is_github_repo_public(github_token, owner, repo):
         st.error("Error accessing GitHub repository. Ensure the repository exists and the token is correct.")
         return False
 
-import re
-import streamlit as st
-from pymongo import MongoClient
-
 # Username validation pattern
 def validate_username(username):
     pattern = r"^AF0[3-4][0-7]\d{4}$"  # Matches AF0300000 to AF0470000
@@ -137,17 +133,18 @@ def validate_username(username):
 def register_user():
     """Register a new user."""
     st.title("Register")
-    name = st.text_input("Name")
-    username = st.text_input("Username")
-    github_link = st.text_input("GitHub Repository Link")
-    github_token = st.text_input("GitHub Token", type="password")  # Hide GitHub token input
-    password = None
-
+    
     # MongoDB connection
     client = MongoClient(connection_string)
     login_db = client["LoginData"]
 
     # Flags to check conditions
+    name = st.text_input("Name", placeholder="Enter your full name")
+    username = st.text_input("Username", placeholder="Enter username (e.g., AF0300000)")
+    github_link = st.text_input("GitHub Repository Link", placeholder="Enter your GitHub repository link")
+    github_token = st.text_input("GitHub Token", type="password", placeholder="Enter your GitHub token")  # Hide GitHub token input
+    password = None
+
     valid_name = bool(name.strip())
     valid_username = validate_username(username)  # Validate the username against the pattern
     valid_github = False
@@ -161,11 +158,28 @@ def register_user():
                 st.success("GitHub Repository is Public")
                 valid_github = True
                 valid_token = True
-                password = st.text_input("Set Password", type="password")
+                password = st.text_input("Set Password", type="password", placeholder="Enter your password")
             else:
                 st.error("GitHub repository is private or inaccessible.")
         else:
             st.error("Invalid GitHub repository link. Please make sure the link is in the correct format.")
+
+    # Highlight errors and add placeholders
+    if not valid_name:
+        st.error("Name cannot be empty.")
+        name = st.text_input("Name", placeholder="Enter your full name", key="name_error", value=name)
+        
+    if not valid_username:
+        st.error("Invalid username format. Please use the correct format (e.g., AF0300000).")
+        username = st.text_input("Username", placeholder="Enter username (e.g., AF0300000)", key="username_error", value=username)
+        
+    if not valid_github:
+        st.error("GitHub link is invalid or inaccessible.")
+        github_link = st.text_input("GitHub Repository Link", placeholder="Enter your GitHub repository link", key="github_link_error", value=github_link)
+        
+    if not valid_token:
+        st.error("GitHub token is required.")
+        github_token = st.text_input("GitHub Token", type="password", placeholder="Enter your GitHub token", key="github_token_error", value=github_token)
 
     # Show the "Submit" button only if all conditions are met
     if valid_name and valid_username and valid_github and valid_token and password:
@@ -184,6 +198,7 @@ def register_user():
                 st.success("Data added successfully")
     else:
         st.info("Please complete all fields and ensure the repository is valid to enable submission.")
+
 
 
 def check_repo_visibility(owner, repo, headers):
