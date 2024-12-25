@@ -159,7 +159,6 @@ def register_user():
                 "role": "student"
                 })
             st.success("Data add successfully")
-            st.session_state.current_page = "Home"
 
 def check_repo_visibility(owner, repo, headers):
     repo_url = f"https://api.github.com/repos/{owner}/{repo}"
