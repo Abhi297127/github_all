@@ -24,66 +24,53 @@ def connect_to_mongo():
         return None
 
 # Initialize session state
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-    st.session_state.role = None
-    st.session_state.username = None
-
-if "current_page" not in st.session_state:
-    st.session_state.current_page = "Home"
-
-
 def login():
     """Log in an existing user."""
     client = MongoClient(connection_string)
-    login_db = client["JavaFileAnalysis"]
+    login_db = client["LoginData"]
     st.title("Login")
 
     # User inputs for login
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
-    # Initialize session state for button and login status
-    if "login_clicked" not in st.session_state:
-        st.session_state["login_clicked"] = False
-    if "logged_in" not in st.session_state:
-        st.session_state["logged_in"] = False
+    if st.button("Login"):
+        # Verify user credentials
+        user = login_db.users.find_one({"username": username, "password": password})
+        if user:
+            # Store session details
+            st.session_state["logged_in"] = True
+            st.session_state["username"] = username
+            st.success(f"Welcome {user['name']}!")
+            # Fetch and display only the logged-in user's data
+            # st.write("### Your Details:")
+            # st.write(f"**Name**: {user['name']}")
+            # st.write(f"**Username**: {user['username']}")
+            # st.write(f"**Github Link**: {user['github_link']}")
+            # st.write(f"**Token**: {user['github_token']}")
+            # st.write(f"**Password**: {user['password']}")
+            # Extract owner and repository from GitHub link
 
-    # Display login button (always visible)
-    login_button = st.button("Login")
-
-    # If the login button is clicked, start the login process and show the loader
-    if login_button or st.session_state["login_clicked"]:
-        st.session_state["login_clicked"] = True
-        with st.spinner("Logging in and fetching data..."):
-            # Verify user credentials
-            user = login_db.users.find_one({"username": username, "password": password})
-            
-            if user:
-                # Store session details
-                st.session_state["logged_in"] = True
-                st.session_state["username"] = username
-                st.success(f"Welcome {user['name']}!")
-                # Extract owner and repository from GitHub link
-                github_link = user['github_link']
-                github_token = user['github_token']
-                name = user['name']
-                owner, repo = extract_owner_repo(github_link)
-                GITHUB_TOKEN = str(github_token)
-                HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
-
-                if user["role"] == "admin":
-                    st.session_state["current_page"] = "Admin Dashboard"
-                else:
+            github_link = user['github_link']
+            github_token = user['github_token']
+            name = user['name']
+            owner, repo = extract_owner_repo(github_link)
+            GITHUB_TOKEN = str(github_token)
+            HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
+            if user["role"] == "admin":
+                st.session_state["current_page"] = "Admin Dashboard"
+            else:
+                with st.spinner('Fetching data...'):
                     if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
                         db = client.github_data
                         fetch_commits_and_files(owner, repo, db, HEADERS, name)  # Pass HEADERS here
-                        st.success("Data Fetch successfully")
-                    st.session_state["current_page"] = "Student Dashboard"
-                
-                st.rerun()  # Rerun the app to apply changes
-            else:
-                st.error("Invalid Username or Password")
+                        st.success("Data Fetch successful")
+                st.session_state["current_page"] = "Student Dashboard"
+            st.rerun()
+            # Perform additional operations (fetching GitHub data)
+            
+        else:
+            st.error("Invalid Username or Password")
 
 
 # Assuming 'connection_string' and MongoDB client setup are already defined
