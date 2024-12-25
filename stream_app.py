@@ -189,7 +189,7 @@ def check_repo_visibility(owner, repo, headers):
             st.warning("The repository is private.")
             return False
         else:
-            st.success("The repository is public.")
+            st.info("The repository is public.")
             return True
     else:
         st.error(f"Error: Unable to fetch repository details (Status Code: {response.status_code})")
@@ -275,7 +275,7 @@ def fetch_commits_and_files(owner, repo, db, headers,username):
             st.error(f"Error fetching commits: {response.status_code}")
             break
 
-    st.success("Data has been inserted into MongoDB.")
+    st.info("Data has been inserted into MongoDB.")
 
 # Logout functionality
 def logout():
