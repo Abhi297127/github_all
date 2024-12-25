@@ -32,8 +32,11 @@ def student_assignments(db,username):
         # Connect to JavaFileAnalysis database
         java_db = db.client['JavaFileAnalysis']
         user = java_db.users.find_one({"username": username})
-        name=user['name']
-        student_collection = java_db[name]  # Replace with the correct student collection
+        if user:
+            name = user['name']
+            student_collection = java_db[name]
+        else:
+            raise ValueError(f"User with username '{username}' not found")
 
         # Fetch documents from JavaFileAnalysis
         documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
