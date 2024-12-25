@@ -23,7 +23,7 @@ def student_dashboard(db):
 def student_assignments(db,username):
     """Display student's assignments with filtering options."""
     st.subheader("My Assignments")
-    
+    st.write(username)
     
     try:
         # Fetch and display questions
