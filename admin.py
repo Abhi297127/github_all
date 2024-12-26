@@ -20,7 +20,7 @@ def admin_dashboard(db):
             class_question_dict[question['class_name']] = question['question_name']
 
 # Display the dictionary
-    st.write("Class and Question Name Mapping: ", class_question_dict)
+    # st.write("Class and Question Name Mapping: ", class_question_dict)
 
     username = "abhishelke297127"
     password = "Abhi%402971"
