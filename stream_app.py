@@ -319,13 +319,23 @@ def toolbar():
 # Header with logout button (remains the same)
 def header():
     cols = st.columns([4, 1])
+    
+    # Initialize session state for logged_in if not already set
+    if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False
+        st.session_state.username = ""
+    
     with cols[0]:
         st.subheader("Welcome to the Portal")
+    
     with cols[1]:
         if st.session_state.logged_in:
             st.markdown(f"**{st.session_state.username}**")
             if st.button("Logout", key="logout_button"):
                 logout()
+        else:
+            st.write("Not logged in")
+
 
 # Homepage (remains the same)
 def homepage():
