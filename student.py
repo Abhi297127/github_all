@@ -174,13 +174,13 @@ def student_data(db, username):
         submissions_collection = db.submissions
         submissions = list(submissions_collection.find({"username": username}))
         
-        if submissions:
-            st.write("### Submitted Assignments")
-            for submission in submissions:
-                st.write(f"- {submission.get('assignment_name', 'Unknown Assignment')}")
-                st.write(f"  Submitted on: {submission.get('submission_date', 'N/A')}")
-        else:
-            st.info("No assignment submissions found.")
+        # if submissions:
+        #     st.write("### Submitted Assignments")
+        #     for submission in submissions:
+        #         st.write(f"- {submission.get('assignment_name', 'Unknown Assignment')}")
+        #         st.write(f"  Submitted on: {submission.get('submission_date', 'N/A')}")
+        # else:
+        #     st.info("No assignment submissions found.")
 
     except ValueError as ve:
         st.error(f"Value Error: {ve}")
