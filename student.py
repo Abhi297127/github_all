@@ -141,7 +141,7 @@ def student_data(db, username):
         
         # Fetch student-specific data from JavaFileAnalysis database
         java_analysis_db = db.client['JavaFileAnalysis']
-        student_collection = java_analysis_db[username]  # Assuming each student's data is stored in a separate collection
+        student_collection = java_analysis_db[name]  # Assuming each student's data is stored in a separate collection
         student_data = student_collection.find_one()
 
         if student_data:
