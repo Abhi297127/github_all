@@ -34,13 +34,12 @@ def student_assignments(db,username):
         user = java_db.users.find_one({"username": username})
         if user:
             name = user['name']
-            student_collection = java_db[name]
-            st.write(student_collection)
+            # student_collection = java_db[name]
         else:
             raise ValueError(f"User with username '{username}' not found")
 
         # Fetch documents from JavaFileAnalysis
-        documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
+        documents = list(name.find({}, {"added_java_files": 1, "_id": 0}))
         st.write(documents)
         # Collect and sort Java keys
         added_java_keys = []
