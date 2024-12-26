@@ -13,8 +13,10 @@ def student_dashboard(db):
         
         if questions:
             st.write("Recent Assignments:")
+            i=1
             for question in questions:
-                st.write(f"- **{question['question_name']}** (Class: {question['class_name']})")
+                st.write(f"{i} **{question['question_name']}** (Class: {question['class_name']})")
+                i+=1
         else:
             st.info("No assignments available.")
     except Exception as e:
