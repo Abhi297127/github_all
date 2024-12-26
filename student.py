@@ -149,8 +149,6 @@ def student_data(db, username):
 
         if student_data_list:
             for student_data in student_data_list:
-                st.write(f"**Class:** {student_data.get('class_name', 'N/A')}")
-                
                 # Collect added_java_files and modified_java_files
                 added_java_files.update(student_data.get('added_java_files', {}))
                 modified_java_files.update(student_data.get('modified_java_files', {}))
@@ -177,19 +175,6 @@ def student_data(db, username):
                 st.info("No added or modified Java files found.")
         else:
             st.info("No detailed student data found in JavaFileAnalysis.")
-        
-        # Fetch and display assignment submissions
-        submissions_collection = db.submissions
-        submissions = list(submissions_collection.find({"username": username}))
-        
-        if submissions:
-            st.write("### Submitted Assignments")
-            for submission in submissions:
-                st.write(f"- {submission.get('assignment_name', 'Unknown Assignment')}")
-                st.write(f"  Submitted on: {submission.get('submission_date', 'N/A')}")
-        else:
-            st.info("No assignment submissions found.")
-
     except ValueError as ve:
         st.error(f"Value Error: {ve}")
     except Exception as e:
