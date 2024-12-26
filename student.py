@@ -148,7 +148,7 @@ def student_data(db, username):
 
         if student_data_list:
             for student_data in student_data_list:
-                st.write(f"**Class:** {student_data.get('class_name', 'N/A')}")
+                # st.write(f"**Class:** {student_data.get('class_name', 'N/A')}")
                 
                 # Collect added_java_files and modified_java_files
                 added_java_files = student_data.get('added_java_files', {})
