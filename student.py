@@ -19,7 +19,8 @@ def student_dashboard(db):
             st.info("No assignments available.")
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
-def student_assignments(db, username):
+
+def student_assignments(db,username):
     """Display student's assignments with filtering options."""
     st.subheader("My Assignments")
     st.write(username)
@@ -28,23 +29,16 @@ def student_assignments(db, username):
         # Fetch and display questions
         questions_collection = db.questions
         questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
+        # Connect to JavaFileAnalysis database
+        java_db = db.client['LoginData']
+        user = java_db.users.find_one({"username": username})
+        if user:
+            name = user['name']
+            student_collection = java_db[name]
+        else:
+            raise ValueError(f"User with username '{username}' not found")
 
-        # Connect to github_data database
-        java_db = db.client['github_data']
-        st.write(java_db.list_collection_names())
-        # Search for the user across all collections
-        name = None
-        for collection_name in java_db.list_collection_names():
-            user = java_db[collection_name].find_one({"username": username})
-            if user:
-                name = user['name']
-                student_collection = java_db[name]
-                break
-        
-        if not name:
-            raise ValueError(f"User with username '{username}' not found in any collection")
-
-        # Fetch documents from student's collection
+        # Fetch documents from JavaFileAnalysis
         documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
 
         # Collect and sort Java keys
