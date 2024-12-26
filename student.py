@@ -144,27 +144,35 @@ def student_data(db, username):
         student_collection = java_analysis_db[name]  # Assuming each student's data is stored in a separate collection
         student_data_list = list(student_collection.find())
 
-        all_java_files = {}
+        added_java_files = {}
+        modified_java_files = {}
 
         if student_data_list:
             for student_data in student_data_list:
-                # st.write(f"**Class:** {student_data.get('class_name', 'N/A')}")
+                st.write(f"**Class:** {student_data.get('class_name', 'N/A')}")
                 
                 # Collect added_java_files and modified_java_files
-                added_java_files = student_data.get('added_java_files', {})
-                modified_java_files = student_data.get('modified_java_files', {})
-                
-                # Combine files, keeping the latest version
-                for key, value in {**added_java_files, **modified_java_files}.items():
-                    all_java_files[key] = value
+                added_java_files.update(student_data.get('added_java_files', {}))
+                modified_java_files.update(student_data.get('modified_java_files', {}))
             
-            if all_java_files:
+            if added_java_files or modified_java_files:
                 st.write("### Java Files Analysis")
-                selected_file = st.selectbox(
-                    "Select Java File:", 
-                    list(all_java_files.keys())
+                
+                # Selectbox for added files
+                selected_added_file = st.selectbox(
+                    "Select Added Java File:", 
+                    list(added_java_files.keys()),
+                    key='added_files'
                 )
-                st.text_area("File Content:", all_java_files[selected_file])
+                st.text_area("Added File Content:", added_java_files[selected_added_file], height=300)
+                
+                # Selectbox for modified files
+                selected_modified_file = st.selectbox(
+                    "Select Modified Java File:", 
+                    list(modified_java_files.keys()),
+                    key='modified_files'
+                )
+                st.text_area("Modified File Content:", modified_java_files[selected_modified_file], height=300)
             else:
                 st.info("No added or modified Java files found.")
         else:
@@ -174,13 +182,13 @@ def student_data(db, username):
         submissions_collection = db.submissions
         submissions = list(submissions_collection.find({"username": username}))
         
-        # if submissions:
-        #     st.write("### Submitted Assignments")
-        #     for submission in submissions:
-        #         st.write(f"- {submission.get('assignment_name', 'Unknown Assignment')}")
-        #         st.write(f"  Submitted on: {submission.get('submission_date', 'N/A')}")
-        # else:
-        #     st.info("No assignment submissions found.")
+        if submissions:
+            st.write("### Submitted Assignments")
+            for submission in submissions:
+                st.write(f"- {submission.get('assignment_name', 'Unknown Assignment')}")
+                st.write(f"  Submitted on: {submission.get('submission_date', 'N/A')}")
+        else:
+            st.info("No assignment submissions found.")
 
     except ValueError as ve:
         st.error(f"Value Error: {ve}")
