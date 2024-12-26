@@ -30,7 +30,7 @@ def student_assignments(db,username):
         questions_collection = db.questions
         questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
         # Connect to JavaFileAnalysis database
-        java_db = db.client['JavaFileAnalysis']
+        java_db = db.client['github_data']
         user = java_db.users.find_one({"username": username})
         if user:
             name = user['name']
