@@ -148,9 +148,15 @@ def student_data(db, username):
 
         if student_data_list:
             for student_data in student_data_list:
-                # st.write(f"**Class:** {student_data.get('class_name', 'N/A')}")
+                st.write(f"**Class:** {student_data.get('class_name', 'N/A')}")
+                
+                # Collect added_java_files
                 added_java_files = student_data.get('added_java_files', {})
                 all_java_files.update(added_java_files)
+                
+                # Collect modified_java_files if present
+                modified_java_files = student_data.get('modified_java_files', {})
+                all_java_files.update(modified_java_files)
             
             if all_java_files:
                 st.write("### Java Files Analysis")
@@ -160,7 +166,7 @@ def student_data(db, username):
                 )
                 st.text_area("File Content:", all_java_files[selected_file])
             else:
-                st.info("No added Java files found.")
+                st.info("No added or modified Java files found.")
         else:
             st.info("No detailed student data found in JavaFileAnalysis.")
         
