@@ -31,7 +31,7 @@ def student_assignments(db, username):
 
         # Connect to github_data database
         java_db = db.client['github_data']
-        st.write(java_db)
+        st.write(java_db.list_collection_names())
         # Search for the user across all collections
         name = None
         for collection_name in java_db.list_collection_names():
