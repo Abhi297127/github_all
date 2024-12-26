@@ -30,7 +30,6 @@ def student_assignments(db, username):
         questions_collection = db.questions
         questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
 
-        # Debug - Check if questions are fetched
         if not isinstance(questions, list):
             raise ValueError("Questions fetch returned a non-list object.")
 
@@ -59,7 +58,6 @@ def student_assignments(db, username):
             student_collection = java_analysis_db[name]
             documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
             
-            # Debug - Check if documents are fetched
             if not isinstance(documents, list):
                 raise ValueError("Document fetch returned a non-list object.")
             
@@ -73,20 +71,33 @@ def student_assignments(db, username):
         # Remove duplicates and sort the keys
         added_java_keys_list = sorted(set(added_java_keys))
 
-        # Dropdown for filtering by status
-        filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
+        # Count completed and pending assignments
+        completed_count = 0
+        pending_count = 0
 
-        # Debug - Print filter selection
-        st.write(f"Filter selected: {filter_status}")
+        for question in questions:
+            class_name = question.get('class_name', '').replace('.java', '')
+            if class_name in added_java_keys_list:
+                completed_count += 1
+            else:
+                pending_count += 1
 
+        # Dropdown for filtering by status with counts
+        filter_status = st.selectbox(
+            "Filter by Status",
+            [f"All ({len(questions)})", 
+             f"Pending ({pending_count})", 
+             f"Completed ({completed_count})"]
+        )
+
+        # Display filtered assignments
         if questions:
             for question in questions:
-                # Remove ".java" extension from class_name
                 class_name = question.get('class_name', '').replace('.java', '')
                 is_completed = class_name in added_java_keys_list
 
                 # Filter based on dropdown selection
-                if (filter_status == "Completed" and not is_completed) or (filter_status == "Pending" and is_completed):
+                if ("Pending" in filter_status and is_completed) or ("Completed" in filter_status and not is_completed):
                     continue
 
                 # Display question with tick or cross symbol
