@@ -146,6 +146,15 @@ def student_data(db, username):
 
         if student_data:
             st.write(f"**Class:** {student_data.get('class_name', 'N/A')}")
+
+            # Check and display added_java_files if present
+            added_java_files = student_data.get('added_java_files', {})
+            if added_java_files:
+                st.write("### Java Files Analysis")
+                selected_file = st.selectbox("Select Java File:", list(added_java_files.keys()))
+                st.text_area("File Content:", added_java_files[selected_file])
+            else:
+                st.info("No added Java files found.")
         else:
             st.info("No detailed student data found in JavaFileAnalysis.")
         
