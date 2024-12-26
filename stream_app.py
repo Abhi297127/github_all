@@ -333,8 +333,7 @@ def header():
             st.markdown(f"**{st.session_state.username}**")
             if st.button("Logout", key="logout_button"):
                 logout()
-        else:
-            st.write("Not logged in")
+        
 
 
 # Homepage (remains the same)
