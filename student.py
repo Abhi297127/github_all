@@ -30,6 +30,10 @@ def student_assignments(db, username):
         questions_collection = db.questions
         questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
 
+        # Debug - Check if questions are fetched
+        if not isinstance(questions, list):
+            raise ValueError("Questions fetch returned a non-list object.")
+
         # Connect to LoginData database to find user
         login_db = db.client['LoginData']
         
@@ -49,9 +53,15 @@ def student_assignments(db, username):
 
         # Search for student's collection in JavaFileAnalysis
         added_java_keys = []
+        documents = []
+        
         if name in java_analysis_db.list_collection_names():
             student_collection = java_analysis_db[name]
             documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
+            
+            # Debug - Check if documents are fetched
+            if not isinstance(documents, list):
+                raise ValueError("Document fetch returned a non-list object.")
             
             for doc in documents:
                 added_files = doc.get("added_java_files", {})
@@ -65,6 +75,9 @@ def student_assignments(db, username):
 
         # Dropdown for filtering by status
         filter_status = st.selectbox("Filter by Status", ["All", "Pending", "Completed"])
+
+        # Debug - Print filter selection
+        st.write(f"Filter selected: {filter_status}")
 
         if questions:
             for question in questions:
@@ -83,6 +96,9 @@ def student_assignments(db, username):
                     st.write(f"{tick_symbol} {question.get('question_name', 'Unnamed Question')} - {class_name}")
         else:
             st.info("No assignments found.")
+    
+    except ValueError as ve:
+        st.error(f"Value Error: {ve}")
     
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
