@@ -35,6 +35,7 @@ def student_assignments(db,username):
         if user:
             name = user['name']
             student_collection = java_db[name]
+            st.write(student_collection)
         else:
             raise ValueError(f"User with username '{username}' not found")
 
