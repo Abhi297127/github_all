@@ -40,7 +40,7 @@ def student_assignments(db,username):
 
         # Fetch documents from JavaFileAnalysis
         documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
-
+        st.write(documents)
         # Collect and sort Java keys
         added_java_keys = []
         for doc in documents:
