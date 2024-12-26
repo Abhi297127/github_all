@@ -41,34 +41,27 @@ def login():
             # Store session details
             st.session_state["logged_in"] = True
             st.session_state["username"] = username
+            st.session_state["role"] = user["role"]  # Store role in session
             st.success(f"Welcome {user['name']}!")
-            # Fetch and display only the logged-in user's data
-            # st.write("### Your Details:")
-            # st.write(f"**Name**: {user['name']}")
-            # st.write(f"**Username**: {user['username']}")
-            # st.write(f"**Github Link**: {user['github_link']}")
-            # st.write(f"**Token**: {user['github_token']}")
-            # st.write(f"**Password**: {user['password']}")
-            # Extract owner and repository from GitHub link
 
-            github_link = user['github_link']
-            github_token = user['github_token']
-            name = user['name']
-            owner, repo = extract_owner_repo(github_link)
-            GITHUB_TOKEN = str(github_token)
-            HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
+            # Determine page based on role
             if user["role"] == "admin":
                 st.session_state["current_page"] = "Admin Dashboard"
             else:
+                github_link = user['github_link']
+                github_token = user['github_token']
+                name = user['name']
+                owner, repo = extract_owner_repo(github_link)
+                GITHUB_TOKEN = str(github_token)
+                HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
                 with st.spinner('Fetching data...'):
-                    if check_repo_visibility(owner, repo, HEADERS):  # Pass HEADERS here
+                    if check_repo_visibility(owner, repo, HEADERS):
                         db = client.JavaFileAnalysis
-                        fetch_commits_and_files(owner, repo, db, HEADERS, name)  # Pass HEADERS here
+                        fetch_commits_and_files(owner, repo, db, HEADERS, name)
                         st.success("Data Fetch successful")
                 st.session_state["current_page"] = "Student Dashboard"
+
             st.rerun()
-            # Perform additional operations (fetching GitHub data)
-            
         else:
             st.error("Invalid Username or Password")
 
