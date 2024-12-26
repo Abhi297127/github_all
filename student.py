@@ -20,7 +20,7 @@ def student_dashboard(db):
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
 
-def student_assignments(db,username):
+def student_assignments(db, username):
     """Display student's assignments with filtering options."""
     st.subheader("My Assignments")
     st.write(username)
@@ -29,24 +29,36 @@ def student_assignments(db,username):
         # Fetch and display questions
         questions_collection = db.questions
         questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
-        # Connect to JavaFileAnalysis database
-        java_db = db.client['LoginData']
-        user = java_db.users.find_one({"username": username})
-        if user:
-            name = user['name']
-            # student_collection = java_db[name]
-        else:
-            raise ValueError(f"User with username '{username}' not found")
 
-        # Fetch documents from JavaFileAnalysis
-        documents = list(name.find({}, {"added_java_files": 1, "_id": 0}))
-        st.write(documents)
-        # Collect and sort Java keys
+        # Connect to LoginData database to find user
+        login_db = db.client['LoginData']
+        
+        # Search for the user across all collections in LoginData
+        name = None
+        for collection_name in login_db.list_collection_names():
+            user = login_db[collection_name].find_one({"username": username})
+            if user:
+                name = user['name']
+                break
+        
+        if not name:
+            raise ValueError(f"User with username '{username}' not found in any collection")
+
+        # Switch to JavaFileAnalysis database
+        java_analysis_db = db.client['JavaFileAnalysis']
+
+        # Search for student's collection in JavaFileAnalysis
         added_java_keys = []
-        for doc in documents:
-            added_files = doc.get("added_java_files", {})
-            if isinstance(added_files, dict):
-                added_java_keys.extend(added_files.keys())
+        if name in java_analysis_db.list_collection_names():
+            student_collection = java_analysis_db[name]
+            documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
+            
+            for doc in documents:
+                added_files = doc.get("added_java_files", {})
+                if isinstance(added_files, dict):
+                    added_java_keys.extend(added_files.keys())
+        else:
+            st.warning(f"No collection found for '{name}' in JavaFileAnalysis.")
 
         # Remove duplicates and sort the keys
         added_java_keys_list = sorted(set(added_java_keys))
@@ -71,6 +83,7 @@ def student_assignments(db,username):
                     st.write(f"{tick_symbol} {question.get('question_name', 'Unnamed Question')} - {class_name}")
         else:
             st.info("No assignments found.")
+    
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
 
