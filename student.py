@@ -116,32 +116,52 @@ def student_assignments(db, username):
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
 
-def student_data(db):
+def student_data(db, username):
     """Display student's profile and submitted assignments."""
     st.subheader("My Profile and Data")
     
     try:
-        # Fetch student's own data
-        student_collection = db.users
-        student = student_collection.find_one({"username": st.session_state.username})
+        # Connect to LoginData database to find user
+        login_db = db.client['LoginData']
+        user = None
         
-        if student:
-            st.write(f"**Name:** {student.get('full_name', 'N/A')}")
-            st.write(f"**Username:** {student.get('username', 'N/A')}")
-            st.write(f"**Class:** {student.get('class_name', 'N/A')}")
-            
-            # Fetch and display assignment submissions
-            submissions_collection = db.submissions
-            submissions = list(submissions_collection.find({"username": st.session_state.username}))
-            
-            if submissions:
-                st.write("### Submitted Assignments")
-                for submission in submissions:
-                    st.write(f"- {submission.get('assignment_name', 'Unknown Assignment')}")
-                    st.write(f"  Submitted on: {submission.get('submission_date', 'N/A')}")
-            else:
-                st.info("No assignment submissions found.")
+        # Search for the user across all collections in LoginData
+        for collection_name in login_db.list_collection_names():
+            user = login_db[collection_name].find_one({"username": username})
+            if user:
+                break
+        
+        if not user:
+            raise ValueError(f"User with username '{username}' not found in any collection")
+        
+        # Extract user name and switch to JavaFileAnalysis database
+        name = user.get('name', 'Unknown')
+        st.write(f"**Name:** {name}")
+        st.write(f"**Username:** {username}")
+        
+        # Fetch student-specific data from JavaFileAnalysis database
+        java_analysis_db = db.client['JavaFileAnalysis']
+        student_collection = java_analysis_db[username]  # Assuming each student's data is stored in a separate collection
+        student_data = student_collection.find_one()
+
+        if student_data:
+            st.write(f"**Class:** {student_data.get('class_name', 'N/A')}")
         else:
-            st.error("Student data not found.")
+            st.info("No detailed student data found in JavaFileAnalysis.")
+        
+        # Fetch and display assignment submissions
+        submissions_collection = db.submissions
+        submissions = list(submissions_collection.find({"username": username}))
+        
+        if submissions:
+            st.write("### Submitted Assignments")
+            for submission in submissions:
+                st.write(f"- {submission.get('assignment_name', 'Unknown Assignment')}")
+                st.write(f"  Submitted on: {submission.get('submission_date', 'N/A')}")
+        else:
+            st.info("No assignment submissions found.")
+
+    except ValueError as ve:
+        st.error(f"Value Error: {ve}")
     except Exception as e:
-        st.error(f"Error fetching student data: {e}")
+        st.error(f"An error occurred while fetching student data: {e}")

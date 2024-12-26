@@ -367,7 +367,7 @@ def main():
             elif st.session_state.current_page == "Student Dashboard":
                 student_dashboard(db)
             elif st.session_state.current_page == "My Data":
-                student_data(db)
+                student_data(db,st.session_state.username)
     else:
         st.error("Page not found or access restricted.")
 if __name__ == "__main__":
