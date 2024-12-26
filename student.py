@@ -115,7 +115,7 @@ def student_assignments(db, username):
     
     except Exception as e:
         st.error(f"Error fetching assignments: {e}")
-        
+
 def student_data(db, username):
     """Display student's profile and submitted assignments."""
     st.subheader("My Profile and Data")
@@ -144,22 +144,23 @@ def student_data(db, username):
         student_collection = java_analysis_db[name]  # Assuming each student's data is stored in a separate collection
         student_data_list = list(student_collection.find())
 
+        all_java_files = {}
+
         if student_data_list:
             for student_data in student_data_list:
                 st.write(f"**Class:** {student_data.get('class_name', 'N/A')}")
-
-                # Check and display added_java_files if present
                 added_java_files = student_data.get('added_java_files', {})
-                if added_java_files:
-                    st.write("### Java Files Analysis")
-                    selected_file = st.selectbox(
-                        "Select Java File:", 
-                        list(added_java_files.keys()), 
-                        key=student_data['_id']  # Unique key for each document
-                    )
-                    st.text_area("File Content:", added_java_files[selected_file])
-                else:
-                    st.info("No added Java files found.")
+                all_java_files.update(added_java_files)
+            
+            if all_java_files:
+                st.write("### Java Files Analysis")
+                selected_file = st.selectbox(
+                    "Select Java File:", 
+                    list(all_java_files.keys())
+                )
+                st.text_area("File Content:", all_java_files[selected_file])
+            else:
+                st.info("No added Java files found.")
         else:
             st.info("No detailed student data found in JavaFileAnalysis.")
         
