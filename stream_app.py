@@ -372,7 +372,7 @@ def homepage():
         **Operation: Input Collection and Data Storage**
         
         **What Happens**:
-        - A new user (student or admin) fills out a registration form with:
+        - A new user (student) fills out a registration form with:
         - Name
         - Username (e.g., AF0442897)
         - Repository Link
