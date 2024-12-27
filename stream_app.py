@@ -330,7 +330,7 @@ def header():
         
 def homepage():
     st.title("Home Page")
-    if st.session_state.role == "admin" or st.session_state.role == "student":
+    if st.session_state.role == "admin" and st.session_state.role == "student":
         # Display project information
         st.header("Project Information")
         st.write("""
