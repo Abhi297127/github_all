@@ -1,10 +1,7 @@
 import streamlit as st
 from bson.objectid import ObjectId
 from pymongo import MongoClient
-from utils import add_background
 
-# Add a background image with blur for the "Admin" page
-st.markdown(add_background("images/background02.jpg", blur=10), unsafe_allow_html=True)
 
 
 def admin_dashboard(db):
