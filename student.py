@@ -2,7 +2,7 @@ import streamlit as st
 from utils import add_background
 
 # Add a background image with blur for the "Student" page
-st.markdown(add_background("images/images/backround02.jpg", blur=8), unsafe_allow_html=True)
+st.markdown(add_background("./images/images/backround02.jpg", blur=8), unsafe_allow_html=True)
 
 # Rest of the content
 def student_dashboard(db):

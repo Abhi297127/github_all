@@ -11,7 +11,7 @@ import re
 from utils import add_background
 
 # Add a background image with blur for the "Stream" page
-st.markdown(add_background("images/backround02.jpg", blur=7), unsafe_allow_html=True)
+st.markdown(add_background("./images/backround02.jpg", blur=7), unsafe_allow_html=True)
 
 # MongoDB Connection
 username = "abhishelke297127"

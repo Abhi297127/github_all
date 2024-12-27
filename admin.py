@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from utils import add_background
 
 # Add a background image with blur for the "Admin" page
-st.markdown(add_background("images/images/backround02.jpg", blur=10), unsafe_allow_html=True)
+st.markdown(add_background("./images/images/backround02.jpg", blur=10), unsafe_allow_html=True)
 
 
 def admin_dashboard(db):
