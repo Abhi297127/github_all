@@ -328,13 +328,6 @@ def header():
             if st.button("Logout", key="logout_button"):
                 logout()
         
-
-
-# Homepage (remains the same)
-import streamlit as st
-
-import streamlit as st
-
 def homepage():
     st.title("Home Page")
 
