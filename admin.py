@@ -24,9 +24,10 @@ def admin_dashboard(db):
 # Display the dictionary
     # st.write("Class and Question Name Mapping: ", class_question_dict)
 
-    username = "shubhangipawar486"
-    password = "TzCEUP39JxmPFA23"
-    connection_string = f"mongodb+srv://{username}:{password}@cluster.mongodb.net/<database>?authSource=admin&retryWrites=true&w=majority"
+    username = "abhishelke297127"
+    password = "Abhi%402971"
+    connection_string = f"mongodb+srv://{username}:{password}@cluster0.uu8yq.mongodb.net/?retryWrites=true&w=majority"
+    
     # Connect to MongoDB
     client = MongoClient(connection_string)
     db = client["JavaFileAnalysis"]  # Replace with your actual database name
