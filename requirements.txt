@@ -1,6 +1,5 @@
 streamlit
 pymongo
-bson
 plotly
 pandas
 numpy
