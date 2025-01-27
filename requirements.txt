@@ -1,3 +1,9 @@
 streamlit
 pymongo
-pygithub
+bson
+plotly
+pandas
+numpy
+requests
+altair
+streamlit-lottie
