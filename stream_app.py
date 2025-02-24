@@ -66,9 +66,6 @@ def login():
         else:
             st.error("Invalid Username or Password")
 
-
-# Assuming 'connection_string' and MongoDB client setup are already defined
-
 def extract_owner_repo(github_url):
     """Extract owner and repository name from GitHub URL."""
     github_url = github_url.rstrip(".git")
@@ -77,8 +74,6 @@ def extract_owner_repo(github_url):
     if len(path_parts) >= 2:
         return path_parts[0], path_parts[1]
     return None, None
-
-# Function to validate username format
 
 # Function to check if GitHub repo is public
 def is_github_repo_public(github_token, owner, repo):
@@ -404,7 +399,6 @@ def homepage():
         st.write("Use the sidebar to navigate to your dashboard.")
     else:
         st.write("This is the public homepage. Please log in to access your dashboard.")
-
 
 # Main function with expanded routing
 def main():

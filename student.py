@@ -14,7 +14,6 @@ def load_lottie_url(url):
         return None
     return r.json()
 
-# Custom CSS for better styling
 def init_styles():
     st.markdown("""
         <style>
@@ -239,7 +238,6 @@ def student_assignments(db, username):
         
     except Exception as e:
         st.error(f"Error loading assignments: {e}")
-
 def student_data(db, username):
     """Enhanced student data view with reload button."""
     # init_styles()
@@ -363,7 +361,6 @@ def get_student_files(db, name):
             if isinstance(added_files, dict):
                 added_java_keys.extend(added_files.keys())
     return list(set(added_java_keys))
-
 def display_assignments(questions, added_java_keys, filter_status):
     """Display filtered assignments with enhanced status indicators and better text contrast."""
     for question in questions:

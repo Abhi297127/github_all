@@ -139,7 +139,6 @@ def manage_questions(db):
         else:
             st.info("📝 No questions available.")
 
-
 def analyze_code_complexity(code):
     """Analyze code complexity metrics."""
     # Count nested loops and conditionals
