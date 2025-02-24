@@ -330,170 +330,81 @@ def header():
         
 def homepage():
     st.title("Home Page")
+
     if not st.session_state.get("logged_in", False):
-        # Display project information
-        st.header("Project Information")
-        st.write("""
-        Welcome to the GitHub Data History Tracker project. This application allows you to track and analyze all GitHub commit history for registered users.
-        
-        ### Key Features:
-        - **GitHub Data Tracking**: Allows users to track commits, including file changes, additions, deletions, and renames.
-        - **Registration and Login**: Users can register by providing their GitHub username and access token. After registration, they can log in to their dashboard.
-        - **Commit History**: The app records detailed commit data such as commit ID, message, date/time, file changes, and stores this information in a MongoDB Cloud database.
-        - **MongoDB Integration**: The project uses MongoDB Cloud to store user and commit data, ensuring secure and efficient data management.
-        
-        ### Project Structure:
-        - `student.py`: Handles the registration and login process, interacts with GitHub API, and processes commit data.
-        - `admin.py`: Admin functionalities to manage users and data.
-        - `stream.py`: Main Streamlit app that integrates everything and provides the user interface.
-        
-        ### Technologies Used:
-        - **Streamlit** for the web interface.
-        - **GitHub API** for fetching commit history.
-        - **MongoDB** for storing user and commit data.
-        
-        ### How to Use:
-        1. Register using your GitHub username, link, and access token.
-        2. Log in to access your personalized dashboard and see your commit history.
-        3. Navigate through your commit data, including added, modified, and deleted files.
-        """)
+        # Create tabs for Project Information and GitHub Token Creation
+        tab1, tab2 = st.tabs(["Project Information", "How to Create a GitHub Token"])
 
-        st.header("GitHub Data Tracking Project: Detailed Workflow and Operations")
+        with tab1:
+            st.header("Project Information")
+            st.write("""
+            Welcome to the **GitHub Data History Tracker** project. This application allows users to track and analyze their commit history on GitHub.
 
-        st.subheader("Overview")
-        st.write("""
-        This document explains the detailed workflow and operations of the GitHub Data Tracking Project. It is structured to help your team understand how the system works, the technologies used, and the operations performed.
-        """)
+            ### Key Features:
+            - **GitHub Data Tracking**: Monitors commit history, including added, modified, and deleted files.
+            - **User Authentication**: Secure registration and login system.
+            - **Commit History Storage**: Data is stored securely in **MongoDB Cloud**.
+            - **Interactive Dashboard**: Displays commit logs and file changes dynamically.
 
-        st.subheader("Workflow")
+            ### Project Structure:
+            - `student.py`: Handles registration, login, and GitHub API interactions.
+            - `admin.py`: Provides admin functionalities for managing users and commit data.
+            - `stream.py`: The main Streamlit app that integrates all features.
 
-        st.markdown("### Step 1: User Registration")
-        st.write("""
-        **Operation: Input Collection and Data Storage**
-        
-        **What Happens**:
-        - A new user (student) fills out a registration form with:
-        - Name
-        - Username (e.g., AF0442897)
-        - Repository Link
-        - GitHub Token
-        - Password
-        - Role (Student/Admin)
-        - Upon submission, the data is validated and stored in the `Login Database` collection in MongoDB Cloud.
+            ### Technologies Used:
+            - **Streamlit** - Web Interface
+            - **GitHub API** - Fetching commit data
+            - **MongoDB Cloud** - Secure database storage
 
-        **Operations Performed**:
-        - Input validation to ensure mandatory fields are completed.
-        - Secure storage of user details, including encrypted passwords.
-        """)
+            ### How to Use:
+            1. **Register** using your GitHub credentials (username, repository link, and token).
+            2. **Log in** to access your dashboard and view commit history.
+            3. **Analyze commits** including changes in files and contributions.
+            """)
 
-        st.markdown("### Step 2: Login Authentication")
-        st.write("""
-        **Operation: Verify Credentials**
-        
-        **What Happens**:
-        - The user logs in with their username and password.
-        - The system checks the credentials against the `Login Database`.
+        with tab2:
+            st.header("How to Create a GitHub Personal Access Token")
+            st.write("""
+            A **GitHub Personal Access Token (PAT)** is required to access your repositories securely. Follow these steps to create one:
 
-        **Operations Performed**:
-        - Credential validation to authenticate users.
-        - Role-based access control:
-        - Students can view their own data.
-        - Admins can view data for all students.
-        """)
+            ### Step-by-Step Guide:
 
-        st.markdown("### Step 3: Data Retrieval Using GitHub API")
-        st.write("""
-        **Operation: Fetch and Process Data from GitHub**
-        
-        **What Happens**:
-        - The system connects to the GitHub API using the token provided by the user.
-        - It retrieves commit history and file changes for the specified repository.
+            1. **Log in to GitHub**: Go to [GitHub](https://github.com/) and sign in.
+            2. **Go to Developer Settings**:
+               - Click on your profile picture in the top-right corner.
+               - Select **Settings**.
+               - Scroll down and click **Developer Settings**.
+            3. **Generate a New Token**:
+               - Click **Personal Access Tokens** > **Tokens (Classic)**.
+               - Click **Generate new token**.
+            4. **Set Expiration**: Choose how long the token should remain active.
+            5. **Select Permissions** (Minimum required):
+               - **repo** (Full control of private repositories)
+               - **read:user** (Read access to your user profile)
+               - **admin:repo_hook** (Manage repository webhooks)
+               - **workflow** (Access GitHub Actions)
+               - **read:org** (Read access to organization data)
+            6. **Generate and Copy the Token**:
+               - Click **Generate Token**.
+               - **Copy the token** immediately (it won’t be visible again).
+            7. **Use the Token**:
+               - Store it securely.
+               - Use it for API authentication (instead of a password).
 
-        **Operations Performed**:
-        - Authentication: Token-based secure access to the API.
-        - Data Retrieval: Extracts the following details for each commit:
-        - Commit ID
-        - Date and time
-        - Commit message
-        - File changes (added, renamed, modified, deleted).
-        - Data Processing: Organizes the retrieved information into a structured format.
-        """)
+            ### Important Notes:
+            - **Never share your token** as it grants access to your GitHub data.
+            - If compromised, **revoke** it immediately from **Settings > Developer Settings**.
 
-        st.markdown("### Step 4: Data Storage in MongoDB Cloud")
-        st.write("""
-        **Operation: Store Retrieved Data**
-        
-        **What Happens**:
-        - The structured commit data is saved in the `JavaFileAnalysis Database` collection.
-        - Each student has a dedicated collection for their data.
+            After generating the token, you can use it to authenticate your account in this project.
+            """)
 
-        **Operations Performed**:
-        - Insert commit data into the database.
-        - Create collections dynamically for new students.
-        """)
-
-        st.markdown("### Step 5: Data Display on Streamlit Dashboard")
-        st.write("""
-        **Operation: Dynamic Visualization of Data**
-        
-        **What Happens**:
-        - The application fetches stored data and displays it on the dashboard.
-        - **Sidebar**: Shows user information (e.g., Name, Username, Repository, Role).
-        - **Main Dashboard**: Displays commit history and file changes.
-
-        **Operations Performed**:
-        - Query the database to retrieve relevant data.
-        - Display commit history in a tabular format.
-        - Highlight file changes grouped by type (added, modified, etc.).
-        """)
-
-        st.markdown("### Step 6: Interactive Features")
-        st.write("""
-        **Operation: Role-Specific Actions and Feedback**
-        
-        **What Happens**:
-        - **Students**:
-        - View their commit activity and file changes.
-        - Receive insights about their progress.
-        - **Admins**:
-        - View data for all students.
-        - Monitor contributions and identify irregularities.
-
-        **Operations Performed**:
-        - Role-based data filtering.
-        - Real-time data updates upon new commits.
-        """)
-
-        st.markdown("### Step 7: Additional Operations")
-        st.write("""
-        - **Error Handling**:
-        - Handles invalid tokens or API errors with appropriate feedback messages.
-        - Logs issues for debugging.
-        - **Data Updates**:
-        - Periodic checks for new commits.
-        - Updates database and dashboard dynamically.
-        - **Security Operations**:
-        - Passwords are hashed before storage.
-        - Tokens are managed securely to prevent unauthorized access.
-        """)
-
-        st.subheader("Summary of Operations")
-        st.write("""
-        1. **Registration**: Collect and store user data.
-        2. **Authentication**: Validate login credentials.
-        3. **Data Retrieval**: Use GitHub API to fetch commit details.
-        4. **Storage**: Save processed data in MongoDB Cloud.
-        5. **Visualization**: Display data dynamically on Streamlit.
-        6. **Interaction**: Enable role-based data access and updates.
-        7. **Error Handling**: Provide secure and robust system feedback.
-        """)
-
-    # Check if the user is logged in
-    if st.session_state.logged_in:
+    # If user is logged in, display welcome message
+    if st.session_state.get("logged_in", False):
         st.write(f"Hello, **{st.session_state.username}**! You are logged in as **{st.session_state.role}**.")
         st.write("Use the sidebar to navigate to your dashboard.")
     else:
         st.write("This is the public homepage. Please log in to access your dashboard.")
+
 
 # Main function with expanded routing
 def main():
