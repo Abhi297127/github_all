@@ -1,3 +1,4 @@
+import io
 import streamlit as st
 from bson.objectid import ObjectId
 from pymongo import MongoClient
@@ -60,6 +61,10 @@ def admin_dashboard(db):
     with col4:
         active_students = sum(1 for c in db.list_collection_names() if db[c].count_documents({}) > 0)
         st.metric("🎯 Active Students", active_students)
+
+    # Add the new completion report section
+    st.markdown("---")
+    add_completion_report_section(db)
 def manage_questions(db):
     st.header("Manage Questions")
     
@@ -312,48 +317,41 @@ def manage_students(db):
                 )
                 
                 if selected_file:
-                    # Get file versions
-                    versions = []
-                    for doc in documents:
+                    # Get the latest version of the file
+                    latest_version = None
+                    for doc in reversed(documents):  # Start from the most recent
                         if ('added_java_files' in doc and 
                             isinstance(doc['added_java_files'], dict) and 
                             selected_file in doc['added_java_files']):
-                            versions.append({
-                                'timestamp': doc.get('timestamp', 'Unknown'),
-                                'content': doc['added_java_files'][selected_file]
-                            })
+                            latest_version = doc['added_java_files'][selected_file]
+                            break
                     
-                    # Version comparison
-                    st.subheader("Version Comparison")
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        v1 = st.selectbox("Select Base Version", 
-                                        range(len(versions)), 
-                                        format_func=lambda x: f"Version {x+1}")
-                    with col2:
-                        v2 = st.selectbox("Select Compare Version", 
-                                        range(len(versions)), 
-                                        format_func=lambda x: f"Version {x+1}")
-                    
-                    # Show diff
-                    if v1 != v2:
-                        st.subheader("Code Changes")
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.code(versions[v1]['content'], language='java')
-                        with col2:
-                            st.code(versions[v2]['content'], language='java')
+                    if latest_version:
+                        # Show the file content
+                        st.subheader(f"Content of {selected_file}")
+                        st.code(latest_version, language='java')
+                        
+                        # Add file metadata
+                        with st.expander("File Information"):
+                            # Calculate file size
+                            file_size = len(latest_version.encode('utf-8'))
+                            lines_of_code = len(latest_version.splitlines())
+                            
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.metric("File Size", f"{file_size:,} bytes")
+                            with col2:
+                                st.metric("Lines of Code", lines_of_code)
+                    else:
+                        st.warning("No content found for this file.")
         
         with analytics_tab:
-            if selected_student and selected_file and versions:
+            if selected_student and selected_file and 'latest_version' in locals() and latest_version:
                 st.header("Code Analytics")
                 
-                # Get latest version for analysis
-                latest_code = versions[-1]['content']
-                
                 # Code metrics
-                metrics = analyze_code_complexity(latest_code)
-                summary = generate_code_summary(latest_code)
+                metrics = analyze_code_complexity(latest_version)
+                summary = generate_code_summary(latest_version)
                 
                 # Display metrics in an organized way
                 col1, col2, col3, col4 = st.columns(4)
@@ -400,50 +398,67 @@ def manage_students(db):
                         st.write(f"- {imp}")
         
         with trends_tab:
-            if selected_student and versions:
+            if selected_student:
                 st.header("Code Evolution Trends")
                 
-                # Track metrics over time
-                trend_data = []
-                for idx, version in enumerate(versions):
-                    metrics = analyze_code_complexity(version['content'])
-                    trend_data.append({
-                        'version': idx + 1,
-                        'timestamp': version['timestamp'],
-                        **metrics
-                    })
-                
-                trend_df = pd.DataFrame(trend_data)
-                
-                # Plot metrics trends
-                fig = go.Figure()
-                metrics_to_plot = ['complexity', 'methods', 'loops', 'conditionals']
-                
-                for metric in metrics_to_plot:
-                    fig.add_trace(go.Scatter(
-                        x=trend_df['version'],
-                        y=trend_df[metric],
-                        name=metric.capitalize(),
-                        mode='lines+markers'
-                    ))
-                
-                fig.update_layout(
-                    title="Code Metrics Evolution",
-                    xaxis_title="Version",
-                    yaxis_title="Count",
-                    hovermode='x unified'
-                )
-                st.plotly_chart(fig, use_container_width=True)
-                
-                # Code size evolution
-                sizes = [len(version['content'].split('\n')) for version in versions]
-                fig = px.line(
-                    x=range(1, len(sizes) + 1),
-                    y=sizes,
-                    title="Code Size Evolution",
-                    labels={'x': 'Version', 'y': 'Lines of Code'}
-                )
-                st.plotly_chart(fig, use_container_width=True)
+                if selected_file:
+                    # Get all versions of the selected file
+                    versions = []
+                    for doc in documents:
+                        if ('added_java_files' in doc and 
+                            isinstance(doc['added_java_files'], dict) and 
+                            selected_file in doc['added_java_files']):
+                            versions.append({
+                                'timestamp': doc.get('timestamp', 'Unknown'),
+                                'content': doc['added_java_files'][selected_file]
+                            })
+                    
+                    if versions:
+                        # Track metrics over time
+                        trend_data = []
+                        for idx, version in enumerate(versions):
+                            metrics = analyze_code_complexity(version['content'])
+                            trend_data.append({
+                                'version': idx + 1,
+                                'timestamp': version['timestamp'],
+                                **metrics
+                            })
+                        
+                        trend_df = pd.DataFrame(trend_data)
+                        
+                        # Plot metrics trends
+                        fig = go.Figure()
+                        metrics_to_plot = ['complexity', 'methods', 'loops', 'conditionals']
+                        
+                        for metric in metrics_to_plot:
+                            fig.add_trace(go.Scatter(
+                                x=trend_df['version'],
+                                y=trend_df[metric],
+                                name=metric.capitalize(),
+                                mode='lines+markers'
+                            ))
+                        
+                        fig.update_layout(
+                            title="Code Metrics Evolution",
+                            xaxis_title="Version",
+                            yaxis_title="Count",
+                            hovermode='x unified'
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # Code size evolution
+                        sizes = [len(version['content'].split('\n')) for version in versions]
+                        fig = px.line(
+                            x=range(1, len(sizes) + 1),
+                            y=sizes,
+                            title="Code Size Evolution",
+                            labels={'x': 'Version', 'y': 'Lines of Code'}
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.warning("No version history found for this file.")
+                else:
+                    st.info("Please select a file to view its trends.")
     
     except Exception as e:
         st.error(f"Error: {str(e)}")
@@ -479,3 +494,131 @@ def edit_question(db, question):
             if st.form_submit_button("❌ Cancel", use_container_width=True):
                 st.session_state[f"editing_{question['_id']}"] = False
                 st.rerun()
+
+def generate_completion_report(db):
+    """Generate Excel report of all students' assignment completion status."""
+    try:
+        # Get all questions
+        abhi = db.client['Question']
+        questions_collection = abhi.questions
+        questions = list(questions_collection.find({}, {"question_name": 1, "class_name": 1, "_id": 0}))
+
+        # Get all students
+        login_db = db.client['LoginData']
+        students = list(login_db.users.find({"role": "student"}, {"name": 1, "username": 1, "_id": 0}))
+
+        # Get JavaFileAnalysis database
+        java_analysis_db = db.client['JavaFileAnalysis']
+        
+        # Prepare data for Excel
+        excel_data = []
+
+        for student in students:
+            student_name = student['name']
+            student_username = student['username']
+
+            # Get student's submitted files
+            submitted_files = []
+            if student_name in java_analysis_db.list_collection_names():
+                student_collection = java_analysis_db[student_name]
+                documents = list(student_collection.find({}, {"added_java_files": 1, "_id": 0}))
+                for doc in documents:
+                    added_files = doc.get("added_java_files", {})
+                    if isinstance(added_files, dict):
+                        submitted_files.extend(added_files.keys())
+            submitted_files = list(set(submitted_files))
+
+            # Create student row
+            student_row = {
+                'Student Name': student_name,
+                'Username': student_username
+            }
+
+            # Add completion status for each class_name
+            for question in questions:
+                class_name = question.get('class_name', '').replace('.java', '')
+                status = '✓' if class_name in submitted_files else '✗'
+                student_row[class_name] = status
+
+            # Calculate completion percentage
+            total_questions = len(questions)
+            completed_questions = sum(1 for q in questions 
+                                    if q.get('class_name', '').replace('.java', '') in submitted_files)
+            completion_percentage = (completed_questions / total_questions * 100) if total_questions > 0 else 0
+            student_row['Completion %'] = f"{completion_percentage:.1f}%"
+
+            excel_data.append(student_row)
+
+        # Convert to DataFrame
+        df = pd.DataFrame(excel_data)
+
+        # Generate Question-Class Mapping
+        question_class_mapping = pd.DataFrame({
+            'Class Name': [q.get('class_name', '').replace('.java', '') for q in questions],
+            'Question Name': [q.get('question_name', '') for q in questions]
+        })
+
+        # Add summary statistics
+        avg_completion = df['Completion %'].str.rstrip('%').astype(float).mean()
+        total_students = len(df)
+        fully_completed = len(df[df['Completion %'] == '100.0%'])
+
+        summary_df = pd.DataFrame([{
+            'Metric': 'Value',
+            'Total Students': total_students,
+            'Average Completion %': f"{avg_completion:.1f}%",
+            'Students with 100% Completion': fully_completed,
+            'Generated Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }])
+
+        # Create Excel writer with multiple sheets
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, sheet_name='Student Completion', index=False)
+            summary_df.to_excel(writer, sheet_name='Summary', index=False)
+            question_class_mapping.to_excel(writer, sheet_name='Question-Class Mapping', index=False)
+
+            # Auto-adjust column widths
+            for sheet_name in writer.sheets:
+                sheet = writer.sheets[sheet_name]
+                for idx, col in enumerate(df.columns):
+                    series = df[col]
+                    max_len = max(
+                        series.astype(str).map(len).max(),
+                        len(str(col))
+                    ) + 2
+                    sheet.set_column(idx, idx, max_len)
+
+        output.seek(0)
+        return output
+
+    except Exception as e:
+        st.error(f"Error generating report: {e}")
+        return None
+
+def add_completion_report_section(db):
+    """Add completion report section to admin dashboard."""
+    st.header("📊 Assignment Completion Report")
+    
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        st.write("""
+        Generate an Excel report containing:
+        - Individual student completion status for each assignment
+        - Overall completion percentages
+        - Summary statistics
+        """)
+    
+    with col2:
+        if st.button("📥 Download Report", type="primary"):
+            with st.spinner("Generating report..."):
+                excel_file = generate_completion_report(db)
+                if excel_file:
+                    st.download_button(
+                        label="📥 Save Excel Report",
+                        data=excel_file,
+                        file_name=f"student_completion_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                    st.success("Report generated successfully!")
