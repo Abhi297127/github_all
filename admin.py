@@ -113,16 +113,6 @@ def manage_questions(db):
         if questions:
             for question in questions:
                 with st.container():
-                    st.markdown("""
-                        <div style='
-                            padding: 1rem;
-                            border-radius: 0.5rem;
-                            border: 1px solid #e0e0e0;
-                            margin: 0.5rem 0;
-                            background-color: #f8f9fa;
-                        '>
-                    """, unsafe_allow_html=True)
-                    
                     col1, col2, col3 = st.columns([6, 1, 1])
                     with col1:
                         st.markdown(f"""
