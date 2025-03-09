@@ -484,11 +484,11 @@ def edit_question(db, question):
                 st.session_state[f"editing_{question['_id']}"] = False
                 st.rerun()
 
+
 import pandas as pd
 import io
 from datetime import datetime
 import streamlit as st
-import uuid
 
 def generate_completion_report(db):
     """Generate report of all students' assignment completion status."""
@@ -532,8 +532,7 @@ def generate_completion_report(db):
             # Add completion status for each class_name
             for question in questions:
                 class_name = question.get('class_name', '').replace('.java', '')
-                # Use "Yes" and "No" instead of checkmarks to avoid encoding issues
-                status = "Yes" if class_name in submitted_files else "No"
+                status = '✓' if class_name in submitted_files else '✗'
                 student_row[class_name] = status
 
             # Calculate completion percentage
@@ -567,51 +566,27 @@ def generate_completion_report(db):
             'Generated Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }])
 
-        # Create a CSV file
-        output = io.StringIO()
+        # Use CSV format instead of Excel
+        output = io.BytesIO()
         
-        output.write("# STUDENT COMPLETION DATA\n")
+        # Write a header to indicate the start of each section
+        output.write(b"STUDENT COMPLETION DATA\n")
         df.to_csv(output, index=False)
         
-        output.write("\n\n# SUMMARY STATISTICS\n")
+        output.write(b"\n\nSUMMARY STATISTICS\n")
         summary_df.to_csv(output, index=False)
         
-        output.write("\n\n# QUESTION-CLASS MAPPING\n")
+        output.write(b"\n\nQUESTION-CLASS MAPPING\n")
         question_class_mapping.to_csv(output, index=False)
         
-        # Get the CSV content
-        csv_content = output.getvalue()
-        
-        # Convert to bytes for download
-        bytes_output = io.BytesIO(csv_content.encode('utf-8-sig'))
-        bytes_output.seek(0)
-        
-        return bytes_output
+        output.seek(0)
+        return output
 
     except Exception as e:
         st.error(f"Error generating report: {e}")
         return None
 
 def add_completion_report_section(db):
-    """Add the completion report section to the admin dashboard."""
-    st.header("Completion Report")
-    
-    if st.button("Generate Completion Report"):
-        with st.spinner("Generating report..."):
-            report_data = generate_completion_report(db)
-            
-            if report_data:
-                # Generate a unique filename with timestamp
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"student_completion_report_{timestamp}.csv"
-                
-                # Provide download button for the report
-                st.download_button(
-                    label="Download Report",
-                    data=report_data,
-                    file_name=filename,
-                    mime="text/csv",
-                )
-                st.success("Report generated successfully!")
-            else:
-                st.error("Failed to generate report.")
+    # This function needs to be implemented
+    pass
+
