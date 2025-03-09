@@ -593,103 +593,25 @@ def generate_completion_report(db):
         return None
 
 def add_completion_report_section(db):
-    """Add a section to download completion report in Streamlit."""
+    """Add the completion report section to the admin dashboard."""
     st.header("Completion Report")
     
-    # Generate a unique key for the button to avoid duplicate IDs
-    button_key = f"generate_report_{str(uuid.uuid4())}"
-    
-    if st.button("Generate Completion Report", key=button_key):
-        # Show a spinner while generating the report
+    if st.button("Generate Completion Report"):
         with st.spinner("Generating report..."):
             report_data = generate_completion_report(db)
-        
-        if report_data:
-            # Get current date for filename
-            current_date = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"student_completion_report_{current_date}.csv"
             
-            # Generate a unique key for the download button
-            download_key = f"download_report_{str(uuid.uuid4())}"
-            
-            # Provide the file for download with correct extension
-            st.download_button(
-                label="Download CSV Report",
-                data=report_data,
-                file_name=filename,
-                mime="text/csv",
-                key=download_key
-            )
-            
-            st.success("Report generated successfully!")
-        else:
-            st.error("Failed to generate report.")
-    """Add a section to download completion report in Streamlit."""
-    st.header("Completion Report")
-    
-    if st.button("Generate Completion Report"):
-        report_data = generate_completion_report(db)
-        
-        if report_data:
-            # Get current date for filename
-            current_date = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"student_completion_report_{current_date}.csv"
-            
-            # Provide the file for download with correct extension
-            st.download_button(
-                label="Download CSV Report",
-                data=report_data,
-                file_name=filename,
-                mime="text/csv"
-            )
-            
-            st.success("Report generated successfully!")
-        else:
-            st.error("Failed to generate report.")
-    """Add a section to download completion report in Streamlit."""
-    st.header("Completion Report")
-    
-    if st.button("Generate Completion Report"):
-        report_data = generate_completion_report(db)
-        
-        if report_data:
-            # Get current date for filename
-            current_date = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"student_completion_report_{current_date}.csv"
-            
-            # Provide the file for download with correct extension
-            st.download_button(
-                label="Download CSV Report",
-                data=report_data,
-                file_name=filename,
-                mime="text/csv"
-            )
-            
-            st.success("Report generated successfully!")
-        else:
-            st.error("Failed to generate report.")
-    """Add completion report section to admin dashboard."""
-    st.header("📊 Assignment Completion Report")
-    
-    col1, col2 = st.columns([3, 1])
-    
-    with col1:
-        st.write("""
-        Generate an Excel report containing:
-        - Individual student completion status for each assignment
-        - Overall completion percentages
-        - Summary statistics
-        """)
-    
-    with col2:
-        if st.button("📥 Download Report", type="primary"):
-            with st.spinner("Generating report..."):
-                excel_file = generate_completion_report(db)
-                if excel_file:
-                    st.download_button(
-                        label="📥 Save Excel Report",
-                        data=excel_file,
-                        file_name=f"student_completion_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
-                    st.success("Report generated successfully!")
+            if report_data:
+                # Generate a unique filename with timestamp
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"student_completion_report_{timestamp}.csv"
+                
+                # Provide download button for the report
+                st.download_button(
+                    label="Download Report",
+                    data=report_data,
+                    file_name=filename,
+                    mime="text/csv",
+                )
+                st.success("Report generated successfully!")
+            else:
+                st.error("Failed to generate report.")
