@@ -484,8 +484,9 @@ def edit_question(db, question):
                 st.session_state[f"editing_{question['_id']}"] = False
                 st.rerun()
 
+
 def generate_completion_report(db):
-    """Generate Excel report of all students' assignment completion status."""
+    """Generate report of all students' assignment completion status."""
     try:
         # Get all questions
         abhi = db.client['Question']
@@ -499,7 +500,7 @@ def generate_completion_report(db):
         # Get JavaFileAnalysis database
         java_analysis_db = db.client['JavaFileAnalysis']
         
-        # Prepare data for Excel
+        # Prepare data for report
         excel_data = []
 
         for student in students:
@@ -560,28 +561,19 @@ def generate_completion_report(db):
             'Generated Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }])
 
-        # Create Excel writer with openpyxl instead of xlsxwriter
+        # Use CSV format instead of Excel
         output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, sheet_name='Student Completion', index=False)
-            summary_df.to_excel(writer, sheet_name='Summary', index=False)
-            question_class_mapping.to_excel(writer, sheet_name='Question-Class Mapping', index=False)
-
-            # Auto-adjust column widths for openpyxl
-            for sheet_name in writer.sheets:
-                worksheet = writer.sheets[sheet_name]
-                for idx, col in enumerate(df.columns):
-                    max_len = 0
-                    column = worksheet.cell(row=1, column=idx+1).column_letter
-                    for cell in worksheet[column]:
-                        try:
-                            if len(str(cell.value)) > max_len:
-                                max_len = len(str(cell.value))
-                        except:
-                            pass
-                    adjusted_width = (max_len + 2)
-                    worksheet.column_dimensions[column].width = adjusted_width
-
+        
+        # Write a header to indicate the start of each section
+        output.write(b"STUDENT COMPLETION DATA\n")
+        df.to_csv(output, index=False)
+        
+        output.write(b"\n\nSUMMARY STATISTICS\n")
+        summary_df.to_csv(output, index=False)
+        
+        output.write(b"\n\nQUESTION-CLASS MAPPING\n")
+        question_class_mapping.to_csv(output, index=False)
+        
         output.seek(0)
         return output
 
