@@ -484,13 +484,6 @@ def edit_question(db, question):
                 st.session_state[f"editing_{question['_id']}"] = False
                 st.rerun()
 
-
-import pandas as pd
-import io
-from datetime import datetime
-import streamlit as st
-import csv
-
 def generate_completion_report(db):
     """Generate report of all students' assignment completion status."""
     try:
@@ -533,7 +526,8 @@ def generate_completion_report(db):
             # Add completion status for each class_name
             for question in questions:
                 class_name = question.get('class_name', '').replace('.java', '')
-                status = '✓' if class_name in submitted_files else '✗'
+                # Use "Yes" and "No" instead of checkmarks to avoid encoding issues
+                status = "Yes" if class_name in submitted_files else "No"
                 student_row[class_name] = status
 
             # Calculate completion percentage
@@ -583,7 +577,7 @@ def generate_completion_report(db):
         csv_content = output.getvalue()
         
         # Convert to bytes for download
-        bytes_output = io.BytesIO(csv_content.encode())
+        bytes_output = io.BytesIO(csv_content.encode('utf-8-sig'))  # Use UTF-8 with BOM to help Excel with encoding
         bytes_output.seek(0)
         
         return bytes_output
@@ -593,6 +587,28 @@ def generate_completion_report(db):
         return None
 
 def add_completion_report_section(db):
+    """Add a section to download completion report in Streamlit."""
+    st.header("Completion Report")
+    
+    if st.button("Generate Completion Report"):
+        report_data = generate_completion_report(db)
+        
+        if report_data:
+            # Get current date for filename
+            current_date = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"student_completion_report_{current_date}.csv"
+            
+            # Provide the file for download with correct extension
+            st.download_button(
+                label="Download CSV Report",
+                data=report_data,
+                file_name=filename,
+                mime="text/csv"
+            )
+            
+            st.success("Report generated successfully!")
+        else:
+            st.error("Failed to generate report.")
     """Add a section to download completion report in Streamlit."""
     st.header("Completion Report")
     
