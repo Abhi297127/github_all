@@ -485,6 +485,12 @@ def edit_question(db, question):
                 st.rerun()
 
 
+import pandas as pd
+import io
+from datetime import datetime
+import streamlit as st
+import csv
+
 def generate_completion_report(db):
     """Generate report of all students' assignment completion status."""
     try:
@@ -561,27 +567,54 @@ def generate_completion_report(db):
             'Generated Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }])
 
-        # Use CSV format instead of Excel
-        output = io.BytesIO()
+        # Create a CSV file
+        output = io.StringIO()
         
-        # Write a header to indicate the start of each section
-        output.write(b"STUDENT COMPLETION DATA\n")
+        output.write("# STUDENT COMPLETION DATA\n")
         df.to_csv(output, index=False)
         
-        output.write(b"\n\nSUMMARY STATISTICS\n")
+        output.write("\n\n# SUMMARY STATISTICS\n")
         summary_df.to_csv(output, index=False)
         
-        output.write(b"\n\nQUESTION-CLASS MAPPING\n")
+        output.write("\n\n# QUESTION-CLASS MAPPING\n")
         question_class_mapping.to_csv(output, index=False)
         
-        output.seek(0)
-        return output
+        # Get the CSV content
+        csv_content = output.getvalue()
+        
+        # Convert to bytes for download
+        bytes_output = io.BytesIO(csv_content.encode())
+        bytes_output.seek(0)
+        
+        return bytes_output
 
     except Exception as e:
         st.error(f"Error generating report: {e}")
         return None
 
 def add_completion_report_section(db):
+    """Add a section to download completion report in Streamlit."""
+    st.header("Completion Report")
+    
+    if st.button("Generate Completion Report"):
+        report_data = generate_completion_report(db)
+        
+        if report_data:
+            # Get current date for filename
+            current_date = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"student_completion_report_{current_date}.csv"
+            
+            # Provide the file for download with correct extension
+            st.download_button(
+                label="Download CSV Report",
+                data=report_data,
+                file_name=filename,
+                mime="text/csv"
+            )
+            
+            st.success("Report generated successfully!")
+        else:
+            st.error("Failed to generate report.")
     """Add completion report section to admin dashboard."""
     st.header("📊 Assignment Completion Report")
     
