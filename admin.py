@@ -485,8 +485,12 @@ def edit_question(db, question):
                 st.rerun()
 
 def generate_completion_report(db):
-    """Generate Excel report of all students' assignment completion status."""
+    """Generate CSV report of all students' assignment completion status."""
     try:
+        import pandas as pd
+        import io
+        from datetime import datetime
+        
         # Get all questions
         abhi = db.client['Question']
         questions_collection = abhi.questions
@@ -499,8 +503,8 @@ def generate_completion_report(db):
         # Get JavaFileAnalysis database
         java_analysis_db = db.client['JavaFileAnalysis']
         
-        # Prepare data for Excel
-        excel_data = []
+        # Prepare data for CSV
+        csv_data = []
 
         for student in students:
             student_name = student['name']
@@ -536,10 +540,10 @@ def generate_completion_report(db):
             completion_percentage = (completed_questions / total_questions * 100) if total_questions > 0 else 0
             student_row['Completion %'] = f"{completion_percentage:.1f}%"
 
-            excel_data.append(student_row)
+            csv_data.append(student_row)
 
         # Convert to DataFrame
-        df = pd.DataFrame(excel_data)
+        df = pd.DataFrame(csv_data)
 
         # Generate Question-Class Mapping
         question_class_mapping = pd.DataFrame({
@@ -560,31 +564,34 @@ def generate_completion_report(db):
             'Generated Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }])
 
-        # Create Excel writer with multiple sheets
+        # Create CSV outputs
         output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            df.to_excel(writer, sheet_name='Student Completion', index=False)
-            summary_df.to_excel(writer, sheet_name='Summary', index=False)
-            question_class_mapping.to_excel(writer, sheet_name='Question-Class Mapping', index=False)
-
-            # Auto-adjust column widths
-            for sheet_name in writer.sheets:
-                sheet = writer.sheets[sheet_name]
-                for idx, col in enumerate(df.columns):
-                    series = df[col]
-                    max_len = max(
-                        series.astype(str).map(len).max(),
-                        len(str(col))
-                    ) + 2
-                    sheet.set_column(idx, idx, max_len)
+        
+        # Write main student completion data to CSV
+        df.to_csv(output, index=False)
+        
+        # Create a separate StringIO for summary data
+        summary_output = io.StringIO()
+        summary_df.to_csv(summary_output, index=False)
+        
+        # Create a separate StringIO for question-class mapping
+        mapping_output = io.StringIO()
+        question_class_mapping.to_csv(mapping_output, index=False)
+        
+        # Write a header to separate the sections
+        output.write(b"\n\n--- SUMMARY ---\n")
+        output.write(summary_output.getvalue().encode())
+        
+        output.write(b"\n\n--- QUESTION-CLASS MAPPING ---\n")
+        output.write(mapping_output.getvalue().encode())
 
         output.seek(0)
         return output
 
     except Exception as e:
+        import streamlit as st
         st.error(f"Error generating report: {e}")
         return None
-
 def add_completion_report_section(db):
     """Add completion report section to admin dashboard."""
     st.header("📊 Assignment Completion Report")
@@ -611,3 +618,6 @@ def add_completion_report_section(db):
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
                     st.success("Report generated successfully!")
+
+
+
