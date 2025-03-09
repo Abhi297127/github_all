@@ -564,29 +564,20 @@ def generate_completion_report(db):
             'Generated Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }])
 
-        # Create CSV outputs
-        output = io.BytesIO()
+        # Create CSV output
+        output = io.StringIO()  # Changed to StringIO for text data
         
         # Write main student completion data to CSV
         df.to_csv(output, index=False)
         
-        # Create a separate StringIO for summary data
-        summary_output = io.StringIO()
-        summary_df.to_csv(summary_output, index=False)
+        # Add a header to separate the sections
+        output.write("\n\n--- SUMMARY ---\n")
+        summary_df.to_csv(output, index=False)
         
-        # Create a separate StringIO for question-class mapping
-        mapping_output = io.StringIO()
-        question_class_mapping.to_csv(mapping_output, index=False)
-        
-        # Write a header to separate the sections
-        output.write(b"\n\n--- SUMMARY ---\n")
-        output.write(summary_output.getvalue().encode())
-        
-        output.write(b"\n\n--- QUESTION-CLASS MAPPING ---\n")
-        output.write(mapping_output.getvalue().encode())
+        output.write("\n\n--- QUESTION-CLASS MAPPING ---\n")
+        question_class_mapping.to_csv(output, index=False)
 
-        output.seek(0)
-        return output
+        return output.getvalue()  # Return string content instead of BytesIO
 
     except Exception as e:
         import streamlit as st
@@ -594,13 +585,16 @@ def generate_completion_report(db):
         return None
 def add_completion_report_section(db):
     """Add completion report section to admin dashboard."""
+    import streamlit as st
+    from datetime import datetime
+    
     st.header("📊 Assignment Completion Report")
     
     col1, col2 = st.columns([3, 1])
     
     with col1:
         st.write("""
-        Generate an Excel report containing:
+        Generate a CSV report containing:
         - Individual student completion status for each assignment
         - Overall completion percentages
         - Summary statistics
@@ -609,13 +603,13 @@ def add_completion_report_section(db):
     with col2:
         if st.button("📥 Download Report", type="primary"):
             with st.spinner("Generating report..."):
-                excel_file = generate_completion_report(db)
-                if excel_file:
+                csv_content = generate_completion_report(db)
+                if csv_content:
                     st.download_button(
-                        label="📥 Save Excel Report",
-                        data=excel_file,
-                        file_name=f"student_completion_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        label="📥 Save CSV Report",
+                        data=csv_content,
+                        file_name=f"student_completion_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                        mime="text/csv"
                     )
                     st.success("Report generated successfully!")
 
