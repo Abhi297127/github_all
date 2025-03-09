@@ -484,6 +484,12 @@ def edit_question(db, question):
                 st.session_state[f"editing_{question['_id']}"] = False
                 st.rerun()
 
+import pandas as pd
+import io
+from datetime import datetime
+import streamlit as st
+import uuid
+
 def generate_completion_report(db):
     """Generate report of all students' assignment completion status."""
     try:
@@ -577,7 +583,7 @@ def generate_completion_report(db):
         csv_content = output.getvalue()
         
         # Convert to bytes for download
-        bytes_output = io.BytesIO(csv_content.encode('utf-8-sig'))  # Use UTF-8 with BOM to help Excel with encoding
+        bytes_output = io.BytesIO(csv_content.encode('utf-8-sig'))
         bytes_output.seek(0)
         
         return bytes_output
@@ -587,6 +593,37 @@ def generate_completion_report(db):
         return None
 
 def add_completion_report_section(db):
+    """Add a section to download completion report in Streamlit."""
+    st.header("Completion Report")
+    
+    # Generate a unique key for the button to avoid duplicate IDs
+    button_key = f"generate_report_{str(uuid.uuid4())}"
+    
+    if st.button("Generate Completion Report", key=button_key):
+        # Show a spinner while generating the report
+        with st.spinner("Generating report..."):
+            report_data = generate_completion_report(db)
+        
+        if report_data:
+            # Get current date for filename
+            current_date = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"student_completion_report_{current_date}.csv"
+            
+            # Generate a unique key for the download button
+            download_key = f"download_report_{str(uuid.uuid4())}"
+            
+            # Provide the file for download with correct extension
+            st.download_button(
+                label="Download CSV Report",
+                data=report_data,
+                file_name=filename,
+                mime="text/csv",
+                key=download_key
+            )
+            
+            st.success("Report generated successfully!")
+        else:
+            st.error("Failed to generate report.")
     """Add a section to download completion report in Streamlit."""
     st.header("Completion Report")
     
