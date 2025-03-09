@@ -560,23 +560,27 @@ def generate_completion_report(db):
             'Generated Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }])
 
-        # Create Excel writer with multiple sheets
+        # Create Excel writer with openpyxl instead of xlsxwriter
         output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, sheet_name='Student Completion', index=False)
             summary_df.to_excel(writer, sheet_name='Summary', index=False)
             question_class_mapping.to_excel(writer, sheet_name='Question-Class Mapping', index=False)
 
-            # Auto-adjust column widths
+            # Auto-adjust column widths for openpyxl
             for sheet_name in writer.sheets:
-                sheet = writer.sheets[sheet_name]
+                worksheet = writer.sheets[sheet_name]
                 for idx, col in enumerate(df.columns):
-                    series = df[col]
-                    max_len = max(
-                        series.astype(str).map(len).max(),
-                        len(str(col))
-                    ) + 2
-                    sheet.set_column(idx, idx, max_len)
+                    max_len = 0
+                    column = worksheet.cell(row=1, column=idx+1).column_letter
+                    for cell in worksheet[column]:
+                        try:
+                            if len(str(cell.value)) > max_len:
+                                max_len = len(str(cell.value))
+                        except:
+                            pass
+                    adjusted_width = (max_len + 2)
+                    worksheet.column_dimensions[column].width = adjusted_width
 
         output.seek(0)
         return output
