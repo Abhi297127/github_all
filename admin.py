@@ -530,7 +530,8 @@ def generate_completion_report(db):
             # Add completion status for each class_name
             for question in questions:
                 class_name = question.get('class_name', '').replace('.java', '')
-                status = '✓' if class_name in submitted_files else '✗'
+                # Use "Yes" instead of checkmark and "No" instead of X
+                status = "Yes" if class_name in submitted_files else "No"
                 student_row[class_name] = status
 
             # Calculate completion percentage
@@ -564,25 +565,26 @@ def generate_completion_report(db):
             'Generated Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }])
 
-        # Create CSV output
-        output = io.StringIO()  # Changed to StringIO for text data
+        # Create CSV output with utf-8 encoding explicitly set
+        output = io.StringIO()
         
         # Write main student completion data to CSV
-        df.to_csv(output, index=False)
+        df.to_csv(output, index=False, encoding='utf-8')
         
         # Add a header to separate the sections
         output.write("\n\n--- SUMMARY ---\n")
-        summary_df.to_csv(output, index=False)
+        summary_df.to_csv(output, index=False, encoding='utf-8')
         
         output.write("\n\n--- QUESTION-CLASS MAPPING ---\n")
-        question_class_mapping.to_csv(output, index=False)
+        question_class_mapping.to_csv(output, index=False, encoding='utf-8')
 
-        return output.getvalue()  # Return string content instead of BytesIO
+        return output.getvalue()
 
     except Exception as e:
         import streamlit as st
         st.error(f"Error generating report: {e}")
         return None
+
 def add_completion_report_section(db):
     """Add completion report section to admin dashboard."""
     import streamlit as st
