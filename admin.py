@@ -484,14 +484,8 @@ def edit_question(db, question):
                 st.session_state[f"editing_{question['_id']}"] = False
                 st.rerun()
 
-
-import pandas as pd
-import io
-from datetime import datetime
-import streamlit as st
-
 def generate_completion_report(db):
-    """Generate report of all students' assignment completion status."""
+    """Generate Excel report of all students' assignment completion status."""
     try:
         # Get all questions
         abhi = db.client['Question']
@@ -505,7 +499,7 @@ def generate_completion_report(db):
         # Get JavaFileAnalysis database
         java_analysis_db = db.client['JavaFileAnalysis']
         
-        # Prepare data for report
+        # Prepare data for Excel
         excel_data = []
 
         for student in students:
@@ -566,19 +560,24 @@ def generate_completion_report(db):
             'Generated Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }])
 
-        # Use CSV format instead of Excel
+        # Create Excel writer with multiple sheets
         output = io.BytesIO()
-        
-        # Write a header to indicate the start of each section
-        output.write(b"STUDENT COMPLETION DATA\n")
-        df.to_csv(output, index=False)
-        
-        output.write(b"\n\nSUMMARY STATISTICS\n")
-        summary_df.to_csv(output, index=False)
-        
-        output.write(b"\n\nQUESTION-CLASS MAPPING\n")
-        question_class_mapping.to_csv(output, index=False)
-        
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, sheet_name='Student Completion', index=False)
+            summary_df.to_excel(writer, sheet_name='Summary', index=False)
+            question_class_mapping.to_excel(writer, sheet_name='Question-Class Mapping', index=False)
+
+            # Auto-adjust column widths
+            for sheet_name in writer.sheets:
+                sheet = writer.sheets[sheet_name]
+                for idx, col in enumerate(df.columns):
+                    series = df[col]
+                    max_len = max(
+                        series.astype(str).map(len).max(),
+                        len(str(col))
+                    ) + 2
+                    sheet.set_column(idx, idx, max_len)
+
         output.seek(0)
         return output
 
@@ -587,6 +586,28 @@ def generate_completion_report(db):
         return None
 
 def add_completion_report_section(db):
-    # This function needs to be implemented
-    pass
-
+    """Add completion report section to admin dashboard."""
+    st.header("📊 Assignment Completion Report")
+    
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        st.write("""
+        Generate an Excel report containing:
+        - Individual student completion status for each assignment
+        - Overall completion percentages
+        - Summary statistics
+        """)
+    
+    with col2:
+        if st.button("📥 Download Report", type="primary"):
+            with st.spinner("Generating report..."):
+                excel_file = generate_completion_report(db)
+                if excel_file:
+                    st.download_button(
+                        label="📥 Save Excel Report",
+                        data=excel_file,
+                        file_name=f"student_completion_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                    st.success("Report generated successfully!")
